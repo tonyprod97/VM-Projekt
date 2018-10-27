@@ -1,0 +1,43 @@
+{
+  "name": "vm-projekt",
+  "version": "1.0.0",
+  "description": "Project for college purposes.",
+  "main": "app/app.js",
+  "scripts": {
+    "start": "node app/app.js",
+    "devStart": "nodemon --watch app/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tonyprod97/VM-Projekt.git"
+  },
+  "keywords": [
+    "nodeJs",
+    "JavaScript",
+    "HTML",
+    "CSS",
+    "Bootstrap"
+  ],
+  "authors": [
+    "Antonio Kamber",
+    "Mateo Majnarić",
+    "Filip Budiša",
+    "Vedran Mornar",
+    "Lara Lokin",
+    "Kristijan Vrbanac",
+    "Martin Sršen"
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tonyprod97/VM-Projekt/issues"
+  },
+  "homepage": "https://github.com/tonyprod97/VM-Projekt#readme",
+  "dependencies": {
+    "bootstrap": "^4.1.3",
+    "express": "^4.16.4",
+    "express-handlebars": "^3.0.0",
+    "fs": "0.0.1-security",
+    "nodemon": "^1.18.5",
+    "path": "^0.12.7"
+  }
+}
