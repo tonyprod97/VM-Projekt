@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 
+router.use('/user',require('./user'));
+
 /* GET home page. */
 router.get('/', function(req, res) {
   res.render('index', 

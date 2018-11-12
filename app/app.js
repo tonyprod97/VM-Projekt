@@ -14,6 +14,7 @@ app.engine('hbs',hbs({
   layoutsDir: path.join(__dirname,'views','layouts'),
   partialsDir: path.join(__dirname,'views','partials')
 }));
+
 app.set('views',path.join(__dirname,'views'));
 app.set('view engine', 'hbs');
 
