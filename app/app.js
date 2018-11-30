@@ -1,11 +1,15 @@
-const express = require('express'),
-      path = require('path'),
-      hbs = require('express-handlebars'),
-      routes = require('./routes/index');
+const express = require('express');
+const path = require('path');
+const hbs = require('express-handlebars');
+const routes = require('./routes/index');
+    
 
 //configuring server
-const port = 3000;
+const port = require('./constants').port;
 const app = express();
+
+
+const databaseManager = require('./DatabaseManager');
 
 //configuring view engine
 app.engine('hbs',hbs({
