@@ -30,6 +30,5 @@ app.use('/controllers', express.static(path.join(__dirname,'controllers')));
 //configuring routes
 app.use('/', routes);
 
-
 //starting server
 app.listen(port, () => console.log(`App is listening on port ${port}!`));
