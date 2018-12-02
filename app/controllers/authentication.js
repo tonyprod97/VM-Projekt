@@ -1,3 +1,4 @@
+
 let form;
 let emailInput;
 let passwordInput;
@@ -21,23 +22,28 @@ function onFormChange() {
     }
 }
 
-function onSubmit() {
+function onSubmit() {  
+    let url;
     // If passwordConfirmInput exists user is trying to register else to log in.
     if(passwordConfirmInput) {
         // Check if user registered succesfully.
-        if(true) {
-            window.location.href="/";
-        } else {
-            // Add validation messages.
-        }
+        url = './register';
     } else {
         // Check if user logged in succesfully.
-        if(true) {
-            window.location.href="/";
-        } else {
-            // Add validation messages.
-        }
+        url = './login';
     }
+    
+    //send http POST
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({
+        user: {
+            email: emailInput.value,
+            password: passwordInput.value
+        }
+    })); 
+    window.location.href="/";
 }
 
 function register() {
@@ -45,7 +51,6 @@ function register() {
         && passwordConfirmInput.value === passwordInput.value
         && validateEmail(emailInput.value)) {
         submitButton.removeAttribute("disabled","");
-        // Conncect with backend.
     } 
 }
 
@@ -53,7 +58,6 @@ function login() {
     if(emailInput.value && passwordInput.value 
         && validateEmail(emailInput.value)) {
         submitButton.removeAttribute("disabled","");
-        // Conncect with backend.
     } 
 }
 
