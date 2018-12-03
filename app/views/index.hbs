@@ -4,20 +4,16 @@
       <div class="jumbotron">
         <h1 class="display-4">{{ message }}</h1>
         <hr>
-        {{# if condition}}
         <div class="dropdown" style="margin:15px">
           <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Students
           </button>
           <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          {{# each students as |val key|}}
-            <a class="dropdown-item">{{val}}</a>
+          {{# each students as |student|}}
+            <a class="dropdown-item">{{student.firstName}} {{ student.lastName }}</a>
           {{/each}}
           </div>
         </div>
-        {{ else }}
-          Condition not met
-        {{/if}}
         </div>
     </div>
   </div>

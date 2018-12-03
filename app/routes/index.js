@@ -27,40 +27,34 @@ router.get('/', function(req, res) {
 
         // create Request object
         var request = new sql.Request();
-        response = "{message:\"Welcome to VM Projekt\"," +
-            "condition: true,"+
-            "loggedIn: true," +
-            "students: [";
-
+    
+        //students array for view
+        let students = new Array();
         // query to the database and get the records
         request.query('select * from Student', function (err, recordset) {
             if (err) console.log(err)
             // send records as a response
             var jsonPretty = JSON.stringify(recordset,null,2);
             var objectValue = JSON.parse(jsonPretty);
-            console.log(objectValue['rowsAffected'][0]);
 
             for(var i = 0; i < objectValue['rowsAffected'][0]; i++){
 
                 var string = JSON.stringify(objectValue['recordset'][i]);
                 var objectValuethis = JSON.parse(string);
-                if (i+1==objectValue['rowsAffected'][0]) {
-                    response+="\""+objectValuethis['firstName']+" "+objectValuethis['lastName']+"\"";
-                } else {
-                    response+="\""+objectValuethis['firstName']+" "+objectValuethis['lastName']+"\""+",";
-                }
 
+                students.push({
+                    firstName : objectValuethis['firstName'],
+                    lastName : objectValuethis['lastName']
+                });
             }
-            response=response+"]}";
-            //var str = JSON.stringify(recordset, null, 2);
-            var responsePretty = JSON.stringify(response,null,2);
-            var responseValue = JSON.parse(responsePretty);
-            console.log(responseValue);
-            res.render('index', {responseValue});
+            
+            res.render('index', {
+                message: "Welcome to VM Projekt",
+                loggedIn: true,
+                students: students
+            });
         });
     });
-    //console.log(response)
-
 });
 
 module.exports = router;

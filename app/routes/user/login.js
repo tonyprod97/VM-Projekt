@@ -3,7 +3,7 @@ var router = express.Router();
 
 router.get('/', (req,res)=>res.render('./user/login'));
 router.post('/',(req,res) => {
-    console.log('Login post works!')
+    console.log('Login post works!',req);
 });
 
 module.exports = router;

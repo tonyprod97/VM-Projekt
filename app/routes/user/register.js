@@ -3,7 +3,7 @@ var router = express.Router();
 
 router.get('/', (req,res)=>res.render('./user/register'));
 router.post('/',(req,res) => {
-    console.log('Register post works!')
+    console.log('Register post works!',req)
 });
 
 module.exports = router;
