@@ -9,7 +9,8 @@ module.exports.databaseErrors = {
 };
 
 module.exports.databaseGetRequests = {
-    DATABASE_VERSION: 1 // request database version 
+    USER: 1 // request userData version 
+    
 };
 
 module.exports.databaseSendRequests = {

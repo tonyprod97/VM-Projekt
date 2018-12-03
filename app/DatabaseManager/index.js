@@ -7,9 +7,7 @@ const config = {
     password: 'VMproject123',
     database: 'calendarSyncDatabase', 
 
-    options:
-    {
-        
+    options: {
         encrypt: true
     }
 };
@@ -195,6 +193,40 @@ class DatabaseManager {
 
             }
         }
+    }
+
+    getSingleRequest(requestData,callback) {
+
+        let data = {
+            state: null,
+            msg: "",
+            data: null
+        };
+
+        switch (requestData.id) {
+
+            case getRequests.USER: {
+
+                db.query("SELECT firstName,lastName FROM student", (error, result) => {
+
+                    if (error) {
+
+                        data.status = dbConsts.OPERATION_FAILED;
+                        msg: "failed to get students";
+                        callback(data);
+                        return;
+                    }
+
+                    data.state = dbConsts.OPERATION_SUCCESS;
+                    data.msg   = "operation success";
+
+                    data.data =  toJSON(result)[0][0];
+                    callback(data);
+                });
+
+            } break;
+        }
+
     }
 
     sendRequest(sentData,callback) {

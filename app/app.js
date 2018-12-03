@@ -3,11 +3,9 @@ const path = require('path');
 const hbs = require('express-handlebars');
 const routes = require('./routes/index');
     
-
 //configuring server
 const port = require('./constants').port;
 const app = express();
-
 
 const databaseManager = require('./DatabaseManager');
 
