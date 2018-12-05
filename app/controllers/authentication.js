@@ -22,6 +22,10 @@ function onFormChange() {
     }
 }
 
+function onOutlookLogin() {
+
+}
+
 function onSubmit() {  
     let url;
     // If passwordConfirmInput exists user is trying to register else to log in.
