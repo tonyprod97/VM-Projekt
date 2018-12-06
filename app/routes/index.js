@@ -9,6 +9,8 @@ const databaseManager = require('../DatabaseManager');
 const ids             = require('../constants').databaseGetRequests;
 const operationStates = require('../constants').databaseErrors; 
 
+// const sendIds = require('../constants').databaseSendRequests; // for testing 
+
 /* GET home page. */
 router.get('/', function(req, res) {
 
@@ -19,6 +21,34 @@ router.get('/', function(req, res) {
         res.redirect('/');
         return;
     }
+
+    //for testing
+
+   //databaseManager.sendRequest({ id: sendIds.CREATE_NEW_USER, data: { username: 'oetmateo', email: 'test@test.com', password: 'testPass' } }, (answer) => {
+   //
+   //    console.log(answer.msg);
+   //
+   //    //databaseManager.sendRequest({ id: sendIds.LOGIN_REQUEST, data: { username: 'oetmateo', password: 'testPass' } }, (answer) => {
+   //    databaseManager.sendRequest({ id: sendIds.LOGIN_REQUEST, data: { email: 'test@test.com', password: 'testPass' } }, (answer) => {
+   //
+   //        if (answer.state != operationStates.OPERATION_SUCCESS) {
+   //            console.log(answer.msg);
+   //            return;
+   //        }
+   //
+   //        console.log(answer.data);
+   //
+   //        databaseManager.sendRequest({ id: sendIds.TERMINATE_SESSION, data: { userid: answer.data.id, token: answer.data.sessionToken } }, (answer) => {
+   //
+   //            if (answer.state != operationStates.OPERATION_SUCCESS) {
+   //                console.log(answer.msg);
+   //                return
+   //            }
+   //
+   //            console.log("session terminated");
+   //        });
+   //    });
+   //}); 
 
     databaseManager.getSingleRequest({ id: ids.USER }, (answer) => {
 
