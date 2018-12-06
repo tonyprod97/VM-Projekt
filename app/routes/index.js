@@ -13,9 +13,11 @@ const operationStates = require('../constants').databaseErrors;
 router.get('/', function(req, res) {
 
     if (!databaseManager.isReady()) {
-        sleep(200);
+        setTimeout(()=>{
+            console.log('Database Manager is not ready.');
+        },200);
         res.redirect('/');
-        return
+        return;
     }
 
     databaseManager.getSingleRequest({ id: ids.USER }, (answer) => {
