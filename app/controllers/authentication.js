@@ -5,7 +5,7 @@ let passwordInput;
 let submitButton;
 let passwordConfirmInput;
 
-var authHelper = require('../OutlookManager/outlookHelper');
+const authHelper = require('../OutlookManager/outlookHelper');
 
 window.onload =()=>{
     form = document.querySelector("form");
@@ -25,8 +25,7 @@ function onFormChange() {
 }
 
 function onOutlookLogin() {
-    let authUrl = authHelper.getAuthUrl;
-    authHelper.getTokenFromCode(authUrl, null, req, resp);
+    
 }
 
 function onSubmit() {  
