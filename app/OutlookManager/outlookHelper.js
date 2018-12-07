@@ -9,14 +9,30 @@ var scopes = [
     'https://outlook.office.com/calendars.readwrite'
 ];
 
+//var credentials = {
+//    clientID: clientId,
+//    clientSecret: clientSecret,
+//    site: 'https://login.microsoftonline.com/common',
+//    authorizationPath: '/oauth2/v2.0/authorize',
+//    tokenPath: '/oauth2/v2.0/token'
+//}
 var credentials = {
-    clientID: clientId,
-    clientSecret: clientSecret,
-    site: 'https://login.microsoftonline.com/common',
-    authorizationPath: '/oauth2/v2.0/authorize',
-    tokenPath: '/oauth2/v2.0/token'
+
+    client: {
+        id: clientId,
+        secret: clientSecret
+    },
+    //site: 'https://login.microsoftonline.com/common',
+
+    auth: {
+        //authorizationPath: '/oauth2/v2.0/authorize',
+        tokenHost: 'https://login.microsoftonline.com/common',
+    },
+    //authorizationPath: '/oauth2/v2.0/authorize',
+    //tokenPath: '/oauth2/v2.0/token'
 }
-var oauth2 = require('simple-oauth2')(credentials)
+
+var oauth2 = require('simple-oauth2').create(credentials)
 
 module.exports = {
     getAuthUrl: function() {

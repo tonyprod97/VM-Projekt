@@ -8,6 +8,7 @@ const port = require('./constants').port;
 const app = express();
 
 const databaseManager = require('./DatabaseManager');
+const outlookManager  = require('./OutlookManager');
 
 //configuring view engine
 app.engine('hbs',hbs({
