@@ -9,7 +9,6 @@ const port = require('./constants').port;
 const app = express();
 
 const databaseManager = require('./DatabaseManager');
-const outlookManager  = require('./OutlookManager');
 
 //configurin parser engine
 app.use(bodyParser.json());

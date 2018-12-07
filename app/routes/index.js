@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
+
 // var response ="";
 
 router.use('/user',require('./user'));
@@ -9,6 +10,15 @@ const databaseManager = require('../DatabaseManager');
 const ids             = require('../constants').databaseGetRequests;
 const operationStates = require('../constants').databaseErrors; 
 
+const authHelper = require('../OutlookManager');
+const session = require('express-session');
+
+router.use(session(
+    {
+        secret: '0dc529ba-5051-4cd6-8b67-c9a901bb8bdf',
+        resave: false,
+        saveUninitialized: false
+    }));
 // const sendIds = require('../constants').databaseSendRequests; // for testing 
 
 /* GET home page. */
@@ -117,6 +127,50 @@ router.get('/', function(req, res) {
     //        });
     //    });
     //});
+});
+
+router.get('/authorize', function (req, res) {
+    var authCode = req.query.code;
+    if (authCode) {
+        console.log('');
+        console.log('Retrieved auth code in /authorize: ' + authCode);
+        authHelper.getTokenFromCode(authCode, tokenReceived, req, res);
+    }
+    else {
+        // redirect to home
+        console.log('/authorize called without a code parameter, redirecting to login');
+        res.redirect('/');
+    }
+});
+
+function tokenReceived(req, res, error, token) {
+    if (error) {
+        console.log('ERROR getting token:' + error);
+        res.send('ERROR getting token: ' + error);
+    }
+    else {
+        // save tokens in session
+        req.session.access_token = token.token.access_token;
+        req.session.refresh_token = token.token.refresh_token;
+        req.session.email = authHelper.getEmailFromIdToken(token.token.id_token);
+        res.redirect('/');
+    }
+}
+
+router.get('/refreshtokens', function (req, res) {
+    var refresh_token = req.session.refresh_token;
+    if (refresh_token === undefined) {
+        console.log('no refresh token in session');
+        res.redirect('/');
+    }
+    else {
+        authHelper.getTokenFromRefreshToken(refresh_token, tokenReceived, req, res);
+    }
+});
+
+router.get('/logout', function (req, res) {
+    req.session.destroy();
+    res.redirect('/');
 });
 
 module.exports = router;

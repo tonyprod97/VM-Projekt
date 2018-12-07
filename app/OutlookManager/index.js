@@ -15,20 +15,19 @@ var credentials = {
         id: clientId,
         secret: clientSecret
     },
-    //site: 'https://login.microsoftonline.com/common',
 
     auth: {
-        //authorizationPath: '/oauth2/v2.0/authorize',
-        tokenHost: 'https://login.microsoftonline.com/common',
-    },
-    //authorizationPath: '/oauth2/v2.0/authorize',
-    //tokenPath: '/oauth2/v2.0/token'
+        tokenHost: 'https://login.microsoftonline.com/',
+        authorizePath: '/common/oauth2/v2.0/authorize',
+        tokenPath: '/common/oauth2/v2.0/token'
+    }
 }
-//var oauth2 = require('simple-oauth2').create(credentials)
+
+var oauth2 = require('simple-oauth2').create(credentials);
 
 module.exports = {
-    getAuthUrl: function() {
-        var returnVal = oauth2.authCode.authorizeURL({
+    getAuthUrl: function () {
+        var returnVal = oauth2.authorizationCode.authorizeURL({
             redirect_uri: redirectUri,
             scope: scopes.join(' ')
         });
@@ -37,23 +36,22 @@ module.exports = {
         return returnVal;
     },
 
-    getTokenFromCode: function(auth_code, callback, request, response) {
-        oauth2.authCode.getToken({
-            code: auth_code,
-            redirect_uri: redirectUri,
-            scope: scopes.join(' ')
-        }, function (error, result) {
-            if (error) {
-                console.log('Access token error: ', error.message);
-                callback(request ,response, error, null);
-            }
-            else {
-                var token = oauth2.accessToken.create(result);
-                console.log('');
-                console.log('Token created: ', token.token);
-                callback(request, response, null, token);
-            }
-        });
+    getTokenFromCode: async function (auth_code, callback, request, response) {
+        try {
+            const result = await oauth2.authorizationCode.getToken({
+                code: auth_code,
+                redirect_uri: redirectUri,
+                scope: scopes.join(' ')
+            });
+
+            const accessToken = oauth2.accessToken.create(result);
+            console.log('');
+            console.log('Token created: ', accessToken.token);
+            callback(request, response, null, accessToken);
+        } catch (error) {
+            console.log('Access token error: ', error.message);
+            callback(request, response, error, null);
+        }
     },
 
     getEmailFromIdToken: function(id_token) {
@@ -61,7 +59,7 @@ module.exports = {
         var token_parts = id_token.split('.');
 
         // Token content is in the second part, in urlsafe base64
-        var encoded_token = new Buffer(token_parts[1].replace('-', '+').replace('_', '/'), 'base64');
+        var encoded_token = new Buffer.from(token_parts[1].replace('-', '+').replace('_', '/'), 'base64');
 
         var decoded_token = encoded_token.toString();
 
@@ -71,17 +69,16 @@ module.exports = {
         return jwt.preferred_username
     },
 
-    getTokenFromRefreshToken: function(refresh_token, callback, request, response) {
-        var token = oauth2.accessToken.create({ refresh_token: refresh_token, expires_in: 0});
-        token.refresh(function(error, result) {
-            if (error) {
-                console.log('Refresh token error: ', error.message);
-                callback(request, response, error, null);
-            }
-            else {
-                console.log('New token: ', result.token);
-                callback(request, response, null, result);
-            }
-        });
+    getTokenFromRefreshToken: async function(refresh_token, callback, request, response) {
+        var token = oauth2.accessToken.create({ refresh_token: refresh_token, expires_in: 0 });
+        try {
+            token = await token.refresh();
+
+            console.log('New token: ', token.token);
+            callback(request, response, null, token);
+        } catch (error) {
+            console.log('Refresh token error: ', error.message);
+            callback(request, response, error, null);
+        }
     }
 };

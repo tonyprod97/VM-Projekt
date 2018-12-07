@@ -22,7 +22,7 @@ function onFormChange() {
 }
 
 function onOutlookLogin() {
-    
+    window.location.href = './outlookLogin';
 }
 
 function onSubmit() {  
