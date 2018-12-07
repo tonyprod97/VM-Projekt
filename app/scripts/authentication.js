@@ -1,11 +1,8 @@
-
 let form;
 let emailInput;
 let passwordInput;
 let submitButton;
 let passwordConfirmInput;
-
-const authHelper = require('../OutlookManager/outlookHelper');
 
 window.onload =()=>{
     form = document.querySelector("form");
@@ -43,6 +40,8 @@ function onSubmit() {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Accept','application/json');
+    xhr.responseType = 'JSON';
     xhr.send(JSON.stringify({
         user: {
             email: emailInput.value,
