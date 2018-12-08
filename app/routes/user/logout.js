@@ -5,11 +5,12 @@ const sendIds = require('../../constants').databaseSendRequests;
 
 router.post('/',(req,res)=>{
    let user = req.body.user;
-   console.log(user);
+    console.log(user);
+
    databaseManager.sendRequest({
         id: sendIds.TERMINATE_SESSION, 
            data: { 
-               userId: user.id, token: user.sessionToken 
+               userid: user.id, token: user.sessionToken 
             } }, 
             (answer) => {
                 console.log(answer.msg);

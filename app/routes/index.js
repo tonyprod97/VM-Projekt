@@ -76,9 +76,9 @@ router.get('/', function(req, res) {
             return;
         }
 
-        res.render('home', {
+        res.render('index', {
             message: "Welcome to VM Projekt",
-            loggedIn: true,
+            loggedIn: false,
             students: answer.data
         });
     });

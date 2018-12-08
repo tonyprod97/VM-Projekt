@@ -444,6 +444,8 @@ class DatabaseManager {
 
                 let database = new mssql.Request()
 
+                console.log(sentData.data);
+
                 database.input('userid', mssql.Int, sentData.data.userid);
                 database.input('token', mssql.VarChar(70), sentData.data.token);
 
