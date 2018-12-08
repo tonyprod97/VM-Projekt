@@ -3,22 +3,19 @@ var router = express.Router();
 const databaseManager = require('../../DatabaseManager');
 const sendIds = require('../../constants').databaseSendRequests; 
 
-router.get('/', (req,res)=>res.render('./user/register'));
-router.post('/',(req,res) => {
-    let user = req.body.user;
-    
-   databaseManager.sendRequest(
-       { 
-           id: sendIds.CREATE_NEW_USER, 
+router.post('/',(req,res)=>{
+   let user = req.body.user;
+   console.log(user);
+   databaseManager.sendRequest({
+        id: sendIds.TERMINATE_SESSION, 
            data: { 
-               email: user.email, password: user.password 
+               userId: user.id, token: user.sessionToken 
             } }, 
             (answer) => {
                 console.log(answer.msg);
                 res.send({
-                    redirectUrl: './login'
-                });
+                  redirectUrl: '/'
+              });
    }); 
 });
-
 module.exports = router;

@@ -1,10 +1,12 @@
 var express = require('express');
 var router = express.Router();
 
-
 // var response ="";
 
 router.use('/user',require('./user'));
+router.get('/home',(req,res)=>{
+    res.render('home',{loggedIn:true});
+})
 
 const databaseManager = require('../DatabaseManager');
 const ids             = require('../constants').databaseGetRequests;
@@ -74,7 +76,7 @@ router.get('/', function(req, res) {
             return;
         }
 
-        res.render('index', {
+        res.render('home', {
             message: "Welcome to VM Projekt",
             loggedIn: true,
             students: answer.data
