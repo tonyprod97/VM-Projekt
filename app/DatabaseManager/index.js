@@ -143,7 +143,7 @@ function login(database,email,password, callback) {
         data: null
     };
 
-    database.input('email', mssql.VarChar(30), email);
+    database.input('email', mssql.VarChar(100), email);
     database.input('hash', mssql.VarChar(70), seededSha256(email, password));
 
     database.query('SELECT id,email FROM ' + userTable + ' WHERE email = @email and passwordHash = @hash', (error, result) => {
