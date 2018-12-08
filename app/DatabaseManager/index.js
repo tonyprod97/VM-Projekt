@@ -53,7 +53,7 @@ function randomTokenString(size) {
     return crypto.randomBytes(size).toString('hex');
 }
 
-function createUser(database, username, email, password, callback) {
+function createUser(database, email, password, callback) {
 
     let answer = {
         state: null,
@@ -61,16 +61,16 @@ function createUser(database, username, email, password, callback) {
         data: null
     };
 
-    database.input('username', mssql.VarChar(30), username);
+    //database.input('username', mssql.VarChar(30), username);
     database.input('email', mssql.VarChar(100), email);
-    database.input('hash', mssql.VarChar(70), seededSha256(username, password));
+    database.input('hash', mssql.VarChar(70), seededSha256(email, password));
 
-    database.query('INSERT INTO ' + userTable + '(username,email,passwordHash) VALUES ( @username, @email, @hash )', (error) => {
+    database.query('INSERT INTO ' + userTable + '(email,passwordHash) VALUES ( @email, @hash )', (error) => {
 
         if (error) {
 
             answer.state = dbConsts.OPERATION_FAILED;
-            answer.msg   = 'username or email is already is taken';
+            answer.msg   = 'email is already taken';
             setTimeout(() => callback(answer), 0);
 
             return;
@@ -84,20 +84,20 @@ function createUser(database, username, email, password, callback) {
     });
 }
 
-function getUserByEmail(database, email,callback) {
-
-    database.input('email', mssql.VarChar(100), email);
-
-    database.query('SELECT username FROM ' + userTable + ' WHERE email = @email', (error,result) => {
-
-        if ((error) || (result.rowsAffected[0] == 0)) {
-            setTimeout(() => callback({ state: dbConsts.OPERATION_FAILED }),0);
-            return;
-        }
-
-        setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, username: toJSON(result)[0][0][0].username}), 0);
-    });
-}
+//function getUserByEmail(database, email,callback) {
+//
+//    database.input('email', mssql.VarChar(100), email);
+//
+//    database.query('SELECT username FROM ' + userTable + ' WHERE email = @email', (error,result) => {
+//
+//        if ((error) || (result.rowsAffected[0] == 0)) {
+//            setTimeout(() => callback({ state: dbConsts.OPERATION_FAILED }),0);
+//            return;
+//        }
+//
+//        setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, username: toJSON(result)[0][0][0].username}), 0);
+//    });
+//}
 
 function isValidSessionInfo(database, userid, sessionToken, callback) {
     // TODO
@@ -135,7 +135,7 @@ function toJSON(rowDataPacket) {
     return Object.values(JSON.parse(JSON.stringify(rowDataPacket)));
 }
 
-function login(database,username,password, callback) {
+function login(database,email,password, callback) {
 
     let data = {
         msg: "",
@@ -143,10 +143,10 @@ function login(database,username,password, callback) {
         data: null
     };
 
-    database.input('username', mssql.VarChar(30), username);
-    database.input('hash', mssql.VarChar(70), seededSha256(username, password));
+    database.input('email', mssql.VarChar(30), email);
+    database.input('hash', mssql.VarChar(70), seededSha256(email, password));
 
-    database.query('SELECT id,username FROM ' + userTable + ' WHERE username = @username and passwordHash = @hash', (error, result) => {
+    database.query('SELECT id,email FROM ' + userTable + ' WHERE email = @email and passwordHash = @hash', (error, result) => {
 
         if ((error) || (result.rowsAffected[0] == 0)) {
 
@@ -341,31 +341,33 @@ class DatabaseManager {
         switch (sentData.id) {
 
             case sendRequests.CREATE_NEW_USER: {
-                createUser(new mssql.Request(), sentData.data.username, sentData.data.email, sentData.data.password, callback);
+                createUser(new mssql.Request(), sentData.data.email, sentData.data.password, callback);
                 break;
             }
 
             case sendRequests.LOGIN_REQUEST: {
 
-                if (!sentData.data.username) {
+                login(new mssql.Request(), sentData.data.email, sentData.data.password, callback);
 
-                    getUserByEmail(new mssql.Request(), sentData.data.email, (answer) => {
-
-                        if (answer.state != dbConsts.OPERATION_SUCCESS) {
-
-                            response.state = answer.state;
-                            response.msg = "Invalid login data";
-
-                            setTimeout(() => callback(response), 0);
-                            return;
-                        }
-
-                        login(new mssql.Request(), answer.username, sentData.data.password, callback);
-                    });
-
-                } else {
-                    login(new mssql.Request(), sentData.data.username, sentData.data.password, callback);
-                }
+                //if (!sentData.data.username) {
+                //
+                //    getUserByEmail(new mssql.Request(), sentData.data.email, (answer) => {
+                //
+                //        if (answer.state != dbConsts.OPERATION_SUCCESS) {
+                //
+                //            response.state = answer.state;
+                //            response.msg = "Invalid login data";
+                //
+                //            setTimeout(() => callback(response), 0);
+                //            return;
+                //        }
+                //
+                //        login(new mssql.Request(), answer.username, sentData.data.password, callback);
+                //    });
+                //
+                //} else {
+                //    login(new mssql.Request(), sentData.data.username, sentData.data.password, callback);
+                //}
                 break;
             }
 

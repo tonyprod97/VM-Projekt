@@ -25,20 +25,21 @@ router.use(session(
 router.get('/', function(req, res) {
 
     if (!databaseManager.isReady()) {
-        setTimeout(()=>{
+
+        setTimeout(()=> {
             console.log('Database Manager is not ready.');
+            res.redirect('/');
         },200);
-        res.redirect('/');
+       
         return;
     }
 
     //for testing
 
-   //databaseManager.sendRequest({ id: sendIds.CREATE_NEW_USER, data: { username: 'oetmateo', email: 'test@test.com', password: 'testPass' } }, (answer) => {
+   //databaseManager.sendRequest({ id: sendIds.CREATE_NEW_USER, data: { email: 'test@test.com', password: 'testPass' } }, (answer) => {
    //
    //    console.log(answer.msg);
    //
-   //    //databaseManager.sendRequest({ id: sendIds.LOGIN_REQUEST, data: { username: 'oetmateo', password: 'testPass' } }, (answer) => {
    //    databaseManager.sendRequest({ id: sendIds.LOGIN_REQUEST, data: { email: 'test@test.com', password: 'testPass' } }, (answer) => {
    //
    //        if (answer.state != operationStates.OPERATION_SUCCESS) {

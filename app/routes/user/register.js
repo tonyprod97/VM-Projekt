@@ -12,7 +12,7 @@ router.post('/',(req,res) => {
        { 
            id: sendIds.CREATE_NEW_USER, 
            data: { 
-               username: 'unknown', email: user.email, password: user.password 
+               email: user.email, password: user.password 
             } }, (answer) => {
       console.log(answer.msg);
    }); 

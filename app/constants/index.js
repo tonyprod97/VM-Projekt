@@ -15,6 +15,6 @@ module.exports.databaseGetRequests = {
 module.exports.databaseSendRequests = {
 
     CREATE_NEW_USER: 1,  // create new user  (needs in data fild: username,userEmail,password) 
-    LOGIN_REQUEST: 2,    // login user (needs in data fild: username or email, password)
-    TERMINATE_SESSION: 3 // logout user from session (needs ins data fild: userid, token)
+    LOGIN_REQUEST: 2,    // login user (needs in data fild: email, password)
+    TERMINATE_SESSION: 3 // logout user from session (needs in data fild: userid, token)
 };
