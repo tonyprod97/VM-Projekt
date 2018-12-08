@@ -5,7 +5,7 @@ const sendIds = require('../../constants').databaseSendRequests;
 
 router.post('/',(req,res)=>{
    let user = req.body.user;
-    console.log(user);
+   //console.log(user);
 
    databaseManager.sendRequest({
         id: sendIds.TERMINATE_SESSION, 
@@ -13,7 +13,7 @@ router.post('/',(req,res)=>{
                userid: user.id, token: user.sessionToken 
             } }, 
             (answer) => {
-                console.log(answer.msg);
+                //console.log(answer.msg);
                 res.send({
                   redirectUrl: '/'
               });

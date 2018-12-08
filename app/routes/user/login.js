@@ -15,7 +15,7 @@ router.post('/',(req,res) => {
             } }, 
             (answer) => {
                 userData = answer.data;
-                console.log(userData);
+                //console.log(userData);
 
                 res.send({
                     userData: JSON.stringify(userData),
