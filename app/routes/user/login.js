@@ -1,9 +1,12 @@
 var express = require('express');
 var router = express.Router();
+
 const databaseManager = require('../../DatabaseManager');
 const sendIds = require('../../constants').databaseSendRequests; 
+const operationStates = require('../../constants').databaseErrors; 
 
-router.get('/', (req,res)=>res.render('./user/login',));
+router.get('/', (req, res) => res.render('./user/login'));
+
 router.post('/',(req,res) => {
     let user = req.body.user;
     let userData;
@@ -16,6 +19,11 @@ router.post('/',(req,res) => {
             (answer) => {
                 userData = answer.data;
                 //console.log(userData);
+
+                if (answer.state != operationStates.OPERATION_SUCCESS) {
+                    res.send({ redirectUrl: './login', error: answer.msg, email: user.email });
+                    return;
+                }
 
                 res.send({
                     userData: JSON.stringify(userData),
