@@ -85,7 +85,7 @@ function logout() {
     xhr.send(JSON.stringify({
         user: {
             id: userData.id,
-            token: userData.sessionToken
+            sessionToken: userData.sessionToken
         }
     })); 
 
