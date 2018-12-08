@@ -22,6 +22,12 @@ const crypto = require('crypto');
 const userTable    = 'Profile';
 const sessionTable = 'Session';
 
+/**
+ * .....................
+ * @param {String}seed
+ * @param {String}password
+ * @returns {PromiseLike<ArrayBuffer>}hash
+ */
 function seededSha256(seed, password) {
 
     let hashStr   = "";
@@ -49,10 +55,22 @@ function seededSha256(seed, password) {
     return hash;
 }
 
+/**
+ * Creating a random string token
+ * @param {number}size
+ * @returns {*} random string token
+ */
 function randomTokenString(size) {
     return crypto.randomBytes(size).toString('hex');
 }
 
+/**
+ * Creating a user in database
+ * @param {Object}database
+ * @param {String}email
+ * @param {String}password
+ * @param {Object}callback
+ */
 function createUser(database, email, password, callback) {
 
     let answer = {
@@ -98,11 +116,23 @@ function createUser(database, email, password, callback) {
 //        setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, username: toJSON(result)[0][0][0].username}), 0);
 //    });
 //}
-
+/**
+ * Checking if session is valid
+ * @param {Object}database
+ * @param {Sting}userid
+ * @param {String}sessionToken
+ * @param {Object}callback
+ */
 function isValidSessionInfo(database, userid, sessionToken, callback) {
     // TODO
 }
 
+/**
+ * Creating a new session
+ * @param {Object}database
+ * @param {String}userid
+ * @param {Object}callback
+ */
 function newSession(database, userid, callback) {
 
     let sessionToken = randomTokenString(64);
@@ -124,6 +154,11 @@ function newSession(database, userid, callback) {
     });
 }
 
+/**
+ * Creating database and setting up database manager
+ * @param {Object}database
+ * @param {Object}OLD_VERSION
+ */
 function initDatabase(database, OLD_VERSION) {
 
     // TODO
@@ -131,10 +166,22 @@ function initDatabase(database, OLD_VERSION) {
     // for creating database and setting up manager
 }
 
+/**
+ * Turning object into JSON
+ * @param {Object}rowDataPacket
+ * @returns {any[]} object turned into JSON
+ */
 function toJSON(rowDataPacket) {
     return Object.values(JSON.parse(JSON.stringify(rowDataPacket)));
 }
 
+/**
+ * Loging in
+ * @param {Object}database
+ * @param {String}email
+ * @param {String}password
+ * @param {Object}callback
+ */
 function login(database,email,password, callback) {
 
     let data = {
@@ -183,8 +230,11 @@ function login(database,email,password, callback) {
 //var db = null; //mssql.connect(config).Request();
 var readyForUse = false;
 
-class DatabaseManager {
 
+class DatabaseManager {
+    /**
+     * @constructor
+     */
     constructor() {
 
         mssql.connect(config, (error) => {
@@ -244,10 +294,19 @@ class DatabaseManager {
         });
     }
 
+    /**
+     * Checks if database is ready to use
+     * @returns {boolean}
+     */
     isReady() {
         return readyForUse;
     }
 
+    /**
+     * ..............
+     * @param {Object}requestData
+     * @param {Object}callback
+     */
     getRequest(requestData, callback) {
 
         let requestsNeeded = [];
@@ -294,6 +353,11 @@ class DatabaseManager {
         setTimeout(() => callback({ length: length, states: resultsState, msges: resultsMSG, data: results }), 0);
     }
 
+    /**
+     * .....................
+     * @param {Object}requestData
+     * @param {Object}callback
+     */
     getSingleRequest(requestData,callback) {
 
         let data = {
@@ -330,6 +394,11 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Sends a request
+     * @param {Object}sentData
+     * @param {Object}callback
+     */
     sendRequest(sentData,callback) {
 
         let response = {
@@ -399,4 +468,8 @@ class DatabaseManager {
     }
 }
 
+/**
+ *
+ * @type {DatabaseManager}
+ */
 module.exports  = new DatabaseManager();
