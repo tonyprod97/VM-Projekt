@@ -1,5 +1,12 @@
+/**
+ *
+ * @type {number}
+ */
 module.exports.port = 3000;
-
+/**
+ *
+ * @type {{OPERATION_SUCCESS: number, OPERATION_FAILED: number, OPERATION_WARRNING: number, OPERATION_DENIED: number}}
+ */
 module.exports.databaseErrors = {
 
     OPERATION_SUCCESS : 0, // all good
@@ -7,11 +14,17 @@ module.exports.databaseErrors = {
     OPERATION_WARRNING: 2, // operation succeded but might couse problems
     OPERATION_DENIED  : 3  // operation might be dangoruse so it was blocked
 };
-
+/**
+ *
+ * @type {{USER: number}}
+ */
 module.exports.databaseGetRequests = {
     USER: 1 // request userData
 };
-
+/**
+ *
+ * @type {{CREATE_NEW_USER: number, LOGIN_REQUEST: number, TERMINATE_SESSION: number}}
+ */
 module.exports.databaseSendRequests = {
 
     CREATE_NEW_USER: 1,  // create new user  (needs in data fild: username,userEmail,password) 
