@@ -12,6 +12,9 @@ window.onload =()=>{
     passwordConfirmInput = document.getElementById("passwordConfirm");
 };
 
+/**
+ *Checking if user is trying to register or log in
+ */
 function onFormChange() {
     // If passwordConfirmInput exists user is trying to register else to log in.
     if(passwordConfirmInput) { 
@@ -21,9 +24,16 @@ function onFormChange() {
     }
 }
 
+/**
+ * Logging in on outlook
+ */
 function onOutlookLogin() {
     window.location.href = './outlookLogin';
 }
+
+/**
+ * Doing action on submit
+ */
 
 function onSubmit() {  
     let url;
@@ -65,6 +75,10 @@ function onSubmit() {
       }
 
 }
+
+/**
+ * Enabling registration
+ */
 function register() {
     if(emailInput.value && passwordInput.value && passwordConfirmInput 
         && passwordConfirmInput.value === passwordInput.value
@@ -73,6 +87,9 @@ function register() {
     } 
 }
 
+/**
+ * Logging out
+ */
 function logout() {
     let userData = JSON.parse(localStorage.getItem("user"));
     console.log('XXX',userData.sessionToken)
@@ -97,13 +114,20 @@ function logout() {
         }
       }
 }
+/**
+ * Enabling login 
+ */
 function login() {
     if(emailInput.value && passwordInput.value 
         && validateEmail(emailInput.value)) {
         submitButton.removeAttribute("disabled","");
     } 
 }
-
+/**
+ * Validating email
+ * @param {Object} email
+ * @returns {boolean}
+ */
 function validateEmail(email) {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
