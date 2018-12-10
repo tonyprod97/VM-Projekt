@@ -1,0 +1,27 @@
+td {
+    border: 1px solid black;
+}
+
+td:hover {
+    background-color: rgb(97, 96, 94);
+}
+
+th {
+    text-align: center;
+}
+
+.calendar-form {
+    margin: 10px;
+}
+
+table {
+    margin: 10px;
+}
+
+.taken {
+    background-color: red;
+}
+
+.free {
+    background-color: green;
+}

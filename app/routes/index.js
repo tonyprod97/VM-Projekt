@@ -4,6 +4,7 @@ var router = express.Router();
 // var response ="";
 
 router.use('/user',require('./user'));
+router.use('/calendar',require('./calendar'));
 router.get('/home',(req,res)=>{
     res.render('home',{loggedIn:true});
 })
