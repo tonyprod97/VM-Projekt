@@ -146,6 +146,13 @@ router.get('/authorize', function (req, res) {
     }
 });
 
+/**
+ * Checking if token is received
+ * @param {Object} req
+ * @param {Object} res
+ * @param {Object} error
+ * @param {Object} token
+ */
 function tokenReceived(req, res, error, token) {
     if (error) {
         console.log('ERROR getting token:' + error);
