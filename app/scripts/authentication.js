@@ -3,6 +3,7 @@ let emailInput;
 let passwordInput;
 let submitButton;
 let passwordConfirmInput;
+let emailErrorRegister;
 
 window.onload =()=>{
     form = document.querySelector("form");
@@ -10,6 +11,7 @@ window.onload =()=>{
     passwordInput = document.getElementById("password");
     submitButton = document.getElementById("submitButton");
     passwordConfirmInput = document.getElementById("passwordConfirm");
+    emailErrorRegister = document.getElementById("errorEmailRegister");
 };
 
 /**
@@ -34,18 +36,23 @@ function onOutlookLogin() {
 /**
  * Doing action on submit
  */
-
 function onSubmit() {  
     let url;
+    let email = emailInput.value;
+    let password = passwordInput.value;
+
+    let valid = true;
     // If passwordConfirmInput exists user is trying to register else to log in.
-    if(passwordConfirmInput) {
-        // Check if user registered succesfully.
+    if (passwordConfirmInput) {
+        valid = checkMail(email);
         url = './register';
     } else {
         // Check if user logged in succesfully.
         url = './login';
     }
-    
+
+    if (!valid) return;
+
     //send http POST
     var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
@@ -58,7 +65,7 @@ function onSubmit() {
             password: passwordInput.value
         }
     })); 
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if(!passwordConfirmInput) {
                 /** 
@@ -67,13 +74,23 @@ function onSubmit() {
                  * "email":"antonio.kamber97@yahoo.com",
                  * "sessionToken":"82d643e83539c493a72ac6221fd7d783da5cb59a9dd5f43879989b2c4c3046af5d9455c2b9f8654e2bab9352be5c38bc1a8c4487e571ae9c3f3bc624c7b3c488"}"
                 */
-                localStorage.setItem("user",xhr.response.userData);
+                localStorage.setItem("user", xhr.response.userData);
             }
             
             window.location.href = xhr.response.redirectUrl;
         }
       }
 
+}
+
+function checkMail(email) {
+    if (validateEmail(email)) {
+        emailErrorRegister.innerHTML = "";
+        return true;
+    } else {
+        emailErrorRegister.innerHTML = "Please enter a valid e-mail address";
+        return false;
+    }
 }
 
 /**
@@ -109,7 +126,7 @@ function logout() {
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
             localStorage.removeItem("user");
-            console.log(xhr.response)
+            console.log(xhr.response);
             window.location.href = xhr.response.redirectUrl;
         }
       }
