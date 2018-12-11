@@ -1,19 +1,35 @@
 <script src="/scripts/calendar/week.js"></script>
 <link rel="stylesheet" href="/css/calendar/week.css">
-<div class="calendar-picker">
-</div>
-<form class="calendar-form">
-    <div class="form-group">
-        <input type="date" id="startingDate">
-        <button type="button" class="btn btn-primary" onclick="dateChanged()">Search</button>
+<div class="container">
+    <div class="row justify-content-center">       
+        <form class="calendar-form">
+            <div class="form-group">
+                <input type="date" id="date-picker">
+                <button type="button" class="btn btn-primary btn-link" onclick="dateChanged()">Search</button>
+            </div>
+        </form>
     </div>
-</form>
-<div class="table-responsive">
-    <table class="table table-striped">
-    <thead>
-        <tr id="header" class="table-active"></tr>
-    </thead>
-    <tbody>
-    </tbody>
-</table>
+    <div class="row">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="thead-dark">
+                    <tr id="header" class="table-active"></tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <nav aria-label="...">
+        <ul class="pagination">
+            <li class="page-item">
+            <span class="page-link" onclick="previous()">Previous</span>
+            </li>
+            <li class="page-item">
+            <span class="page-link" onclick="next()">Next</span>
+            </li>
+        </ul>
+        </nav>
+    </div>
 </div>

@@ -1,30 +1,35 @@
 let headerRow;
 let tableBody;
 let startingDate;
-let cellIsTaken = false;
 
 window.onload = ()=>{
     headerRow = document.getElementById('header');
     tableBody = document.getElementsByTagName('tbody')[0];
-    startingDate = document.getElementById('startingDate');
+    startingDate = document.querySelector('#date-picker');
+    startingDate.value = getLocalDateFormat(new Date());
     appendWeek(new Date());
     appendHours();
 };
 
+/*
+* Create columns in table.
+*/
 function appendWeek(date) {
     headerRow.innerHTML = "";
     currentDate = date;
-    headerRow.innerHTML += '<th> time: </th>';
+    headerRow.innerHTML += '<th> YEAR '+currentDate.getFullYear()+' </th>';
 
     for(let i = 0;i<7;i++) {
         let currentDay = currentDate.getDate();
         currentMonth = currentDate.getMonth()+1;
-
-        headerRow.innerHTML += '<th>'+currentDay+'.'+currentMonth+'.'+ '</th>';
+        headerRow.innerHTML += '<th>'+currentMonth+'/'+currentDay+ '</th>';
         currentDate.setDate(currentDate.getDate()+1);
     }
 }
 
+/*
+* Create rows in table.
+*/
 function appendHours() {
     for(let i=8;i<21;i++) {
         tableBody.innerHTML += '<tr id="row"'+(i+1)+'>';
@@ -42,15 +47,39 @@ function appendHours() {
 }
 
 function dateChanged() {
-    console.log(startingDate.value);
     appendWeek(new Date(startingDate.value));
 }
 
 function cellClicked(startingTimeHour,dateIndex) {
     let cell = document.getElementById('cell'+startingTimeHour+'-'+dateIndex);
-    let classToAdd = cellIsTaken ? 'free' : 'taken';
+    let classToAdd = cell.classList.contains('taken') ? 'free' : 'taken';
+    let classToRemove = classToAdd == 'free' ? 'taken':'free';
+    cell.classList.remove(classToRemove);
     cell.classList.add(classToAdd);
     cellIsTaken = !cellIsTaken;
     console.log(cell.classList.value)
     console.log(startingTimeHour,dateIndex);
+}
+
+function next() {
+    let date = new Date(startingDate.value);
+    date.setDate(date.getDate()+7);
+    startingDate.value = getLocalDateFormat(date);
+    console.log(startingDate.value)
+    appendWeek(date);
+}
+
+function previous() {
+    let date = new Date(startingDate.value);
+    date.setDate(date.getDate()-7);
+    startingDate.value = getLocalDateFormat(date);
+    appendWeek(date);
+}
+
+/*
+* Returns correct date format for HTML date input
+*/
+function getLocalDateFormat(date) {
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+    return date.toJSON().slice(0,10);
 }
