@@ -22,6 +22,8 @@ const crypto = require('crypto');
 const userTable    = 'Profile';
 const sessionTable = 'Session';
 
+const sessionLifeTime = 10;
+
 /**
  * .....................
  * @param {String}seed
@@ -124,7 +126,25 @@ function createUser(database, email, password, callback) {
  * @param {Object}callback
  */
 function isValidSessionInfo(database, userid, sessionToken, callback) {
-    // TODO
+
+    database.input('userid', mssql.Int, userid);
+    database.input('sessionToken', mssql.VarChar(70), sessionToken);
+
+    database.query('SELECT sessionToken FROM ' + sessionTable + ' WHERE userid = @userid and sessionToken = @sessionToken and CONVERT(Date, GETDATE()) <= DATEADD(DAY,' + sessionLifeTime + ',createdate)', (error, result) => {
+
+        if (error) {
+            console.log(error);
+            setTimeout(() => callback({ state: dbConsts.OPERATION_FAILED }));
+            return;
+        }
+
+        if (result.rowsAffected[0] == 0) {
+            setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, valid: false }));
+            return;
+        }
+
+        setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, valid: true }));
+    });
 }
 
 /**
@@ -135,12 +155,12 @@ function isValidSessionInfo(database, userid, sessionToken, callback) {
  */
 function newSession(database, userid, callback) {
 
-    let sessionToken = randomTokenString(64);
+    let sessionToken = randomTokenString(32);
 
-    database.input('userID', mssql.Int, userid);
+    database.input('userid', mssql.Int, userid);
     database.input('sessionToken', mssql.VarChar(70), sessionToken);
 
-    database.query('INSERT INTO ' + sessionTable + ' (userID,sessionToken,createDate) VALUES (@userID, @sessionToken, CONVERT(Date, GETDATE()))', (error) => {
+    database.query('INSERT INTO ' + sessionTable + ' (userID,sessionToken,createDate) VALUES (@userid, @sessionToken, CONVERT(Date, GETDATE()))', (error) => {
 
         if (error) {
 
@@ -150,7 +170,6 @@ function newSession(database, userid, callback) {
         }
 
         setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, token: sessionToken }));
-
     });
 }
 
@@ -225,6 +244,20 @@ function login(database,email,password, callback) {
         });
     });
 
+}
+
+function getUsersThatSheredCalendarWithYou(database, userid, sessionToken, callback) {
+
+    isValidSessionInfo(new mssql.Request(), sessionToken, (answer) => {
+
+        if (!answer.valid) {
+            setTimeout(() => callback({ state: dbConsts.OPERATION_DENIED, msg: "invalid sessionToken" }), 0);
+            return;
+        }
+
+        //TODO
+
+    });
 }
 
 //var db = null; //mssql.connect(config).Request();
@@ -445,6 +478,10 @@ class DatabaseManager {
                 let database = new mssql.Request()
 
                 //console.log(sentData.data);
+
+                //isValidSessionInfo(new mssql.Request(), sentData.data.userid, sentData.data.token, (answer) => {
+                //    console.log(answer);
+                //});
 
                 database.input('userid', mssql.Int, sentData.data.userid);
                 database.input('token', mssql.VarChar(70), sentData.data.token);
