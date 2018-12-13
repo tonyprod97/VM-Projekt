@@ -4,6 +4,7 @@ let passwordInput;
 let submitButton;
 let passwordConfirmInput;
 let emailErrorRegister;
+let errorPasswordRegister;
 
 window.onload =()=>{
     form = document.querySelector("form");
@@ -12,6 +13,7 @@ window.onload =()=>{
     submitButton = document.getElementById("submitButton");
     passwordConfirmInput = document.getElementById("passwordConfirm");
     emailErrorRegister = document.getElementById("errorEmailRegister");
+    errorPasswordRegister = document.getElementById("errorPasswordRegister");
 };
 
 /**
@@ -40,11 +42,18 @@ function onSubmit() {
     let url;
     let email = emailInput.value;
     let password = passwordInput.value;
+    let confirmPassword = passwordConfirmInput.value;
 
     let valid = true;
     // If passwordConfirmInput exists user is trying to register else to log in.
     if (passwordConfirmInput) {
         valid = checkMail(email);
+        if (valid) {
+            valid = checkPassword(password, confirmPassword);
+        } else {
+            checkPassword(password, confirmPassword);
+        }
+
         url = './register';
     } else {
         // Check if user logged in succesfully.
@@ -91,6 +100,20 @@ function checkMail(email) {
         emailErrorRegister.innerHTML = "Please enter a valid e-mail address";
         return false;
     }
+}
+
+function checkPassword(password, confirmPassword) {
+    if (password.length < 6) {
+        errorPasswordRegister.innerHTML = "Password must have at least 6 characters";
+        return false;
+    } else if (password !== confirmPassword) {
+        errorPasswordRegister.innerHTML = "Confirm password must match";
+        return false;
+    } else {
+        errorPasswordRegister.innerHTML = "";
+    }
+
+    return true;
 }
 
 /**
