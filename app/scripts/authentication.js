@@ -3,8 +3,8 @@ let emailInput;
 let passwordInput;
 let submitButton;
 let passwordConfirmInput;
-let emailErrorRegister;
-let errorPasswordRegister;
+let emailError;
+let errorPassword;
 
 window.onload =()=>{
     form = document.querySelector("form");
@@ -12,8 +12,8 @@ window.onload =()=>{
     passwordInput = document.getElementById("password");
     submitButton = document.getElementById("submitButton");
     passwordConfirmInput = document.getElementById("passwordConfirm");
-    emailErrorRegister = document.getElementById("errorEmailRegister");
-    errorPasswordRegister = document.getElementById("errorPasswordRegister");
+    emailError = document.getElementById("errorEmail");
+    errorPassword = document.getElementById("errorPassword");
 };
 
 /**
@@ -42,21 +42,27 @@ function onSubmit() {
     let url;
     let email = emailInput.value;
     let password = passwordInput.value;
-    let confirmPassword = passwordConfirmInput.value;
 
-    let valid = true;
+    let valid = checkMail(email);
     // If passwordConfirmInput exists user is trying to register else to log in.
     if (passwordConfirmInput) {
-        valid = checkMail(email);
+        let confirmPassword = passwordConfirmInput.value;
+
         if (valid) {
-            valid = checkPassword(password, confirmPassword);
+            valid = checkPasswordConf(password, confirmPassword);
         } else {
-            checkPassword(password, confirmPassword);
+            checkPasswordConf(password, confirmPassword);
         }
 
         url = './register';
     } else {
         // Check if user logged in succesfully.
+        if (valid) {
+            valid = checkPassword(password);
+        } else {
+            checkPassword(password);
+        }
+
         url = './login';
     }
 
@@ -94,23 +100,31 @@ function onSubmit() {
 
 function checkMail(email) {
     if (validateEmail(email)) {
-        emailErrorRegister.innerHTML = "";
+        emailError.innerHTML = "";
         return true;
     } else {
-        emailErrorRegister.innerHTML = "Please enter a valid e-mail address";
+        emailError.innerHTML = "Please enter a valid e-mail address";
         return false;
     }
 }
 
-function checkPassword(password, confirmPassword) {
-    if (password.length < 6) {
-        errorPasswordRegister.innerHTML = "Password must have at least 6 characters";
+function checkPasswordConf(password, confirmPassword) {
+    if (!checkPassword(password)) {
         return false;
     } else if (password !== confirmPassword) {
-        errorPasswordRegister.innerHTML = "Confirm password must match";
+        errorPassword.innerHTML = "Confirm password must match";
+        return false;
+    }
+
+    return true;
+}
+
+function checkPassword(password) {
+    if (password.length < 6) {
+        errorPassword.innerHTML = "Password must have at least 6 characters";
         return false;
     } else {
-        errorPasswordRegister.innerHTML = "";
+        errorPassword.innerHTML = "";
     }
 
     return true;
