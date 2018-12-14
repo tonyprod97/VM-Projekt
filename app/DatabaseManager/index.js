@@ -21,6 +21,8 @@ const crypto = require('crypto');
 
 const userTable    = 'Profile';
 const sessionTable = 'Session';
+const unverifiedTable = 'Unverified';
+const visibilityTable = 'Visibility';
 
 const sessionLifeTime = 10;
 
@@ -85,7 +87,7 @@ function createUser(database, email, password, callback) {
     database.input('email', mssql.VarChar(100), email);
     database.input('hash', mssql.VarChar(70), seededSha256(email, password));
 
-    database.query('INSERT INTO ' + userTable + '(email,passwordHash) VALUES ( @email, @hash )', (error) => {
+    database.query('INSERT INTO ' + userTable + ' (email, passwordHash) VALUES (@email, @hash)', (error) => {
 
         if (error) {
 
@@ -98,7 +100,30 @@ function createUser(database, email, password, callback) {
 
         answer.state = dbConsts.OPERATION_SUCCESS;
         answer.msg   = "operation success";
-        setTimeout(() => callback(answer), 0);
+        //setTimeout(() => callback(answer), 0);
+
+        database.query('SELECT id FROM ' + userTable + ' WHERE email = @email', (error, result) => {
+
+            if (error) { // shouldn't happen
+                console.log(error);
+                setTimeout(() => callback(answer), 0);
+                return;
+            }
+
+            database.input('userid', mssql.Int, toJSON(result)[0][0][0].id);
+            database.input('token', mssql.VarChar(70), randomTokenString(32));
+
+            database.query('INSERT INTO ' + unverifiedTable + ' (userid, token, createdate) VALUES(@userid, @token, CONVERT(Date, GETDATE()))', (error, result) => {
+
+                if (error) { // shouldn't happen
+                    console.log(error);
+                    setTimeout(() => callback(answer), 0);
+                    return;
+                }
+
+                setTimeout(() => callback(answer), 0);
+            });
+        });
 
         return;
     });
@@ -259,6 +284,43 @@ function getUsersThatSheredCalendarWithYou(database, userid, sessionToken, callb
 
     });
 }
+
+function getVerification(database, email, callback) {
+
+    let data = {
+        state: null,
+        msg: "",
+        data: null
+    };
+
+    database.input('email', mssql.VarChar(100), email);
+
+    database.query('SELECT userid,token FROM ' + userTable + ' JOIN ' + unverifiedTable + ' ON id = userid WHERE email = @email', (error, result) => {
+
+        if (error) {
+
+            console.log(error);
+            data.state = dbConsts.OPERATION_FAILED;
+            data.msg = "Failed to get verification";
+            setTimeout(() => callback(data), 0);
+            return;
+        }
+
+        data.state = dbConsts.OPERATION_SUCCESS;
+        data.msg   = "operation success";
+
+        if (result.rowsAffected[0] == 0) {
+            data.data = {verified: true};
+            setTimeout(() => callback(data), 0);
+            return;
+        }
+
+        data.data = toJSON(result)[0][0][0];
+        data.data.verified = false;
+        setTimeout(() => callback(data), 0);
+    });
+}
+
 
 //var db = null; //mssql.connect(config).Request();
 var readyForUse = false;
@@ -424,6 +486,11 @@ class DatabaseManager {
 
                 break;
             } 
+
+            case getRequests.GET_VERIFICATION: {
+                getVerification(new mssql.Request(), requestData.data.email, callback);
+                break;
+            }
         }
     }
 
@@ -448,40 +515,13 @@ class DatabaseManager {
             }
 
             case sendRequests.LOGIN_REQUEST: {
-
                 login(new mssql.Request(), sentData.data.email, sentData.data.password, callback);
-
-                //if (!sentData.data.username) {
-                //
-                //    getUserByEmail(new mssql.Request(), sentData.data.email, (answer) => {
-                //
-                //        if (answer.state != dbConsts.OPERATION_SUCCESS) {
-                //
-                //            response.state = answer.state;
-                //            response.msg = "Invalid login data";
-                //
-                //            setTimeout(() => callback(response), 0);
-                //            return;
-                //        }
-                //
-                //        login(new mssql.Request(), answer.username, sentData.data.password, callback);
-                //    });
-                //
-                //} else {
-                //    login(new mssql.Request(), sentData.data.username, sentData.data.password, callback);
-                //}
                 break;
             }
 
             case sendRequests.TERMINATE_SESSION: {
 
                 let database = new mssql.Request()
-
-                //console.log(sentData.data);
-
-                //isValidSessionInfo(new mssql.Request(), sentData.data.userid, sentData.data.token, (answer) => {
-                //    console.log(answer);
-                //});
 
                 database.input('userid', mssql.Int, sentData.data.userid);
                 database.input('token', mssql.VarChar(70), sentData.data.token);
@@ -502,6 +542,35 @@ class DatabaseManager {
                     
                     setTimeout(() => callback(response), 0);
                 });
+
+                break;
+            }
+
+            case sendRequests.VERIFY_USER: {
+
+                let database = new mssql.Request();
+
+                database.input('userid', mssql.Int, sentData.data.userid);
+                database.input('token', mssql.VarChar(70), sentData.data.verificationToken);
+
+                database.query('DELETE FROM ' + unverifiedTable + ' WHERE userid = @userid and token = @token', (error) => {
+
+                    if (error) {
+
+                        response.state = dbConsts.OPERATION_FAILED;
+                        response.msg   = "failed to verify user";
+
+                        setTimeout(() => callback(response));
+                        return;
+                    }
+
+                    response.state = dbConsts.OPERATION_SUCCESS;
+                    response.msg   = "operation success";
+
+                    setTimeout(() => callback(response), 0);
+                });
+
+                break;
             }
         }
     }

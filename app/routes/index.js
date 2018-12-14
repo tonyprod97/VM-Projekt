@@ -22,7 +22,8 @@ router.use(session(
         resave: false,
         saveUninitialized: false
     }));
-// const sendIds = require('../constants').databaseSendRequests; // for testing 
+
+//const sendIds = require('../constants').databaseSendRequests; // for testing 
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -39,30 +40,49 @@ router.get('/', function(req, res) {
 
     //for testing
 
-   //databaseManager.sendRequest({ id: sendIds.CREATE_NEW_USER, data: { email: 'test@test.com', password: 'testPass' } }, (answer) => {
-   //
-   //    console.log(answer.msg);
-   //
-   //    databaseManager.sendRequest({ id: sendIds.LOGIN_REQUEST, data: { email: 'test@test.com', password: 'testPass' } }, (answer) => {
-   //
-   //        if (answer.state != operationStates.OPERATION_SUCCESS) {
-   //            console.log(answer.msg);
-   //            return;
-   //        }
-   //
-   //        console.log(answer.data);
-   //
-   //        databaseManager.sendRequest({ id: sendIds.TERMINATE_SESSION, data: { userid: answer.data.id, token: answer.data.sessionToken } }, (answer) => {
-   //
-   //            if (answer.state != operationStates.OPERATION_SUCCESS) {
-   //                console.log(answer.msg);
-   //                return
-   //            }
-   //
-   //            console.log("session terminated");
-   //        });
-   //    });
-   //}); 
+    //databaseManager.sendRequest({ id: sendIds.CREATE_NEW_USER, data: { email: 'test@test.com', password: 'testPass' } }, (answer) => {
+    //
+    //    console.log(answer.msg);
+    //
+    //    databaseManager.sendRequest({ id: sendIds.LOGIN_REQUEST, data: { email: 'test@test.com', password: 'testPass' } }, (answer) => {
+    //
+    //        if (answer.state != operationStates.OPERATION_SUCCESS) {
+    //            console.log(answer.msg);
+    //            return;
+    //        }
+    //
+    //        databaseManager.getSingleRequest({ id: ids.GET_VERIFICATION, data: { email: 'test@test.com' } }, (answer) => {
+    //
+    //            if (answer.state != operationStates.OPERATION_SUCCESS) {
+    //                console.log(answer.msg);
+    //                return;
+    //            }
+    //
+    //            if (answer.data.verified) {
+    //                console.log('user verified');
+    //                return;
+    //            }
+    //
+    //            console.log(answer.data);
+    //
+    //            databaseManager.sendRequest({ id: sendIds.VERIFY_USER, data: { userid: answer.data.userid, verificationToken: answer.data.token } }, (answer) => {
+    //                if (answer.state != operationStates.OPERATION_SUCCESS) {
+    //                    console.log(answer.msg);
+    //                }
+    //            });
+    //        });
+    //
+    //        databaseManager.sendRequest({ id: sendIds.TERMINATE_SESSION, data: { userid: answer.data.id, token: answer.data.sessionToken } }, (answer) => {
+    //
+    //            if (answer.state != operationStates.OPERATION_SUCCESS) {
+    //                console.log(answer.msg);
+    //                return
+    //            }
+    //
+    //            console.log("session terminated");
+    //        });
+    //    });
+    //}); 
 
     databaseManager.getSingleRequest({ id: ids.USER }, (answer) => {
 
