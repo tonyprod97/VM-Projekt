@@ -1,5 +1,6 @@
 td {
     border: 1px solid black;
+    background-color: rgb(161, 241, 141);
 }
 
 td:hover {
@@ -10,10 +11,6 @@ th {
     text-align: center;
 }
 
-.taken {
-    background-color: red;
-}
-
-.free {
-    background-color: green;
+.reserved {
+    background-color: rgb(54, 67, 240);
 }

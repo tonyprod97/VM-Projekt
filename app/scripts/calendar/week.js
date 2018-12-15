@@ -1,6 +1,7 @@
 let headerRow;
 let tableBody;
 let startingDate;
+let reservedCells = new Array();
 
 window.onload = ()=>{
     headerRow = document.getElementById('header');
@@ -52,13 +53,12 @@ function dateChanged() {
 
 function cellClicked(startingTimeHour,dateIndex) {
     let cell = document.getElementById('cell'+startingTimeHour+'-'+dateIndex);
-    let classToAdd = cell.classList.contains('taken') ? 'free' : 'taken';
-    let classToRemove = classToAdd == 'free' ? 'taken':'free';
-    cell.classList.remove(classToRemove);
-    cell.classList.add(classToAdd);
-    cellIsTaken = !cellIsTaken;
-    console.log(cell.classList.value)
-    console.log(startingTimeHour,dateIndex);
+    cell.classList.toggle('reserved');
+    let newCellObject = new cellObject(dateIndex,startingTimeHour);
+    let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
+
+    if(reservedCells.length == newArray.length) newArray.push(newCellObject);
+    reservedCells = newArray;
 }
 
 function next() {
@@ -82,4 +82,30 @@ function previous() {
 function getLocalDateFormat(date) {
     date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
     return date.toJSON().slice(0,10);
+}
+
+function sendRequestForMeetings() {
+    console.log(reservedCells);
+
+    reservedCells = reservedCells.map(o=>{
+
+        let cell = document.getElementById('cell'+o.startingTime+'-'+o.date);
+        cell.classList.toggle('reserved'); 
+
+        let newDate = new Date(startingDate.value);
+        newDate.setDate(newDate.getDate()+o.date);
+        return new cellObject(newDate,o.startingTime); 
+    })
+    reservedCells = new Array();
+}
+
+class cellObject {
+    constructor(date,startingTime) {
+        this.date = date;
+        this.startingTime = startingTime;
+    }
+
+    equals(obj) {
+        return this.date === obj.date && this.startingTime === obj.startingTime;
+    }
 }
