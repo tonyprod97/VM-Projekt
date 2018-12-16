@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: constants/index.js</title>
+    <title>JSDoc: Source: scripts/calendar/calendarNav.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: constants/index.js</h1>
+    <h1 class="page-title">Source: scripts/calendar/calendarNav.js</h1>
 
     
 
@@ -27,33 +27,13 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @file U ovoj datoteci se izlazu kao moduli numericka varijabla "port", objekt "databaseErrors",
- * objekt "databaseGetRequest" te objekt "databaseSendRequests" 
+ * ...
+ * @param {Object} ref
  */
-module.exports.port = 3000;
-
-module.exports.databaseErrors = {
-
-    OPERATION_SUCCESS : 0, // all good
-    OPERATION_FAILED  : 1, // failed to execute
-    OPERATION_WARRNING: 2, // operation succeded but might couse problems
-    OPERATION_DENIED  : 3  // operation might be dangoruse so it was blocked
-};
-
-module.exports.databaseGetRequests = {
-    USER             : 1, // request developers
-    VISIBLE_CALENDARS: 2, // returns all users a current user has rights to see there calendar (needs in data field: userid, token)
-    GET_VERIFICATION : 4  //request verification details about user (needs in data field: email) returns (verified, userid *, token *) * -> if not verified 
-};
-
-module.exports.databaseSendRequests = {
-
-    CREATE_NEW_USER  : 1, // create new user  (needs in data field: username, email, password) 
-    LOGIN_REQUEST    : 2, // login user (needs in data field: email, password)
-    TERMINATE_SESSION: 3, // logout user from session (needs in data field: userid, token)
-    SHARE_CALENDAR   : 4, // share calendar with other user (needs in data field: userid, token, with) with - email of a user you want to share calendar with
-    VERIFY_USER      : 5  // verifie user (needs in data field: userid, verificationToken)
-};</code></pre>
+function routeChanged(ref) {
+    console.log(ref);
+    ref.classList.toggle('active');
+}</code></pre>
         </article>
     </section>
 

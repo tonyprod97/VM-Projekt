@@ -1,4 +1,6 @@
-
+/**
+ * @file U ovoj datoteci se obavlja konfiguracija aplikacije
+ */
 const express = require('express');
 const path = require('path');
 const hbs = require('express-handlebars');
