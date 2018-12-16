@@ -94,6 +94,72 @@
     
 
     
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="config"><span class="type-signature">(constant) </span>config<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Konstanta koja sadrzi sve potrebne podatke za komunikaciju sa bazom podataka
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="DatabaseManager_index.js.html">DatabaseManager/index.js</a>, <a href="DatabaseManager_index.js.html#line9">line 9</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -112,7 +178,7 @@
 
 
 <div class="description">
-    Creating a user in database
+    Stvaranje korisnika u bazi podataka
 </div>
 
 
@@ -164,7 +230,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">objekt koji predstavlja bazu podataka</td>
         </tr>
 
     
@@ -187,7 +253,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">adresa elektronicke poste korisnika</td>
         </tr>
 
     
@@ -210,7 +276,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">lozinka korisnika</td>
         </tr>
 
     
@@ -223,7 +289,7 @@
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">function</span>
 
 
             
@@ -233,7 +299,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">funkcija koja ce se izvesti</td>
         </tr>
 
     
@@ -274,7 +340,392 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line74">line 74</a>
+        <a href="DatabaseManager_index.js.html">DatabaseManager/index.js</a>, <a href="DatabaseManager_index.js.html#line84">line 84</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getUsersThatSheredCalendarWithYou"><span class="type-signature"></span>getUsersThatSheredCalendarWithYou<span class="signature">(database, email, password, callback)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Dohvat korisnika koji dijele kalendar sa nekim korisnikom
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>database</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">predstavljabazu podataka</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>email</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">predstavlja adresu elektronicke poste korisnika</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>password</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">predstavlja lozinku korisnika</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">predstavlja funkciju koja ce se izvrsiti</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="DatabaseManager_index.js.html">DatabaseManager/index.js</a>, <a href="DatabaseManager_index.js.html#line286">line 286</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getVerification"><span class="type-signature"></span>getVerification<span class="signature">(email, password, callback)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Verifikcaija korisnika
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>email</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">predstavlja adresu elektronicke poste korisnika</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>password</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">predstavlja lozinku korisnika</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">predstavlja funkciju koja ce se izvrsiti</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="DatabaseManager_index.js.html">DatabaseManager/index.js</a>, <a href="DatabaseManager_index.js.html#line305">line 305</a>
     </li></ul></dd>
     
 
@@ -316,7 +767,7 @@
 
 
 <div class="description">
-    Creating database and setting up database manager
+    Inicijalizacija baze podataka i postavljanje "manager"-a koji upravlja bazom podataka
 </div>
 
 
@@ -368,7 +819,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Predstavlja bazu podataka</td>
         </tr>
 
     
@@ -391,7 +842,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Predstavlja staru verziju baze</td>
         </tr>
 
     
@@ -432,7 +883,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line162">line 162</a>
+        <a href="DatabaseManager_index.js.html">DatabaseManager/index.js</a>, <a href="DatabaseManager_index.js.html#line212">line 212</a>
     </li></ul></dd>
     
 
@@ -474,7 +925,7 @@
 
 
 <div class="description">
-    Checking if session is valid
+    Provjera ako je sjednica vazeca
 </div>
 
 
@@ -526,7 +977,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">objekt koji predstavlja bazu podataka</td>
         </tr>
 
     
@@ -549,7 +1000,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">korisnikov identifikacijski broj</td>
         </tr>
 
     
@@ -572,7 +1023,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">predstavlja token</td>
         </tr>
 
     
@@ -595,7 +1046,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">funkcija koja ce se izvesti</td>
         </tr>
 
     
@@ -636,7 +1087,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line126">line 126</a>
+        <a href="DatabaseManager_index.js.html">DatabaseManager/index.js</a>, <a href="DatabaseManager_index.js.html#line159">line 159</a>
     </li></ul></dd>
     
 
@@ -678,7 +1129,7 @@
 
 
 <div class="description">
-    Loging in
+    Prijava u sustav
 </div>
 
 
@@ -730,7 +1181,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">predstavljabazu podataka</td>
         </tr>
 
     
@@ -753,7 +1204,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">predstavlja adresu elektronicke poste korisnika</td>
         </tr>
 
     
@@ -776,7 +1227,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">predstavlja lozinku korisnika</td>
         </tr>
 
     
@@ -799,7 +1250,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">predstavlja funkciju koja ce se izvrsiti</td>
         </tr>
 
     
@@ -840,7 +1291,179 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line185">line 185</a>
+        <a href="DatabaseManager_index.js.html">DatabaseManager/index.js</a>, <a href="DatabaseManager_index.js.html#line235">line 235</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="login"><span class="type-signature"></span>login<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Enabling login
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="scripts_authentication.js.html">scripts/authentication.js</a>, <a href="scripts_authentication.js.html#line174">line 174</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="logout"><span class="type-signature"></span>logout<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Logging out
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="scripts_authentication.js.html">scripts/authentication.js</a>, <a href="scripts_authentication.js.html#line147">line 147</a>
     </li></ul></dd>
     
 
@@ -882,7 +1505,7 @@
 
 
 <div class="description">
-    Creating a new session
+    Stvaranje nove sjednice
 </div>
 
 
@@ -934,7 +1557,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">predstavlja bazu podataka</td>
         </tr>
 
     
@@ -957,7 +1580,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">predstavlja korisnicko ime</td>
         </tr>
 
     
@@ -980,7 +1603,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">predstavlja funkciju koje ce se izvesti</td>
         </tr>
 
     
@@ -1021,7 +1644,265 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line136">line 136</a>
+        <a href="DatabaseManager_index.js.html">DatabaseManager/index.js</a>, <a href="DatabaseManager_index.js.html#line187">line 187</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="onFormChange"><span class="type-signature"></span>onFormChange<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Checking if user is trying to register or log in
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="scripts_authentication.js.html">scripts/authentication.js</a>, <a href="scripts_authentication.js.html#line22">line 22</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="onOutlookLogin"><span class="type-signature"></span>onOutlookLogin<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Logging in on outlook
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="scripts_authentication.js.html">scripts/authentication.js</a>, <a href="scripts_authentication.js.html#line34">line 34</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="onSubmit"><span class="type-signature"></span>onSubmit<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Doing action on submit
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="scripts_authentication.js.html">scripts/authentication.js</a>, <a href="scripts_authentication.js.html#line41">line 41</a>
     </li></ul></dd>
     
 
@@ -1063,7 +1944,7 @@
 
 
 <div class="description">
-    Creating a random string token
+    Stvaranje proizvoljnog "string token-a"
 </div>
 
 
@@ -1115,7 +1996,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">velicina "tokena"</td>
         </tr>
 
     
@@ -1156,7 +2037,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line63">line 63</a>
+        <a href="DatabaseManager_index.js.html">DatabaseManager/index.js</a>, <a href="DatabaseManager_index.js.html#line73">line 73</a>
     </li></ul></dd>
     
 
@@ -1183,7 +2064,7 @@
 
         
 <div class="param-desc">
-    random string token
+    proizvoljni "string token"
 </div>
 
 
@@ -1212,6 +2093,92 @@
     
 
     
+    <h4 class="name" id="register"><span class="type-signature"></span>register<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Enabling registration
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="scripts_authentication.js.html">scripts/authentication.js</a>, <a href="scripts_authentication.js.html#line136">line 136</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="seededSha256"><span class="type-signature"></span>seededSha256<span class="signature">(seed, password)</span><span class="type-signature"> &rarr; {PromiseLike.&lt;ArrayBuffer>}</span></h4>
     
 
@@ -1220,7 +2187,7 @@
 
 
 <div class="description">
-    .....................
+    ...............
 </div>
 
 
@@ -1336,7 +2303,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line31">line 31</a>
+        <a href="DatabaseManager_index.js.html">DatabaseManager/index.js</a>, <a href="DatabaseManager_index.js.html#line41">line 41</a>
     </li></ul></dd>
     
 
@@ -1400,7 +2367,7 @@
 
 
 <div class="description">
-    Turning object into JSON
+    Pretvaranje objekta u JSON
 </div>
 
 
@@ -1437,6 +2404,232 @@
         <tr>
             
                 <td class="name"><code>rowDataPacket</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">predstavlja dio objekta koji se pretvara u JSON</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="DatabaseManager_index.js.html">DatabaseManager/index.js</a>, <a href="DatabaseManager_index.js.html#line224">line 224</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    objekt pretvoren u JSON
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;any></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="tokenReceived"><span class="type-signature"></span>tokenReceived<span class="signature">(req, res, error, token)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Checking if token is received
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>error</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>token</code></td>
             
 
             <td class="type">
@@ -1493,7 +2686,142 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line174">line 174</a>
+        <a href="routes_index.js.html">routes/index.js</a>, <a href="routes_index.js.html#line189">line 189</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="validateEmail"><span class="type-signature"></span>validateEmail<span class="signature">(email)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Validating email
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>email</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="scripts_authentication.js.html">scripts/authentication.js</a>, <a href="scripts_authentication.js.html#line185">line 185</a>
     </li></ul></dd>
     
 
@@ -1519,10 +2847,6 @@
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    object turned into JSON
-</div>
-
 
 
 <dl>
@@ -1531,7 +2855,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Array.&lt;any></span>
+<span class="param-type">boolean</span>
 
 
     </dd>
@@ -1559,13 +2883,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#toJSON">toJSON</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#config">config</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#getUsersThatSheredCalendarWithYou">getUsersThatSheredCalendarWithYou</a></li><li><a href="global.html#getVerification">getVerification</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#onFormChange">onFormChange</a></li><li><a href="global.html#onOutlookLogin">onOutlookLogin</a></li><li><a href="global.html#onSubmit">onSubmit</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#toJSON">toJSON</a></li><li><a href="global.html#tokenReceived">tokenReceived</a></li><li><a href="global.html#validateEmail">validateEmail</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Dec 08 2018 13:01:32 GMT+0100 (GMT+01:00)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Dec 16 2018 19:04:38 GMT+0100 (GMT+01:00)
 </footer>
 
 <script> prettyPrint(); </script>
