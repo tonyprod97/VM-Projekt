@@ -324,6 +324,7 @@ function getVerification(database, email, callback) {
 
 //var db = null; //mssql.connect(config).Request();
 var readyForUse = false;
+var databesDown = false;
 
 
 class DatabaseManager {
@@ -348,7 +349,8 @@ class DatabaseManager {
             }
 
             console.log(errorMSG);
-            //console.log(error);
+            console.log(error);
+
 
             if (errorState == dbConsts.OPERATION_SUCCESS) {
 
@@ -382,9 +384,11 @@ class DatabaseManager {
 
                 readyForUse = true;
                 return;
+
             } 
 
-            readyForUse = false;
+            databesDown = true;
+            //readyForUse = false;
                   
         });
     }
@@ -395,6 +399,10 @@ class DatabaseManager {
      */
     isReady() {
         return readyForUse;
+    }
+
+    isDatabaseDown() {
+        return databesDown;
     }
 
     /**

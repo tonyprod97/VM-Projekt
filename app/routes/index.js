@@ -30,6 +30,18 @@ router.get('/', function(req, res) {
 
     if (!databaseManager.isReady()) {
 
+
+        if (!databaseManager.isDatabaseDown()) {
+
+            res.render('index', {
+                message: "DATABASE DOWN",
+                loggedIn: false,
+                students: new Array();
+            });
+
+            return;
+        }
+
         setTimeout(()=> {
             console.log('Database Manager is not ready.');
             res.redirect('/');
