@@ -36,7 +36,7 @@ router.get('/', function(req, res) {
             res.render('index', {
                 message: "DATABASE DOWN",
                 loggedIn: false,
-                students: new Array();
+                students: new Array()
             });
 
             return;
