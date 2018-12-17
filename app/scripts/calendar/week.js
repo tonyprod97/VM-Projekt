@@ -54,6 +54,7 @@ function appendHours() {
 
 function dateChanged() {
     appendWeek(new Date(startingDate.value));
+    resetCells();
 }
 
 
@@ -67,6 +68,12 @@ function cellClicked(startingTimeHour,dateIndex) {
     reservedCells = newArray;
 }
 
+function resetCells() {
+    let cells = document.querySelectorAll('table td');
+    cells.forEach(cell=>cell.classList.remove('reserved'));
+    reservedCells = new Array();
+}
+
 /**
  * Showing next 7 days
  */
@@ -76,6 +83,7 @@ function next() {
     startingDate.value = getLocalDateFormat(date);
     console.log(startingDate.value)
     appendWeek(date);
+    resetCells();
 }
 
 /**
@@ -86,6 +94,7 @@ function previous() {
     date.setDate(date.getDate()-7);
     startingDate.value = getLocalDateFormat(date);
     appendWeek(date);
+    resetCells();
 }
 
 /**

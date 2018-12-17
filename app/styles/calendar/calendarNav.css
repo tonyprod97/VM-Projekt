@@ -1,0 +1,11 @@
+#tabsNav {
+    background-color: var(--primary-light);
+}
+
+#tabsNav a {
+    color: azure;
+}
+
+#tabsNav a.active {
+    color: black;
+}
