@@ -5,29 +5,22 @@ var router = express.Router();
 
 router.use('/user',require('./user'));
 router.use('/calendar',require('./calendar'));
-router.get('/home',(req,res)=>{
-    res.render('home',{loggedIn:true});
-})
 
 const databaseManager = require('../DatabaseManager');
 const ids             = require('../constants').databaseGetRequests;
 const operationStates = require('../constants').databaseErrors; 
 
 const authHelper = require('../OutlookManager');
-const session = require('express-session');
-
-router.use(session(
-    {
-        secret: '0dc529ba-5051-4cd6-8b67-c9a901bb8bdf',
-        resave: false,
-        saveUninitialized: false
-    }));
 
 //const sendIds = require('../constants').databaseSendRequests; // for testing 
 
 /* GET home page. */
-router.get('/', function(req, res) {
-
+router.get('/', function (req, res) {
+    if (req.session.user != undefined) {
+        res.redirect('/home');
+        return;
+    }
+    
     if (!databaseManager.isReady()) {
 
         setTimeout(()=> {
@@ -200,11 +193,16 @@ router.get('/refreshtokens', function (req, res) {
 });
 
 router.get('/logout', function (req, res) {
-    req.session.destroy();
+    req.session = null;
     res.redirect('/');
 });
 
-router.get('/home', (req,res)=>{
+router.get('/home', function (req, res) {
+    if (req.session.user == undefined) {
+        res.redirect('/user/login');
+        return;
+    }
+
     res.render('home');
 });
 
