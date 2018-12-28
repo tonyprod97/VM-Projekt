@@ -204,6 +204,8 @@ function newSession(database, userid, callback) {
     });
 }
 
+
+
 /**
  * Inicijalizacija baze podataka i postavljanje "manager"-a koji upravlja bazom podataka
  * @param {Object}database - Predstavlja bazu podataka
@@ -368,7 +370,7 @@ class DatabaseManager {
             }
 
             console.log(errorMSG);
-            console.log(error);
+            //console.log(error);
 
 
             if (errorState == dbConsts.OPERATION_SUCCESS) {
@@ -582,12 +584,21 @@ class DatabaseManager {
                 database.input('userid', mssql.Int, sentData.data.userid);
                 database.input('token', mssql.VarChar(70), sentData.data.verificationToken);
 
-                database.query('DELETE FROM ' + unverifiedTable + ' WHERE userid = @userid and token = @token', (error) => {
+                database.query('DELETE FROM ' + unverifiedTable + ' WHERE userid = @userid and token = @token', (error,result) => {
 
                     if (error) {
 
                         response.state = dbConsts.OPERATION_FAILED;
                         response.msg   = "failed to verify user";
+
+                        setTimeout(() => callback(response));
+                        return;
+                    }
+
+                    if ((result.rowsAffected[0] == 0)) {
+
+                        response.state = dbConsts.OPERATION_FAILED;
+                        response.msg = "already verified or invalid params";
 
                         setTimeout(() => callback(response));
                         return;

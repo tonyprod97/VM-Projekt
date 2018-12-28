@@ -5,7 +5,8 @@ const authHelper = require('../../OutlookManager');
 
 router.use('/register',require('./register'));
 router.use('/login',require('./login'));
-router.use('/logout',require('./logout'));
+router.use('/logout', require('./logout'));
+router.use('/verify', require('./verify'));
 
 router.get('/outlookLogin', function (req, res) {
     res.redirect(authHelper.getAuthUrl());

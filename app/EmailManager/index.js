@@ -5,6 +5,9 @@ var transporter = nodemailer.createTransport({
     auth: {
         user: 'projectvm00@gmail.com',
         pass: 'vmproject123'
+    },
+    tls: {
+        rejectUnauthorized: false
     }
 });
 

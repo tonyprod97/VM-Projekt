@@ -2,32 +2,45 @@ var express = require('express');
 var router = express.Router();
 
 const databaseManager = require('../../DatabaseManager');
-const sendIds = require('../../constants').databaseSendRequests; 
+const sendIds = require('../../constants').databaseSendRequests;
+const getIds  = require('../../constants').databaseGetRequests;
 const operationStates = require('../../constants').databaseErrors; 
+
+const emailManager = require('../../EmailManager');
+const urlParser = require('../../UrlManager');
 
 router.get('/', (req, res) => res.render('./user/register'));
 
 router.post('/',(req,res) => {
     let user = req.body.user;
 
-   databaseManager.sendRequest(
-       { 
-           id: sendIds.CREATE_NEW_USER, 
-           data: { 
-               email: user.email, password: user.password 
-            } }, 
-            (answer) => {
+    databaseManager.sendRequest({id: sendIds.CREATE_NEW_USER, data: { email: user.email, password: user.password}}, (answer) => {
 
-                console.log(answer.msg);
+        console.log(answer.msg);
 
-                if (answer.state != operationStates.OPERATION_SUCCESS) {
-                    res.send({ redirectUrl: './register', error: answer.msg, email: user.email });
-                    return;
-                }
+        if (answer.state != operationStates.OPERATION_SUCCESS) {
+            res.send({ redirectUrl: './register', error: answer.msg, email: user.email });
+            return;
+        }
 
-                res.send({
-                    redirectUrl: './login'
-                });
+        databaseManager.getSingleRequest({ id: getIds.GET_VERIFICATION, data: { email: user.email } }, (answer) => {
+
+            if (answer.state != operationStates.OPERATION_SUCCESS) {
+                res.send({error: answer.msg});
+                return;
+            }
+
+            let data = urlParser.getUrlDataFromRequest(req);
+
+            //console.log(data);
+
+            url = data.protocol + '://' + data.host  + '/user/verify/' + answer.data.userid + '/' + answer.data.token;
+
+            console.log("account verification url: " + url);
+
+            emailManager.sendVerificationMail(user.email, url);
+            res.send({ redirectUrl: './login' });
+        });
    }); 
 });
 
