@@ -18,6 +18,8 @@ var outlook = require('node-outlook');
 var moment = require('moment');
 const session = require('express-session');
 
+const mailHelper = require('../EmailManager');
+
 router.use(session(
     {
         secret: '0dc529ba-5051-4cd6-8b67-c9a901bb8bdf',
@@ -105,54 +107,6 @@ router.get('/', function(req, res) {
             students: answer.data
         });
     });
-
-    //var sql = require("mssql");
-    //
-    //console.log(response);
-    //// config for your database
-    //var config = {
-    //    user: 'calendarAdmin',
-    //    password: 'VMproject123',
-    //    server: 'calendarsyncazure.database.windows.net',
-    //    database: 'calendarSyncDatabase',
-    //    encrypt: true
-    //};
-    //
-    //sql.close();
-    //// connect to your database
-    //sql.connect(config, function (err) {
-    //    if (err) console.log(err);
-    //
-    //    // create Request object
-    //    var request = new sql.Request();
-    //
-    //    //students array for view
-    //    let students = new Array();
-    //    // query to the database and get the records
-    //    request.query('select * from Student', function (err, recordset) {
-    //        if (err) console.log(err)
-    //        // send records as a response
-    //        var jsonPretty = JSON.stringify(recordset,null,2);
-    //        var objectValue = JSON.parse(jsonPretty);
-    //
-    //        for(var i = 0; i < objectValue['rowsAffected'][0]; i++){
-    //
-    //            var string = JSON.stringify(objectValue['recordset'][i]);
-    //            var objectValuethis = JSON.parse(string);
-    //
-    //            students.push({
-    //                firstName : objectValuethis['firstName'],
-    //                lastName : objectValuethis['lastName']
-    //            });
-    //        }
-    //
-    //        res.render('index', {
-    //            message: "Welcome to VM Projekt",
-    //            loggedIn: true,
-    //            students: students
-    //        });
-    //    });
-    //});
 });
 
 router.get('/authorize', function (req, res) {
@@ -176,6 +130,7 @@ router.get('/authorize', function (req, res) {
  * @param {Object} error
  * @param {Object} token
  */
+
 function tokenReceived(req, res, error, token) {
     if (error) {
         console.log('ERROR getting token:' + error);
@@ -304,6 +259,12 @@ router.get('/sync', function(req, res) {
             }
         }
     });
+});
+
+router.get('/sendmail', function(req, res) {
+    var subjectMail='lovro.knezevic1@gmail.com';
+    mailHelper.sendVerificationMail(subjectMail,'added url');
+    res.redirect('/');
 });
 
 module.exports = router;
