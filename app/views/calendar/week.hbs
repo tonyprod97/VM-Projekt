@@ -5,6 +5,11 @@
 
 {{> calendarNav }}
 <div class="container">
+    <div class="row">
+        {{#if teacher}}
+        <h3>Displaying calendar for: {{teacher.fullName}}</h3>
+        {{/if}}
+    </div>
     <div class="row justify-content-center">       
         <form class="calendar-form">
             <div class="form-group">

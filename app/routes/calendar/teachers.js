@@ -9,6 +9,16 @@ router.get('/',(req,res)=>{
     //gets name from request
     let fullName = req.query.fullName;
 
+    if(index && fullName) {
+        console.log(index,fullName)
+        res.render('./calendar/week',{teacher: {
+            fullName:fullName,
+            index:index
+        },
+        loggedIn:true});
+        return;
+    }
+
     console.log(index,fullName);
 
     res.render('./calendar/teachers', 
