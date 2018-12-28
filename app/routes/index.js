@@ -207,7 +207,7 @@ router.get('/logout', function (req, res) {
 });
 
 router.get('/home', (req,res)=>{
-    res.render('home');
+    res.render('home',{loggedIn:true});
 });
 
 /*
@@ -295,11 +295,11 @@ router.get('/sync', function(req, res) {
                     req.session.syncUrl = deltaLink;
                 }
 
-                //var finalResponse=JSON.stringify(response.body.value);
+                var finalResponse=JSON.stringify(response.body.value);
                 //console.log(JSON.stringify(response.body.value))
                 console.log('Final respone: '+ JSON.stringify(response.body.value));
-                //res.render('/',{finalResponse});
-                res.redirect('/');
+                res.render('home',{calendarData:finalResponse,loggedIn:true});
+                //res.redirect('/');
 
             }
         }

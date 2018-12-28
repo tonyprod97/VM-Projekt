@@ -15,6 +15,17 @@ th {
 .reserved {
     background-color: rgb(74, 81, 175);
 }
+.taken {
+    background-color: rgb(212, 150, 69);
+    border: 2px solid blue !important;
+    font-style: italic;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-weight: bold;
+    text-align: center;
+}
+.taken:hover {
+    background-color: red;
+}
 
 #request {
     background-color: var(--secondary);

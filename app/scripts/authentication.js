@@ -163,6 +163,7 @@ function logout() {
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
             localStorage.removeItem("user");
+            localStorage.removeItem("calendarData");
             console.log(xhr.response);
             window.location.href = xhr.response.redirectUrl;
         }

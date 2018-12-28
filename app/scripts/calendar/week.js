@@ -2,14 +2,18 @@ let headerRow;
 let tableBody;
 let startingDate;
 let reservedCells = new Array();
+let calendarData;
+let currentDate;
 
 window.onload = ()=>{
     headerRow = document.getElementById('header');
     tableBody = document.getElementsByTagName('tbody')[0];
     startingDate = document.querySelector('#date-picker');
     startingDate.value = getLocalDateFormat(new Date());
+    calendarData = JSON.parse(window.localStorage.getItem("calendarData"));
     appendWeek(new Date());
-    appendHours();
+    fillCellsWithData();
+    console.log('DATA: ',calendarData);
 };
 
 /**
@@ -19,21 +23,30 @@ window.onload = ()=>{
 function appendWeek(date) {
     headerRow.innerHTML = "";
     currentDate = date;
+
     headerRow.innerHTML += '<th> YEAR '+currentDate.getFullYear()+' </th>';
 
     for(let i = 0;i<7;i++) {
-        let currentDay = currentDate.getDate();
-        currentMonth = currentDate.getMonth()+1;
-        headerRow.innerHTML += '<th>'+currentMonth+'/'+currentDay+ '</th>';
-        currentDate.setDate(currentDate.getDate()+1);
+        let tempDate = new Date(currentDate);
+        tempDate.setDate(tempDate.getDate()+i);
+        let tempDay = tempDate.getDate();
+        let tempMonth = tempDate.getMonth()+1;
+    
+        headerRow.innerHTML += '<th>'+tempMonth+'/'+tempDay+ '</th>';
+        //currentDate.setDate(currentDate.getDate()+1);
     }
+    appendHours();
 }
 
 /**
  * Creating rows in table.
+/**
+ *
+ *
  */
 function appendHours() {
-    for(let i=8;i<21;i++) {
+    tableBody.innerHTML = '';
+    for(let i=7;i<21;i++) {
         tableBody.innerHTML += '<tr id="row"'+(i+1)+'>';
         let timeSufix = i>9 ? i+':00' : '0'+i +':00';
         timeSufix +='-';
@@ -41,27 +54,61 @@ function appendHours() {
         let row ='<th scope="row">'+timeSufix+'</th>';
         
         for(let j=0;j<7;j++) {
-            row +='<td id="cell'+i+'-'+j+'" onclick="cellClicked('+i+','+j+')"></td>';
+            let tempDate = new Date(currentDate);
+            tempDate.setDate(tempDate.getDate()+j);
+            let tempDay = tempDate.getDate();
+            let tempMonth = tempDate.getMonth()+1;
+            let dateString = tempMonth+"/"+tempDay;
+            
+            row +='<td id="cell'+i+'-'+dateString+'" onclick="cellClicked('+i+','+tempMonth+','+tempDay+')"></td>';
         }
         tableBody.innerHTML +=row;
         tableBody.innerHTML +='</tr>';
     }
 }
 
+function fillCellsWithData() {
+    calendarData.forEach(event=>{
+        let data = new CalendarEvent(event.Subject,new Date(event.Start.DateTime),new Date(event.End.DateTime),event.Location ? event.Location.DisplayName : '');
+        let id = "cell"+data.start.getHours()+'-'+Number(data.start.getMonth()+1)+'/'+data.start.getDate();
+        let cell = document.getElementById(id);
+        console.log('filling cells with data: ',id,cell);
+        if(cell) {
+            if(data.subject) {
+                cell.innerHTML="<div>"+data.subject+"</div>";
+            } else {
+                cell.innerHTML="<div>taken</div>";
+            }
+            cell.classList.add('taken');
+        }
+        
+    })
+}
+
+function compareDates(x,y) {
+    return x.getDate()==y.getDate() && x.getFullYear() == y.getFullYear() && x.getMonth() == y.getMonth();
+}
 /**
  * Changing date
  */
 
 function dateChanged() {
-    appendWeek(new Date(startingDate.value));
+    if(startingDate.value) {
+
+        appendWeek(new Date(startingDate.value));
+    }else {
+        appendWeek(new Date());
+    }
     resetCells();
+    fillCellsWithData();
 }
 
 
-function cellClicked(startingTimeHour,dateIndex) {
-    let cell = document.getElementById('cell'+startingTimeHour+'-'+dateIndex);
+function cellClicked(startingTimeHour,month,day) {
+    let cell = document.getElementById('cell'+startingTimeHour+'-'+month+'/'+day);
+    console.log('Cell clicked: ',cell.id);
     cell.classList.toggle('reserved');
-    let newCellObject = new cellObject(dateIndex,startingTimeHour);
+    let newCellObject = new cellObject(month,day,startingTimeHour);
     let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
 
     if(reservedCells.length == newArray.length) newArray.push(newCellObject);
@@ -70,7 +117,7 @@ function cellClicked(startingTimeHour,dateIndex) {
 
 function resetCells() {
     let cells = document.querySelectorAll('table td');
-    cells.forEach(cell=>cell.classList.remove('reserved'));
+    cells.forEach(cell=>{cell.classList.remove('reserved');cell.classList.remove('taken');cell.innerHTML=''});
     reservedCells = new Array();
 }
 
@@ -129,13 +176,10 @@ function sendRequestForMeetings() {
  * @class Class representing a cell
  */
 class cellObject {
-    /**
-     * @constructor
-     * @param {Object} date
-     * @param {Object} startingTime
-     */
-    constructor(date,startingTime) {
-        this.date = date;
+ 
+    constructor(month,day,startingTime) {
+        this.month = month;
+        this.day = day;
         this.startingTime = startingTime;
     }
 
@@ -145,6 +189,15 @@ class cellObject {
      * @returns {boolean}
      */
     equals(obj) {
-        return this.date === obj.date && this.startingTime === obj.startingTime;
+        return this.month === obj.month && this.day == obj.day && this.startingTime === obj.startingTime;
+    }
+}
+
+class CalendarEvent {
+    constructor(subject,start,end,location) {
+        this.subject = subject;
+        this.end = end;
+        this.start = start;
+        this.location = location;
     }
 }
