@@ -172,6 +172,10 @@ function sendRequestForMeetings() {
     reservedCells = new Array();
     console.log(dataToSend)
 
+    let subjectElement = document.querySelector("#subject");
+    let subject = subjectElement.value;
+    subjectElement.value='';
+
     //send http POST
     var xhr = new XMLHttpRequest();
     xhr.open("POST", '/calendar/week', true);
@@ -179,6 +183,7 @@ function sendRequestForMeetings() {
     xhr.setRequestHeader('Accept','application/json');
     xhr.responseType = 'json';
     xhr.send(JSON.stringify({
+        subject: subject,
         requestedMeetings: dataToSend
     })); 
     xhr.onreadystatechange = function () {

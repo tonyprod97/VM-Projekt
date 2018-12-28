@@ -6,8 +6,9 @@ router.get('/',(req,res)=>{
 });
 
 router.post('/',(req,res)=>{
+    let subject = req.body.subject;
     let requestedMeetings = req.body.requestedMeetings;
-    console.log('requested meetings: ',requestedMeetings);
+    console.log('subject: ',subject,'requested meetings: ',requestedMeetings);
 })
 
 module.exports = router;

@@ -15,8 +15,16 @@
             <div class="form-group">
                 <label for="date">Pick starting date</label>
                 <input type="date" id="date-picker" onchange="dateChanged()">
-                <button class="btn" id="request" type="button" onclick="sendRequestForMeetings()">Request</button>
+                <div class="form-group">
+                    <label for="date">Subject:</label>
+                    <input type="text" id="subject">
+                    <button class="btn" id="request" type="button" onclick="sendRequestForMeetings()">Request</button>
+                </div>
             </div>
+        </form>
+    </div>
+    <div class="row justify-content-center">       
+        <form class="calendar-form">
         </form>
     </div>
     <div class="row">
