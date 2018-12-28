@@ -210,6 +210,15 @@ router.get('/home', function (req, res) {
     res.render('home');
 });
 
+
+/*
+    JSONPathovi.
+    za naslov - $.Subject
+    početak eventa - $.Start.DateTime
+    kraj eventa - $.End.DateTime
+    mjesto događaja - $.Location.DisplayName
+
+ */
 router.get('/sync', function(req, res) {
     var token = req.session.access_token;
     var email = req.session.email;
@@ -286,7 +295,9 @@ router.get('/sync', function(req, res) {
                     req.session.syncUrl = deltaLink;
                 }
 
+                var finalResponse=JSON.stringify(response.body.value);
                 console.log('Final respone: '+ JSON.stringify(response.body.value));
+                res.render('/',{finalResponse});
                 res.redirect('/');
 
             }
