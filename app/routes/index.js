@@ -233,7 +233,7 @@ router.get('/sync', function(req, res) {
     // Set the user's email as the anchor mailbox
     outlook.base.setAnchorMailbox(req.session.email);
     // Set the preferred time zone
-    outlook.base.setPreferredTimeZone('Eastern Standard Time');
+    outlook.base.setPreferredTimeZone('Europe/Berlin');
 
     // Use the syncUrl if available
     var requestUrl = req.session.syncUrl;
@@ -245,7 +245,7 @@ router.get('/sync', function(req, res) {
     // Set up our sync window from midnight on the current day to
     // midnight 7 days from now.
     var startDate = moment().startOf('day');
-    var endDate = moment(startDate).add(30, 'days');
+    var endDate = moment(startDate).add(7, 'days');
     // The start and end date are passed as query parameters
     var params = {
         startDateTime: startDate.toISOString(),
@@ -295,9 +295,10 @@ router.get('/sync', function(req, res) {
                     req.session.syncUrl = deltaLink;
                 }
 
-                var finalResponse=JSON.stringify(response.body.value);
+                //var finalResponse=JSON.stringify(response.body.value);
+                //console.log(JSON.stringify(response.body.value))
                 console.log('Final respone: '+ JSON.stringify(response.body.value));
-                res.render('/',{finalResponse});
+                //res.render('/',{finalResponse});
                 res.redirect('/');
 
             }
