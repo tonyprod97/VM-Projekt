@@ -1,4 +1,6 @@
 var express = require('express');
+
+
 var router = express.Router();
 
 // var response ="";
@@ -15,6 +17,8 @@ const operationStates = require('../constants').databaseErrors;
 
 const authHelper = require('../OutlookManager');
 const session = require('express-session');
+var outlook = require('node-outlook');
+var moment = require('moment');
 
 router.use(session(
     {
@@ -206,6 +210,90 @@ router.get('/logout', function (req, res) {
 
 router.get('/home', (req,res)=>{
     res.render('home');
+});
+
+router.get('/sync', function(req, res) {
+    var token = req.session.access_token;
+    var email = req.session.email;
+    if (token === undefined || email === undefined) {
+        console.log('/sync called while not logged in');
+        res.redirect('/');
+        return;
+    }
+
+    // Set the endpoint to API v2
+    outlook.base.setApiEndpoint('https://outlook.office.com/api/v2.0');
+    // Set the user's email as the anchor mailbox
+    outlook.base.setAnchorMailbox(req.session.email);
+    // Set the preferred time zone
+    outlook.base.setPreferredTimeZone('Eastern Standard Time');
+
+    // Use the syncUrl if available
+    var requestUrl = req.session.syncUrl;
+    if (requestUrl === undefined) {
+        // Calendar sync works on the CalendarView endpoint
+        requestUrl = outlook.base.apiEndpoint() + '/Me/CalendarView';
+    }
+
+    // Set up our sync window from midnight on the current day to
+    // midnight 7 days from now.
+    var startDate = moment().startOf('day');
+    var endDate = moment(startDate).add(30, 'days');
+    // The start and end date are passed as query parameters
+    var params = {
+        startDateTime: startDate.toISOString(),
+        endDateTime: endDate.toISOString()
+    };
+
+    // Set the required headers for sync
+    var headers = {
+        Prefer: [
+            // Enables sync functionality
+            'odata.track-changes',
+            // Requests only 5 changes per response
+            'odata.maxpagesize=5'
+        ]
+    };
+
+    var apiOptions = {
+        url: requestUrl,
+        token: token,
+        headers: headers,
+        query: params
+    };
+
+    console.log('requestUrl ' + apiOptions.url);
+    console.log('token ' + apiOptions.token);
+    console.log('headers ' + apiOptions.headers);
+    console.log('params ' + apiOptions.query);
+
+    outlook.base.makeApiCall(apiOptions, function(error, response) {
+        if (error) {
+            console.log(JSON.stringify(error));
+            res.send(JSON.stringify(error));
+        }
+        else {
+            if (response.statusCode !== 200) {
+                console.log('API Call returned ' + response.statusCode);
+                res.send('API Call returned ' + response.statusCode);
+            }
+            else {
+                console.log('API Call returned ' + response.statusCode);
+                var nextLink = response.body['@odata.nextLink'];
+                if (nextLink !== undefined) {
+                    req.session.syncUrl = nextLink;
+                }
+                var deltaLink = response.body['@odata.deltaLink'];
+                if (deltaLink !== undefined) {
+                    req.session.syncUrl = deltaLink;
+                }
+
+                console.log('Final respone: '+ JSON.stringify(response.body.value));
+                res.redirect('/');
+
+            }
+        }
+    });
 });
 
 module.exports = router;
