@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: scripts/calendar/week.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: scripts/calendar/week.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>let headerRow;
+let tableBody;
+let startingDate;
+let reservedCells = new Array();
+
+window.onload = ()=>{
+    headerRow = document.getElementById('header');
+    tableBody = document.getElementsByTagName('tbody')[0];
+    startingDate = document.querySelector('#date-picker');
+    startingDate.value = getLocalDateFormat(new Date());
+    appendWeek(new Date());
+    appendHours();
+};
+
+/**
+ * Creating columns in table.
+ * @param {Object} date
+*/
+function appendWeek(date) {
+    headerRow.innerHTML = "";
+    currentDate = date;
+    headerRow.innerHTML += '&lt;th> YEAR '+currentDate.getFullYear()+' &lt;/th>';
+
+    for(let i = 0;i&lt;7;i++) {
+        let currentDay = currentDate.getDate();
+        currentMonth = currentDate.getMonth()+1;
+        headerRow.innerHTML += '&lt;th>'+currentMonth+'/'+currentDay+ '&lt;/th>';
+        currentDate.setDate(currentDate.getDate()+1);
+    }
+}
+
+/**
+ * Creating rows in table.
+ */
+function appendHours() {
+    for(let i=8;i&lt;21;i++) {
+        tableBody.innerHTML += '&lt;tr id="row"'+(i+1)+'>';
+        let timeSufix = i>9 ? i+':00' : '0'+i +':00';
+        timeSufix +='-';
+        timeSufix += i+1>9 ? (i+1)+':00' : '0'+(i+1)+':00';
+        let row ='&lt;th scope="row">'+timeSufix+'&lt;/th>';
+        
+        for(let j=0;j&lt;7;j++) {
+            row +='&lt;td id="cell'+i+'-'+j+'" onclick="cellClicked('+i+','+j+')">&lt;/td>';
+        }
+        tableBody.innerHTML +=row;
+        tableBody.innerHTML +='&lt;/tr>';
+    }
+}
+
+/**
+ * Changing date
+ */
+
+function dateChanged() {
+    appendWeek(new Date(startingDate.value));
+}
+
+
+function cellClicked(startingTimeHour,dateIndex) {
+    let cell = document.getElementById('cell'+startingTimeHour+'-'+dateIndex);
+    cell.classList.toggle('reserved');
+    let newCellObject = new cellObject(dateIndex,startingTimeHour);
+    let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
+
+    if(reservedCells.length == newArray.length) newArray.push(newCellObject);
+    reservedCells = newArray;
+}
+
+/**
+ * Showing next 7 days
+ */
+function next() {
+    let date = new Date(startingDate.value);
+    date.setDate(date.getDate()+7);
+    startingDate.value = getLocalDateFormat(date);
+    console.log(startingDate.value)
+    appendWeek(date);
+}
+
+/**
+ * Showing past 7 days
+ */
+function previous() {
+    let date = new Date(startingDate.value);
+    date.setDate(date.getDate()-7);
+    startingDate.value = getLocalDateFormat(date);
+    appendWeek(date);
+}
+
+/**
+ * Returning correct date format for HTML date input
+ * @param {Object} date
+ * @returns {Object}
+ */
+function getLocalDateFormat(date) {
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+    return date.toJSON().slice(0,10);
+}
+
+/**
+ * Sending request for meetings
+ */
+function sendRequestForMeetings() {
+    console.log(reservedCells);
+
+    reservedCells = reservedCells.map(o=>{
+
+        let cell = document.getElementById('cell'+o.startingTime+'-'+o.date);
+        cell.classList.toggle('reserved'); 
+
+        let newDate = new Date(startingDate.value);
+        newDate.setDate(newDate.getDate()+o.date);
+        return new cellObject(newDate,o.startingTime); 
+    })
+    reservedCells = new Array();
+}
+
+/**
+ * @class Class representing a cell
+ */
+class cellObject {
+    /**
+     * @constructor
+     * @param {Object} date
+     * @param {Object} startingTime
+     */
+    constructor(date,startingTime) {
+        this.date = date;
+        this.startingTime = startingTime;
+    }
+
+    /**
+     * Checking whether objects are equal by date and startingTime parameters
+     * @param {Object} obj
+     * @returns {boolean}
+     */
+    equals(obj) {
+        return this.date === obj.date &amp;&amp; this.startingTime === obj.startingTime;
+    }
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="cellObject.html">cellObject</a></li><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#appendHours">appendHours</a></li><li><a href="global.html#appendWeek">appendWeek</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#dateChanged">dateChanged</a></li><li><a href="global.html#getLocalDateFormat">getLocalDateFormat</a></li><li><a href="global.html#getUsersThatSheredCalendarWithYou">getUsersThatSheredCalendarWithYou</a></li><li><a href="global.html#getVerification">getVerification</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#next">next</a></li><li><a href="global.html#onFormChange">onFormChange</a></li><li><a href="global.html#onOutlookLogin">onOutlookLogin</a></li><li><a href="global.html#onSubmit">onSubmit</a></li><li><a href="global.html#previous">previous</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#routeChanged">routeChanged</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#sendRequestForMeetings">sendRequestForMeetings</a></li><li><a href="global.html#toJSON">toJSON</a></li><li><a href="global.html#tokenReceived">tokenReceived</a></li><li><a href="global.html#validateEmail">validateEmail</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Dec 16 2018 23:31:44 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

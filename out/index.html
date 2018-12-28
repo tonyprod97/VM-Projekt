@@ -42,7 +42,342 @@
 
 
 
+    <section>
+        <article><h1>Opis aplikacije</h1><p>Svrha ove aplikacije je pojednostavljenje komunikacije studenata i nastavnika prilikom ugovora sastanaka. Glavno sucelje aplikacije je <strong>kalendar</strong>, u kojemu su jasno naznaceni svi zauzeti termini prijavljenog korisnika. 
+Postoje tri tipa korisnika sustava:</p>
+<ol>
+<li>Student</li>
+<li>Nastavnik</li>
+<li>Administrator sustava</li>
+</ol>
+<p>Svi korisnici <strong>prijavljuju</strong> se u sustav svojim adresama elektronicke poste i odgovarajucim lozinkama. Ukoliko ne posjeduju racun, korisnici se mogu <strong>registrirati</strong> u odgovarajucem web obrascu.
+Svaki korisnik, nakon registracije, dobiva status <em>STUDENTA</em>. <em>NASTAVNIK</em> je korisnik sustava kojega je nakon prijave administrator sustava odobrio ulogu nastavnika.
+Svaki korisnik ima mogucnost sinkronizacije svoga <strong>Outlook racuna</strong> sa aplikacijom, kako bi se u kalendar aplikacije sinkronizirao sa kalendarom aplikacije <strong>Outlook</strong>. Svaki korisnik je u mogucnosti dodavati dogadaje u kalendar i brisati dogadaje iz kalendara koristeci aplikaciju.
+Osnovni slijed komunikacije korisnika sustava:  </p>
+<ul>
+<li>Nakon prijave u sustav, <strong>student</strong> je u mogucnosti odabrati <strong>nastavnika</strong> kojeg zeli pratiti ( vidjeti njegov kalendar, odnosno njegove zauzete termine). Student odabire nastavnika te odabire razlog pracenja. Nastavniku se salje obavijest na adresu elektronicke poste u kojoj nastavnik moze prihvatiti ili odbiti pracenje. Ukoliko nastavnik <strong>prihvati</strong>, student dobiva na uvid kalendar nastavnika.</li>
+<li>Nakon sto je studentu odobreno pracenje nastavnika, student je u mogucnosti rezervirati termin u slobodnom vremenu nastavnika. Osnovni tijek aktivnosti prilikom rezervacije termina:<ul>
+<li>Student odabire slobodan termin u kalendaru nastavnika te odabire vremensko trajanje i uzrok rezervacije</li>
+<li>Na kalendaru nastanika automatski se naznacuje mjesto koje student pokusava rezervirati- poprimi sivu boju</li>
+<li>Na adresu elektronicke poste nastavnika salje se obavijest u kojoj nastavnik dobiva na izbor prihvat, odbijanje rezervacije ili predlaganje nekog drugog termina rezervacije<ul>
+<li>Ukoliko nastavnik prihvati rezervaciju, azuriraju se kalendari studenta i nastavnika tako da se zauzmu vremena u kojima se dogovorila rezervacija. Na adresu elektronicke poste studenta se salje obavijest o uspjesnoj rezervaciji.</li>
+<li>Ukoliko nastavnik odbije rezervaciju, u kalendaru nastavnika se brise pokusaj rezervacije. Na adresu elektronice poste studenta se salje obavijest o neuspjesnoj rezervaciji.</li>
+<li>Ukoliko nastavnik predlozi neki drugi termin, obavijest sa prijedlogom se salje na adresu elektronicke poste studenta te ukoliko student prihvati promjenu termina, azuriraju se kalendari nastavnika i studenta na mjestu gdje je dogovoren novi termin.   </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2>Stablo direktorija aplikacije</h2><p>Prikaz stabla direktorija aplikacije:</p>
+<pre class="prettyprint source"><code>|---.vs
+|   |---VMprojektLocation
+|       |---v15
+|---app
+|   |---constants
+|   |---DatabaseManager
+|   |---OutlookManager
+|   |---routes
+|   |   |---calendar
+|   |   |---user
+|   |---scripts
+|   |   |---calendar
+|   |---styles
+|   |   |---calendar
+|   |---views
+|       |---calendar
+|       |---layouts
+|       |---partials
+|       |---user
+|---out
+    |---fonts
+    |---scripts
+    |   |---prettify
+    |---styles</code></pre><ul>
+<li>U direktoriju <strong>app</strong> nalaze se svi <em>source</em> kodovi aplikacije.</li>
+<li>U direktoriju <strong>out</strong> nalazi se dokumentacija aplikacije. Poddirektoriji <strong>fonts</strong>, <strong>scripts</strong>, <strong>styles</strong> sadrze datoteke koje su potrebne kako bi se generirala dokumentacija, a sama dokumentacija nalazi se u <em>.html</em> datotekama koje se nalaze u samom direktoriju <strong>out</strong>. </li>
+</ul></article>
+    </section>
 
+
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>app.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">U ovoj datoteci se obavlja konfiguracija aplikacije</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>constants/index.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">U ovoj datoteci se izlazu kao moduli numericka varijabla "port", objekt "databaseErrors",objekt "databaseGetRequest" te objekt "databaseSendRequests"</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="constants_index.js.html">constants/index.js</a>, <a href="constants_index.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>DatabaseManager/index.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Ovdje se nalaze sve varijable i metode potrebne za komunikaciju sa bazom podataka</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="DatabaseManager_index.js.html">DatabaseManager/index.js</a>, <a href="DatabaseManager_index.js.html#line2">line 2</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 
@@ -50,13 +385,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#toJSON">toJSON</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="cellObject.html">cellObject</a></li><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#appendHours">appendHours</a></li><li><a href="global.html#appendWeek">appendWeek</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#dateChanged">dateChanged</a></li><li><a href="global.html#getLocalDateFormat">getLocalDateFormat</a></li><li><a href="global.html#getUsersThatSheredCalendarWithYou">getUsersThatSheredCalendarWithYou</a></li><li><a href="global.html#getVerification">getVerification</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#next">next</a></li><li><a href="global.html#onFormChange">onFormChange</a></li><li><a href="global.html#onOutlookLogin">onOutlookLogin</a></li><li><a href="global.html#onSubmit">onSubmit</a></li><li><a href="global.html#previous">previous</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#routeChanged">routeChanged</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#sendRequestForMeetings">sendRequestForMeetings</a></li><li><a href="global.html#toJSON">toJSON</a></li><li><a href="global.html#tokenReceived">tokenReceived</a></li><li><a href="global.html#validateEmail">validateEmail</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Dec 08 2018 13:01:32 GMT+0100 (GMT+01:00)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Dec 16 2018 23:31:44 GMT+0100 (Central European Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

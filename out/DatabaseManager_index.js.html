@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: index.js</title>
+    <title>JSDoc: Source: DatabaseManager/index.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: index.js</h1>
+    <h1 class="page-title">Source: DatabaseManager/index.js</h1>
 
     
 
@@ -27,7 +27,13 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>"use strict"
+/**
+ * @file Ovdje se nalaze sve varijable i metode potrebne za komunikaciju sa bazom podataka
+ */
 
+ /**
+  * Konstanta koja sadrzi sve potrebne podatke za komunikaciju sa bazom podataka
+  */
 const config = {
 
     server:   'calendarsyncazure.database.windows.net',
@@ -49,9 +55,13 @@ const crypto = require('crypto');
 
 const userTable    = 'Profile';
 const sessionTable = 'Session';
+const unverifiedTable = 'Unverified';
+const visibilityTable = 'Visibility';
+
+const sessionLifeTime = 10;
 
 /**
- * .....................
+ * ...............
  * @param {String}seed
  * @param {String}password
  * @returns {PromiseLike&lt;ArrayBuffer>}hash
@@ -84,20 +94,20 @@ function seededSha256(seed, password) {
 }
 
 /**
- * Creating a random string token
- * @param {number}size
- * @returns {*} random string token
+ * Stvaranje proizvoljnog "string token-a"
+ * @param {number}size - velicina "tokena"
+ * @returns {*} proizvoljni "string token"
  */
 function randomTokenString(size) {
     return crypto.randomBytes(size).toString('hex');
 }
 
 /**
- * Creating a user in database
- * @param {Object}database
- * @param {String}email
- * @param {String}password
- * @param {Object}callback
+ * Stvaranje korisnika u bazi podataka
+ * @param {Object}database - objekt koji predstavlja bazu podataka
+ * @param {String}email - adresa elektronicke poste korisnika
+ * @param {String}password - lozinka korisnika
+ * @param {Function}callback - funkcija koja ce se izvesti
  */
 function createUser(database, email, password, callback) {
 
@@ -111,7 +121,7 @@ function createUser(database, email, password, callback) {
     database.input('email', mssql.VarChar(100), email);
     database.input('hash', mssql.VarChar(70), seededSha256(email, password));
 
-    database.query('INSERT INTO ' + userTable + '(email,passwordHash) VALUES ( @email, @hash )', (error) => {
+    database.query('INSERT INTO ' + userTable + ' (email, passwordHash) VALUES (@email, @hash)', (error) => {
 
         if (error) {
 
@@ -124,7 +134,30 @@ function createUser(database, email, password, callback) {
 
         answer.state = dbConsts.OPERATION_SUCCESS;
         answer.msg   = "operation success";
-        setTimeout(() => callback(answer), 0);
+        //setTimeout(() => callback(answer), 0);
+
+        database.query('SELECT id FROM ' + userTable + ' WHERE email = @email', (error, result) => {
+
+            if (error) { // shouldn't happen
+                console.log(error);
+                setTimeout(() => callback(answer), 0);
+                return;
+            }
+
+            database.input('userid', mssql.Int, toJSON(result)[0][0][0].id);
+            database.input('token', mssql.VarChar(70), randomTokenString(32));
+
+            database.query('INSERT INTO ' + unverifiedTable + ' (userid, token, createdate) VALUES(@userid, @token, CONVERT(Date, GETDATE()))', (error, result) => {
+
+                if (error) { // shouldn't happen
+                    console.log(error);
+                    setTimeout(() => callback(answer), 0);
+                    return;
+                }
+
+                setTimeout(() => callback(answer), 0);
+            });
+        });
 
         return;
     });
@@ -145,30 +178,48 @@ function createUser(database, email, password, callback) {
 //    });
 //}
 /**
- * Checking if session is valid
- * @param {Object}database
- * @param {Sting}userid
- * @param {String}sessionToken
- * @param {Object}callback
+ * Provjera ako je sjednica vazeca
+ * @param {Object}database - objekt koji predstavlja bazu podataka
+ * @param {Sting}userid - korisnikov identifikacijski broj
+ * @param {String}sessionToken - predstavlja token
+ * @param {Object}callback - funkcija koja ce se izvesti
  */
 function isValidSessionInfo(database, userid, sessionToken, callback) {
-    // TODO
+
+    database.input('userid', mssql.Int, userid);
+    database.input('sessionToken', mssql.VarChar(70), sessionToken);
+
+    database.query('SELECT sessionToken FROM ' + sessionTable + ' WHERE userid = @userid and sessionToken = @sessionToken and CONVERT(Date, GETDATE()) &lt;= DATEADD(DAY,' + sessionLifeTime + ',createdate)', (error, result) => {
+
+        if (error) {
+            console.log(error);
+            setTimeout(() => callback({ state: dbConsts.OPERATION_FAILED }));
+            return;
+        }
+
+        if (result.rowsAffected[0] == 0) {
+            setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, valid: false }));
+            return;
+        }
+
+        setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, valid: true }));
+    });
 }
 
 /**
- * Creating a new session
- * @param {Object}database
- * @param {String}userid
- * @param {Object}callback
+ * Stvaranje nove sjednice
+ * @param {Object}database - predstavlja bazu podataka
+ * @param {String}userid - predstavlja korisnicko ime
+ * @param {Object}callback - predstavlja funkciju koje ce se izvesti
  */
 function newSession(database, userid, callback) {
 
-    let sessionToken = randomTokenString(64);
+    let sessionToken = randomTokenString(32);
 
-    database.input('userID', mssql.Int, userid);
+    database.input('userid', mssql.Int, userid);
     database.input('sessionToken', mssql.VarChar(70), sessionToken);
 
-    database.query('INSERT INTO ' + sessionTable + ' (userID,sessionToken,createDate) VALUES (@userID, @sessionToken, CONVERT(Date, GETDATE()))', (error) => {
+    database.query('INSERT INTO ' + sessionTable + ' (userID,sessionToken,createDate) VALUES (@userid, @sessionToken, CONVERT(Date, GETDATE()))', (error) => {
 
         if (error) {
 
@@ -178,14 +229,13 @@ function newSession(database, userid, callback) {
         }
 
         setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, token: sessionToken }));
-
     });
 }
 
 /**
- * Creating database and setting up database manager
- * @param {Object}database
- * @param {Object}OLD_VERSION
+ * Inicijalizacija baze podataka i postavljanje "manager"-a koji upravlja bazom podataka
+ * @param {Object}database - Predstavlja bazu podataka
+ * @param {Object}OLD_VERSION - Predstavlja staru verziju baze
  */
 function initDatabase(database, OLD_VERSION) {
 
@@ -195,20 +245,20 @@ function initDatabase(database, OLD_VERSION) {
 }
 
 /**
- * Turning object into JSON
- * @param {Object}rowDataPacket
- * @returns {any[]} object turned into JSON
+ * Pretvaranje objekta u JSON
+ * @param {Object}rowDataPacket - predstavlja dio objekta koji se pretvara u JSON
+ * @returns {any[]} objekt pretvoren u JSON
  */
 function toJSON(rowDataPacket) {
     return Object.values(JSON.parse(JSON.stringify(rowDataPacket)));
 }
 
 /**
- * Loging in
- * @param {Object}database
- * @param {String}email
- * @param {String}password
- * @param {Object}callback
+ * Prijava u sustav
+ * @param {Object}database - predstavljabazu podataka
+ * @param {String}email - predstavlja adresu elektronicke poste korisnika
+ * @param {String}password - predstavlja lozinku korisnika
+ * @param {Object}callback - predstavlja funkciju koja ce se izvrsiti
  */
 function login(database,email,password, callback) {
 
@@ -254,11 +304,76 @@ function login(database,email,password, callback) {
     });
 
 }
+/**
+ * Dohvat korisnika koji dijele kalendar sa nekim korisnikom
+ * @param {Object}database - predstavljabazu podataka
+ * @param {String}email - predstavlja adresu elektronicke poste korisnika
+ * @param {String}password - predstavlja lozinku korisnika
+ * @param {Object}callback - predstavlja funkciju koja ce se izvrsiti
+ */
+function getUsersThatSheredCalendarWithYou(database, userid, sessionToken, callback) {
+
+    isValidSessionInfo(new mssql.Request(), sessionToken, (answer) => {
+
+        if (!answer.valid) {
+            setTimeout(() => callback({ state: dbConsts.OPERATION_DENIED, msg: "invalid sessionToken" }), 0);
+            return;
+        }
+
+        //TODO
+
+    });
+}
+/**
+ * Verifikcaija korisnika 
+ * @param {String}email - predstavlja adresu elektronicke poste korisnika
+ * @param {String}password - predstavlja lozinku korisnika
+ * @param {Object}callback - predstavlja funkciju koja ce se izvrsiti
+ */
+function getVerification(database, email, callback) {
+
+    let data = {
+        state: null,
+        msg: "",
+        data: null
+    };
+
+    database.input('email', mssql.VarChar(100), email);
+
+    database.query('SELECT userid,token FROM ' + userTable + ' JOIN ' + unverifiedTable + ' ON id = userid WHERE email = @email', (error, result) => {
+
+        if (error) {
+
+            console.log(error);
+            data.state = dbConsts.OPERATION_FAILED;
+            data.msg = "Failed to get verification";
+            setTimeout(() => callback(data), 0);
+            return;
+        }
+
+        data.state = dbConsts.OPERATION_SUCCESS;
+        data.msg   = "operation success";
+
+        if (result.rowsAffected[0] == 0) {
+            data.data = {verified: true};
+            setTimeout(() => callback(data), 0);
+            return;
+        }
+
+        data.data = toJSON(result)[0][0][0];
+        data.data.verified = false;
+        setTimeout(() => callback(data), 0);
+    });
+}
+
 
 //var db = null; //mssql.connect(config).Request();
 var readyForUse = false;
+var databesDown = false;
 
-
+/**
+ * @class Klasa koja reprezentira "upravitelja bazom podataka"
+ */
 class DatabaseManager {
     /**
      * @constructor
@@ -281,7 +396,8 @@ class DatabaseManager {
             }
 
             console.log(errorMSG);
-            //console.log(error);
+            console.log(error);
+
 
             if (errorState == dbConsts.OPERATION_SUCCESS) {
 
@@ -315,25 +431,33 @@ class DatabaseManager {
 
                 readyForUse = true;
                 return;
+
             } 
 
-            readyForUse = false;
+            databesDown = true;
+            //readyForUse = false;
                   
         });
     }
 
     /**
-     * Checks if database is ready to use
-     * @returns {boolean}
+     * Provjera ako je baza podataka spremna za koristenje
+     * @returns {boolean} - vrijednost spremnosti
      */
     isReady() {
         return readyForUse;
     }
+    /**Provjera ako baza podataka reagira na zahtjeve
+     * @returns {boolean} - vrijednost koja pokazuje da li baza ne reagira
+     */
+    isDatabaseDown() {
+        return databesDown;
+    }
 
     /**
-     * ..............
-     * @param {Object}requestData
-     * @param {Object}callback
+     * Zahtjev za dohvat podataka
+     * @param {Object}requestData - predtavlja podatke koji se dohvacaju
+     * @param {Object}callback - predstavlja funkciju koja ce se izvesti
      */
     getRequest(requestData, callback) {
 
@@ -382,9 +506,9 @@ class DatabaseManager {
     }
 
     /**
-     * .....................
-     * @param {Object}requestData
-     * @param {Object}callback
+     * Slanje samo jednog zahtjeva
+     * @param {Object}requestData - predstavlja podatke koji se zahtjevaju
+     * @param {Object}callback - predstavlja funkciju koja ce se izvesti
      */
     getSingleRequest(requestData,callback) {
 
@@ -419,13 +543,18 @@ class DatabaseManager {
 
                 break;
             } 
+
+            case getRequests.GET_VERIFICATION: {
+                getVerification(new mssql.Request(), requestData.data.email, callback);
+                break;
+            }
         }
     }
 
     /**
-     * Sends a request
-     * @param {Object}sentData
-     * @param {Object}callback
+     * Slanje zahtjeva
+     * @param {Object}sentData - predstavlja podatke koji ce se poslati
+     * @param {Object}callback - predstavlja funkciju koja ce se izvesti
      */
     sendRequest(sentData,callback) {
 
@@ -443,28 +572,7 @@ class DatabaseManager {
             }
 
             case sendRequests.LOGIN_REQUEST: {
-
                 login(new mssql.Request(), sentData.data.email, sentData.data.password, callback);
-
-                //if (!sentData.data.username) {
-                //
-                //    getUserByEmail(new mssql.Request(), sentData.data.email, (answer) => {
-                //
-                //        if (answer.state != dbConsts.OPERATION_SUCCESS) {
-                //
-                //            response.state = answer.state;
-                //            response.msg = "Invalid login data";
-                //
-                //            setTimeout(() => callback(response), 0);
-                //            return;
-                //        }
-                //
-                //        login(new mssql.Request(), answer.username, sentData.data.password, callback);
-                //    });
-                //
-                //} else {
-                //    login(new mssql.Request(), sentData.data.username, sentData.data.password, callback);
-                //}
                 break;
             }
 
@@ -491,15 +599,40 @@ class DatabaseManager {
                     
                     setTimeout(() => callback(response), 0);
                 });
+
+                break;
+            }
+
+            case sendRequests.VERIFY_USER: {
+
+                let database = new mssql.Request();
+
+                database.input('userid', mssql.Int, sentData.data.userid);
+                database.input('token', mssql.VarChar(70), sentData.data.verificationToken);
+
+                database.query('DELETE FROM ' + unverifiedTable + ' WHERE userid = @userid and token = @token', (error) => {
+
+                    if (error) {
+
+                        response.state = dbConsts.OPERATION_FAILED;
+                        response.msg   = "failed to verify user";
+
+                        setTimeout(() => callback(response));
+                        return;
+                    }
+
+                    response.state = dbConsts.OPERATION_SUCCESS;
+                    response.msg   = "operation success";
+
+                    setTimeout(() => callback(response), 0);
+                });
+
+                break;
             }
         }
     }
 }
 
-/**
- * 
- * @type {DatabaseManager}
- */
 module.exports  = new DatabaseManager();
 </code></pre>
         </article>
@@ -511,13 +644,13 @@ module.exports  = new DatabaseManager();
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#toJSON">toJSON</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="cellObject.html">cellObject</a></li><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#appendHours">appendHours</a></li><li><a href="global.html#appendWeek">appendWeek</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#dateChanged">dateChanged</a></li><li><a href="global.html#getLocalDateFormat">getLocalDateFormat</a></li><li><a href="global.html#getUsersThatSheredCalendarWithYou">getUsersThatSheredCalendarWithYou</a></li><li><a href="global.html#getVerification">getVerification</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#next">next</a></li><li><a href="global.html#onFormChange">onFormChange</a></li><li><a href="global.html#onOutlookLogin">onOutlookLogin</a></li><li><a href="global.html#onSubmit">onSubmit</a></li><li><a href="global.html#previous">previous</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#routeChanged">routeChanged</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#sendRequestForMeetings">sendRequestForMeetings</a></li><li><a href="global.html#toJSON">toJSON</a></li><li><a href="global.html#tokenReceived">tokenReceived</a></li><li><a href="global.html#validateEmail">validateEmail</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Dec 08 2018 13:01:32 GMT+0100 (GMT+01:00)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Dec 16 2018 23:31:44 GMT+0100 (Central European Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

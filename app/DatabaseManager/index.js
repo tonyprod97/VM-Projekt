@@ -1,5 +1,11 @@
 "use strict"
+/**
+ * @file Ovdje se nalaze sve varijable i metode potrebne za komunikaciju sa bazom podataka
+ */
 
+ /**
+  * Konstanta koja sadrzi sve potrebne podatke za komunikaciju sa bazom podataka
+  */
 const config = {
 
     server:   'calendarsyncazure.database.windows.net',
@@ -27,7 +33,7 @@ const visibilityTable = 'Visibility';
 const sessionLifeTime = 10;
 
 /**
- * .....................
+ * ...............
  * @param {String}seed
  * @param {String}password
  * @returns {PromiseLike<ArrayBuffer>}hash
@@ -60,20 +66,20 @@ function seededSha256(seed, password) {
 }
 
 /**
- * Creating a random string token
- * @param {number}size
- * @returns {*} random string token
+ * Stvaranje proizvoljnog "string token-a"
+ * @param {number}size - velicina "tokena"
+ * @returns {*} proizvoljni "string token"
  */
 function randomTokenString(size) {
     return crypto.randomBytes(size).toString('hex');
 }
 
 /**
- * Creating a user in database
- * @param {Object}database
- * @param {String}email
- * @param {String}password
- * @param {Object}callback
+ * Stvaranje korisnika u bazi podataka
+ * @param {Object}database - objekt koji predstavlja bazu podataka
+ * @param {String}email - adresa elektronicke poste korisnika
+ * @param {String}password - lozinka korisnika
+ * @param {Function}callback - funkcija koja ce se izvesti
  */
 function createUser(database, email, password, callback) {
 
@@ -144,11 +150,11 @@ function createUser(database, email, password, callback) {
 //    });
 //}
 /**
- * Checking if session is valid
- * @param {Object}database
- * @param {Sting}userid
- * @param {String}sessionToken
- * @param {Object}callback
+ * Provjera ako je sjednica vazeca
+ * @param {Object}database - objekt koji predstavlja bazu podataka
+ * @param {Sting}userid - korisnikov identifikacijski broj
+ * @param {String}sessionToken - predstavlja token
+ * @param {Object}callback - funkcija koja ce se izvesti
  */
 function isValidSessionInfo(database, userid, sessionToken, callback) {
 
@@ -173,10 +179,10 @@ function isValidSessionInfo(database, userid, sessionToken, callback) {
 }
 
 /**
- * Creating a new session
- * @param {Object}database
- * @param {String}userid
- * @param {Object}callback
+ * Stvaranje nove sjednice
+ * @param {Object}database - predstavlja bazu podataka
+ * @param {String}userid - predstavlja korisnicko ime
+ * @param {Object}callback - predstavlja funkciju koje ce se izvesti
  */
 function newSession(database, userid, callback) {
 
@@ -199,9 +205,9 @@ function newSession(database, userid, callback) {
 }
 
 /**
- * Creating database and setting up database manager
- * @param {Object}database
- * @param {Object}OLD_VERSION
+ * Inicijalizacija baze podataka i postavljanje "manager"-a koji upravlja bazom podataka
+ * @param {Object}database - Predstavlja bazu podataka
+ * @param {Object}OLD_VERSION - Predstavlja staru verziju baze
  */
 function initDatabase(database, OLD_VERSION) {
 
@@ -211,20 +217,20 @@ function initDatabase(database, OLD_VERSION) {
 }
 
 /**
- * Turning object into JSON
- * @param {Object}rowDataPacket
- * @returns {any[]} object turned into JSON
+ * Pretvaranje objekta u JSON
+ * @param {Object}rowDataPacket - predstavlja dio objekta koji se pretvara u JSON
+ * @returns {any[]} objekt pretvoren u JSON
  */
 function toJSON(rowDataPacket) {
     return Object.values(JSON.parse(JSON.stringify(rowDataPacket)));
 }
 
 /**
- * Loging in
- * @param {Object}database
- * @param {String}email
- * @param {String}password
- * @param {Object}callback
+ * Prijava u sustav
+ * @param {Object}database - predstavljabazu podataka
+ * @param {String}email - predstavlja adresu elektronicke poste korisnika
+ * @param {String}password - predstavlja lozinku korisnika
+ * @param {Object}callback - predstavlja funkciju koja ce se izvrsiti
  */
 function login(database,email,password, callback) {
 
@@ -270,7 +276,13 @@ function login(database,email,password, callback) {
     });
 
 }
-
+/**
+ * Dohvat korisnika koji dijele kalendar sa nekim korisnikom
+ * @param {Object}database - predstavljabazu podataka
+ * @param {String}email - predstavlja adresu elektronicke poste korisnika
+ * @param {String}password - predstavlja lozinku korisnika
+ * @param {Object}callback - predstavlja funkciju koja ce se izvrsiti
+ */
 function getUsersThatSheredCalendarWithYou(database, userid, sessionToken, callback) {
 
     isValidSessionInfo(new mssql.Request(), sessionToken, (answer) => {
@@ -284,7 +296,12 @@ function getUsersThatSheredCalendarWithYou(database, userid, sessionToken, callb
 
     });
 }
-
+/**
+ * Verifikcaija korisnika 
+ * @param {String}email - predstavlja adresu elektronicke poste korisnika
+ * @param {String}password - predstavlja lozinku korisnika
+ * @param {Object}callback - predstavlja funkciju koja ce se izvrsiti
+ */
 function getVerification(database, email, callback) {
 
     let data = {
@@ -324,8 +341,11 @@ function getVerification(database, email, callback) {
 
 //var db = null; //mssql.connect(config).Request();
 var readyForUse = false;
+var databesDown = false;
 
-
+/**
+ * @class Klasa koja reprezentira "upravitelja bazom podataka"
+ */
 class DatabaseManager {
     /**
      * @constructor
@@ -348,7 +368,8 @@ class DatabaseManager {
             }
 
             console.log(errorMSG);
-            //console.log(error);
+            console.log(error);
+
 
             if (errorState == dbConsts.OPERATION_SUCCESS) {
 
@@ -382,25 +403,33 @@ class DatabaseManager {
 
                 readyForUse = true;
                 return;
+
             } 
 
-            readyForUse = false;
+            databesDown = true;
+            //readyForUse = false;
                   
         });
     }
 
     /**
-     * Checks if database is ready to use
-     * @returns {boolean}
+     * Provjera ako je baza podataka spremna za koristenje
+     * @returns {boolean} - vrijednost spremnosti
      */
     isReady() {
         return readyForUse;
     }
+    /**Provjera ako baza podataka reagira na zahtjeve
+     * @returns {boolean} - vrijednost koja pokazuje da li baza ne reagira
+     */
+    isDatabaseDown() {
+        return databesDown;
+    }
 
     /**
-     * ..............
-     * @param {Object}requestData
-     * @param {Object}callback
+     * Zahtjev za dohvat podataka
+     * @param {Object}requestData - predtavlja podatke koji se dohvacaju
+     * @param {Object}callback - predstavlja funkciju koja ce se izvesti
      */
     getRequest(requestData, callback) {
 
@@ -449,9 +478,9 @@ class DatabaseManager {
     }
 
     /**
-     * .....................
-     * @param {Object}requestData
-     * @param {Object}callback
+     * Slanje samo jednog zahtjeva
+     * @param {Object}requestData - predstavlja podatke koji se zahtjevaju
+     * @param {Object}callback - predstavlja funkciju koja ce se izvesti
      */
     getSingleRequest(requestData,callback) {
 
@@ -495,9 +524,9 @@ class DatabaseManager {
     }
 
     /**
-     * Sends a request
-     * @param {Object}sentData
-     * @param {Object}callback
+     * Slanje zahtjeva
+     * @param {Object}sentData - predstavlja podatke koji ce se poslati
+     * @param {Object}callback - predstavlja funkciju koja ce se izvesti
      */
     sendRequest(sentData,callback) {
 
@@ -576,8 +605,4 @@ class DatabaseManager {
     }
 }
 
-/**
- *
- * @type {DatabaseManager}
- */
 module.exports  = new DatabaseManager();

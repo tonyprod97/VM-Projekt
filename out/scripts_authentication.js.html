@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: scripts/authentication.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: scripts/authentication.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>let form;
+let emailInput;
+let passwordInput;
+let submitButton;
+let passwordConfirmInput;
+let emailError;
+let errorPassword;
+
+window.onload =()=>{
+    form = document.querySelector("form");
+    emailInput = document.getElementById("email");
+    passwordInput = document.getElementById("password");
+    submitButton = document.getElementById("submitButton");
+    passwordConfirmInput = document.getElementById("passwordConfirm");
+    emailError = document.getElementById("errorEmail");
+    errorPassword = document.getElementById("errorPassword");
+};
+
+/**
+ *Checking if user is trying to register or log in
+ */
+function onFormChange() {
+    // If passwordConfirmInput exists user is trying to register else to log in.
+    if(passwordConfirmInput) { 
+        register();
+    } else {
+        login();
+    }
+}
+
+/**
+ * Logging in on outlook
+ */
+function onOutlookLogin() {
+    window.location.href = './outlookLogin';
+}
+
+/**
+ * Doing action on submit
+ */
+function onSubmit() {  
+    let url;
+    let email = emailInput.value;
+    let password = passwordInput.value;
+
+    let valid = checkMail(email);
+    // If passwordConfirmInput exists user is trying to register else to log in.
+    if (passwordConfirmInput) {
+        let confirmPassword = passwordConfirmInput.value;
+
+        if (valid) {
+            valid = checkPasswordConf(password, confirmPassword);
+        } else {
+            checkPasswordConf(password, confirmPassword);
+        }
+
+        url = './register';
+    } else {
+        // Check if user logged in succesfully.
+        if (valid) {
+            valid = checkPassword(password);
+        } else {
+            checkPassword(password);
+        }
+
+        url = './login';
+    }
+
+    if (!valid) return;
+
+    //send http POST
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Accept','application/json');
+    xhr.responseType = 'json';
+    xhr.send(JSON.stringify({
+        user: {
+            email: emailInput.value,
+            password: passwordInput.value
+        }
+    })); 
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if(!passwordConfirmInput) {
+                /** 
+                 * localStorage.getItem("user") returns string ex.:
+                 * "{"id":2,
+                 * "email":"antonio.kamber97@yahoo.com",
+                 * "sessionToken":"82d643e83539c493a72ac6221fd7d783da5cb59a9dd5f43879989b2c4c3046af5d9455c2b9f8654e2bab9352be5c38bc1a8c4487e571ae9c3f3bc624c7b3c488"}"
+                */
+                localStorage.setItem("user", xhr.response.userData);
+            }
+            
+            window.location.href = xhr.response.redirectUrl;
+        }
+      }
+
+}
+
+function checkMail(email) {
+    if (validateEmail(email)) {
+        emailError.innerHTML = "";
+        return true;
+    } else {
+        emailError.innerHTML = "Please enter a valid e-mail address";
+        return false;
+    }
+}
+
+function checkPasswordConf(password, confirmPassword) {
+    if (!checkPassword(password)) {
+        return false;
+    } else if (password !== confirmPassword) {
+        errorPassword.innerHTML = "Confirm password must match";
+        return false;
+    }
+
+    return true;
+}
+
+function checkPassword(password) {
+    if (password.length &lt; 6) {
+        errorPassword.innerHTML = "Password must have at least 6 characters";
+        return false;
+    } else {
+        errorPassword.innerHTML = "";
+    }
+
+    return true;
+}
+
+/**
+ * Enabling registration
+ */
+function register() {
+    if(emailInput.value &amp;&amp; passwordInput.value &amp;&amp; passwordConfirmInput 
+        &amp;&amp; passwordConfirmInput.value === passwordInput.value
+        &amp;&amp; validateEmail(emailInput.value)) {
+        submitButton.removeAttribute("disabled","");
+    } 
+}
+
+/**
+ * Logging out
+ */
+function logout() {
+    let userData = JSON.parse(localStorage.getItem("user"));
+    console.log('XXX',userData.sessionToken)
+    //send http POST
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", '/user/logout', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Accept','application/json');
+    xhr.responseType = 'json';
+    xhr.send(JSON.stringify({
+        user: {
+            id: userData.id,
+            sessionToken: userData.sessionToken
+        }
+    })); 
+
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            localStorage.removeItem("user");
+            console.log(xhr.response);
+            window.location.href = xhr.response.redirectUrl;
+        }
+      }
+}
+/**
+ * Enabling login 
+ */
+function login() {
+    if(emailInput.value &amp;&amp; passwordInput.value 
+        &amp;&amp; validateEmail(emailInput.value)) {
+        submitButton.removeAttribute("disabled","");
+    } 
+}
+/**
+ * Validating email
+ * @param {Object} email
+ * @returns {boolean}
+ */
+function validateEmail(email) {
+    var re = /^(([^&lt;>()\[\]\\.,;:\s@"]+(\.[^&lt;>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+}
+
+/*
+* Request to home page
+*/
+function homeClicked() {
+    let user = localStorage.getItem("user");
+
+    let url = user ? '/home' : '/';
+    window.location.href = url;    
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="cellObject.html">cellObject</a></li><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#appendHours">appendHours</a></li><li><a href="global.html#appendWeek">appendWeek</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#dateChanged">dateChanged</a></li><li><a href="global.html#getLocalDateFormat">getLocalDateFormat</a></li><li><a href="global.html#getUsersThatSheredCalendarWithYou">getUsersThatSheredCalendarWithYou</a></li><li><a href="global.html#getVerification">getVerification</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#next">next</a></li><li><a href="global.html#onFormChange">onFormChange</a></li><li><a href="global.html#onOutlookLogin">onOutlookLogin</a></li><li><a href="global.html#onSubmit">onSubmit</a></li><li><a href="global.html#previous">previous</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#routeChanged">routeChanged</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#sendRequestForMeetings">sendRequestForMeetings</a></li><li><a href="global.html#toJSON">toJSON</a></li><li><a href="global.html#tokenReceived">tokenReceived</a></li><li><a href="global.html#validateEmail">validateEmail</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Dec 16 2018 23:31:44 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

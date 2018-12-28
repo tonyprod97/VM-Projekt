@@ -12,8 +12,9 @@ window.onload = ()=>{
     appendHours();
 };
 
-/*
-* Create columns in table.
+/**
+ * Creating columns in table.
+ * @param {Object} date
 */
 function appendWeek(date) {
     headerRow.innerHTML = "";
@@ -28,9 +29,9 @@ function appendWeek(date) {
     }
 }
 
-/*
-* Create rows in table.
-*/
+/**
+ * Creating rows in table.
+ */
 function appendHours() {
     for(let i=8;i<21;i++) {
         tableBody.innerHTML += '<tr id="row"'+(i+1)+'>';
@@ -47,9 +48,15 @@ function appendHours() {
     }
 }
 
+/**
+ * Changing date
+ */
+
 function dateChanged() {
     appendWeek(new Date(startingDate.value));
+    resetCells();
 }
+
 
 function cellClicked(startingTimeHour,dateIndex) {
     let cell = document.getElementById('cell'+startingTimeHour+'-'+dateIndex);
@@ -61,29 +68,48 @@ function cellClicked(startingTimeHour,dateIndex) {
     reservedCells = newArray;
 }
 
+function resetCells() {
+    let cells = document.querySelectorAll('table td');
+    cells.forEach(cell=>cell.classList.remove('reserved'));
+    reservedCells = new Array();
+}
+
+/**
+ * Showing next 7 days
+ */
 function next() {
     let date = new Date(startingDate.value);
     date.setDate(date.getDate()+7);
     startingDate.value = getLocalDateFormat(date);
     console.log(startingDate.value)
     appendWeek(date);
+    resetCells();
 }
 
+/**
+ * Showing past 7 days
+ */
 function previous() {
     let date = new Date(startingDate.value);
     date.setDate(date.getDate()-7);
     startingDate.value = getLocalDateFormat(date);
     appendWeek(date);
+    resetCells();
 }
 
-/*
-* Returns correct date format for HTML date input
-*/
+/**
+ * Returning correct date format for HTML date input
+ * @param {Object} date
+ * @returns {Object}
+ */
 function getLocalDateFormat(date) {
     date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
     return date.toJSON().slice(0,10);
 }
 
+/**
+ * Sending request for meetings
+ */
 function sendRequestForMeetings() {
     console.log(reservedCells);
 
@@ -99,12 +125,25 @@ function sendRequestForMeetings() {
     reservedCells = new Array();
 }
 
+/**
+ * @class Class representing a cell
+ */
 class cellObject {
+    /**
+     * @constructor
+     * @param {Object} date
+     * @param {Object} startingTime
+     */
     constructor(date,startingTime) {
         this.date = date;
         this.startingTime = startingTime;
     }
 
+    /**
+     * Checking whether objects are equal by date and startingTime parameters
+     * @param {Object} obj
+     * @returns {boolean}
+     */
     equals(obj) {
         return this.date === obj.date && this.startingTime === obj.startingTime;
     }

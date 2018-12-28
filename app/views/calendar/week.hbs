@@ -1,20 +1,22 @@
+<script src="/scripts/calendar/calendarNav.js"></script>
 <script src="/scripts/calendar/week.js"></script>
-{{> calendarNav }}
 <link rel="stylesheet" href="/css/calendar/week.css">
+
+{{> calendarNav }}
 <div class="container">
     <div class="row justify-content-center">       
         <form class="calendar-form">
             <div class="form-group">
-                <input type="date" id="date-picker">
-                <button type="button" class="btn btn-primary btn-link" onclick="dateChanged()">Search</button>
-                <button class="btn btn-success" type="button" onclick="sendRequestForMeetings()">Request</button>
+                <label for="date">Pick starting date</label>
+                <input type="date" id="date-picker" onchange="dateChanged()">
+                <button class="btn" id="request" type="button" onclick="sendRequestForMeetings()">Request</button>
             </div>
         </form>
     </div>
     <div class="row">
         <div class="table-responsive">
             <table class="table table-bordered table-striped">
-                <thead class="thead-dark">
+                <thead class="thead-light">
                     <tr id="header" class="table-active"></tr>
                 </thead>
                 <tbody>

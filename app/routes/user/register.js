@@ -5,7 +5,13 @@ const databaseManager = require('../../DatabaseManager');
 const sendIds = require('../../constants').databaseSendRequests; 
 const operationStates = require('../../constants').databaseErrors; 
 
-router.get('/', (req, res) => res.render('./user/register'));
+router.get('/', (req, res) => {
+    if (req.session.user != undefined) {
+        res.redirect('../../home');
+        return;
+    }
+    res.render('./user/register')
+});
 
 router.post('/',(req,res) => {
     let user = req.body.user;
