@@ -107,12 +107,15 @@ function dateChanged() {
 function cellClicked(startingTimeHour,month,day) {
     let cell = document.getElementById('cell'+startingTimeHour+'-'+month+'/'+day);
     console.log('Cell clicked: ',cell.id);
-    cell.classList.toggle('reserved');
-    let newCellObject = new cellObject(month,day,startingTimeHour);
-    let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
+    if(!cell.classList.contains('taken')) {
+        cell.classList.toggle('reserved');
 
-    if(reservedCells.length == newArray.length) newArray.push(newCellObject);
-    reservedCells = newArray;
+        let newCellObject = new CellObject(month,day,startingTimeHour);
+        let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
+
+        if(reservedCells.length == newArray.length) newArray.push(newCellObject);
+        reservedCells = newArray;
+    }
 }
 
 function resetCells() {
@@ -160,22 +163,35 @@ function getLocalDateFormat(date) {
 function sendRequestForMeetings() {
     console.log(reservedCells);
 
-    reservedCells = reservedCells.map(o=>{
-
-        let cell = document.getElementById('cell'+o.startingTime+'-'+o.date);
-        cell.classList.toggle('reserved'); 
-
-        let newDate = new Date(startingDate.value);
-        newDate.setDate(newDate.getDate()+o.date);
-        return new cellObject(newDate,o.startingTime); 
+    reservedCells.forEach(o=>{
+        let cell = document.getElementById('cell'+o.startingTime+'-'+o.month+'/'+o.day);
+        cell.classList.toggle('reserved');  
     })
+    let dataToSend = reservedCells.slice();
     reservedCells = new Array();
+    console.log(dataToSend)
+
+    //send http POST
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", '/calendar/week', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Accept','application/json');
+    xhr.responseType = 'json';
+    xhr.send(JSON.stringify({
+        requestedMeetings: dataToSend
+    })); 
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            console.log('Success')
+        }
+      }
+
 }
 
 /**
  * @class Class representing a cell
  */
-class cellObject {
+class CellObject {
  
     constructor(month,day,startingTime) {
         this.month = month;
