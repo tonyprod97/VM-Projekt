@@ -39,7 +39,9 @@
     "express-session": "^1.15.6",
     "fs": "0.0.1-security",
     "i": "^0.3.6",
+    "moment": "^2.23.0",
     "mssql": "^4.3.0",
+    "node-outlook": "^1.1.8",
     "nodemon": "^1.18.5",
     "path": "^0.12.7",
     "simple-oauth2": "^2.2.1"

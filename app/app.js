@@ -6,12 +6,20 @@ const path = require('path');
 const hbs = require('express-handlebars');
 const routes = require('./routes/index');
 const bodyParser = require('body-parser');
-    
+const session = require('cookie-session');
+
 //configuring server
 const port = require('./constants').port;
 const app = express();
 
 const databaseManager = require('./DatabaseManager');
+
+app.use(session(
+    {
+        secret: '0dc529ba-5051-4cd6-8b67-c9a901bb8bdf',
+        resave: false,
+        saveUninitialized: false
+    }));
 
 //configurin parser engine
 app.use(bodyParser.json());
