@@ -58,9 +58,10 @@ function appendHours() {
             tempDate.setDate(tempDate.getDate()+j);
             let tempDay = tempDate.getDate();
             let tempMonth = tempDate.getMonth()+1;
-            let dateString = tempMonth+"/"+tempDay;
+            let tempYear = tempDate.getFullYear();
+            let dateString = tempYear + '/'+tempMonth+"/"+tempDay;
             
-            row +='<td id="cell'+i+'-'+dateString+'" onclick="cellClicked('+i+','+tempMonth+','+tempDay+')"></td>';
+            row +='<td id="cell'+i+'-'+dateString+'" onclick="cellClicked('+i+','+tempYear+','+tempMonth+','+tempDay+')"></td>';
         }
         tableBody.innerHTML +=row;
         tableBody.innerHTML +='</tr>';
@@ -70,7 +71,7 @@ function appendHours() {
 function fillCellsWithData() {
     calendarData.forEach(event=>{
         let data = new CalendarEvent(event.Subject,new Date(event.Start.DateTime),new Date(event.End.DateTime),event.Location ? event.Location.DisplayName : '');
-        let id = "cell"+data.start.getHours()+'-'+Number(data.start.getMonth()+1)+'/'+data.start.getDate();
+        let id = "cell"+data.start.getHours()+'-'+data.start.getFullYear()+'/'+Number(data.start.getMonth()+1)+'/'+data.start.getDate();
         let cell = document.getElementById(id);
         console.log('filling cells with data: ',id,cell);
         if(cell) {
@@ -104,13 +105,13 @@ function dateChanged() {
 }
 
 
-function cellClicked(startingTimeHour,month,day) {
-    let cell = document.getElementById('cell'+startingTimeHour+'-'+month+'/'+day);
+function cellClicked(startingTimeHour,year,month,day) {
+    let cell = document.getElementById('cell'+startingTimeHour+'-'+year+'/'+month+'/'+day);
     console.log('Cell clicked: ',cell.id);
     if(!cell.classList.contains('taken')) {
         cell.classList.toggle('reserved');
 
-        let newCellObject = new CellObject(month,day,startingTimeHour);
+        let newCellObject = new CellObject(year,month,day,startingTimeHour);
         let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
 
         if(reservedCells.length == newArray.length) newArray.push(newCellObject);
@@ -164,7 +165,7 @@ function sendRequestForMeetings() {
     console.log(reservedCells);
 
     reservedCells.forEach(o=>{
-        let cell = document.getElementById('cell'+o.startingTime+'-'+o.month+'/'+o.day);
+        let cell = document.getElementById('cell'+o.startingTime+'-'+o.year+'/'+o.month+'/'+o.day);
         cell.classList.toggle('reserved');  
     })
     let dataToSend = reservedCells.slice();
@@ -193,7 +194,8 @@ function sendRequestForMeetings() {
  */
 class CellObject {
  
-    constructor(month,day,startingTime) {
+    constructor(year,month,day,startingTime) {
+        this.year = year;
         this.month = month;
         this.day = day;
         this.startingTime = startingTime;
@@ -205,7 +207,7 @@ class CellObject {
      * @returns {boolean}
      */
     equals(obj) {
-        return this.month === obj.month && this.day == obj.day && this.startingTime === obj.startingTime;
+        return this.year===obj.year && this.month === obj.month && this.day === obj.day && this.startingTime === obj.startingTime;
     }
 }
 
