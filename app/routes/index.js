@@ -161,7 +161,7 @@ function tokenReceived(req, res, error, token) {
         req.session.access_token = token.token.access_token;
         req.session.refresh_token = token.token.refresh_token;
         req.session.email = authHelper.getEmailFromIdToken(token.token.id_token);
-        res.redirect('/');
+        res.redirect('/sync');
     }
 }
 
