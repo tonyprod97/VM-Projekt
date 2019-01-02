@@ -44,6 +44,26 @@ router.get('/', function(req, res) {
 
     //for testing
 
+    //databaseManager.getSingleRequest({ id: ids.GET_ALL_USERS }, (answer) => {
+    //
+    //    if (answer.state != operationStates.OPERATION_SUCCESS) {
+    //        console.log(answer.msg);
+    //        return;
+    //    }
+    //
+    //    console.log(answer.data);
+    //    console.log('');
+    //    databaseManager.getSingleRequest({ id: ids.GET_VERIFIED_USERS }, (answer) => {
+    //
+    //        if (answer.state != operationStates.OPERATION_SUCCESS) {
+    //            console.log(answer.msg);
+    //            return;
+    //        }
+    //
+    //        console.log(answer.data);
+    //    });
+    //});
+
     //databaseManager.sendRequest({ id: sendIds.CREATE_NEW_USER, data: { email: 'test@test.com', password: 'testPass' } }, (answer) => {
     //
     //    console.log(answer.msg);

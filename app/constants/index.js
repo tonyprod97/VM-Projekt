@@ -13,9 +13,11 @@ module.exports.databaseErrors = {
 };
 
 module.exports.databaseGetRequests = {
-    USER             : 1, // request developers
-    VISIBLE_CALENDARS: 2, // returns all users a current user has rights to see there calendar (needs in data field: userid, token)
-    GET_VERIFICATION : 4  //request verification details about user (needs in data field: email) returns (verified, userid *, token *) * -> if not verified 
+    USER: 1,               // request developers
+    VISIBLE_CALENDARS: 2,  // returns all users a current user has rights to see there calendar (needs in data field: userid, token)
+    GET_VERIFICATION : 4,  // request verification details about user (needs in data field: email) returns (verified, userid *, token *) * -> if not verified 
+    GET_ALL_USERS: 8,      // request all registrated users
+    GET_VERIFIED_USERS: 16 // request all verified users
 };
 
 module.exports.databaseSendRequests = {

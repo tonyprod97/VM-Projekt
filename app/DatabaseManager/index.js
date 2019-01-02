@@ -204,8 +204,6 @@ function newSession(database, userid, callback) {
     });
 }
 
-
-
 /**
  * Inicijalizacija baze podataka i postavljanje "manager"-a koji upravlja bazom podataka
  * @param {Object}database - Predstavlja bazu podataka
@@ -338,6 +336,33 @@ function getVerification(database, email, callback) {
         data.data.verified = false;
         setTimeout(() => callback(data), 0);
     });
+}
+
+function getUsers(database, onlyVerified, callback) {
+
+    let data = {
+        state: null,
+        msg: "",
+        data: null
+    };
+
+    database.query('SELECT email FROM ' + userTable + ((onlyVerified) ? ' WHERE id NOT IN (SELECT userid FROM ' + unverifiedTable + ' )' : ' '), (error, result) => {
+
+        if (error) {
+
+            data.state = dbConsts.OPERATION_FAILED;
+            data.msg   = "Failed to get users";
+            setTimeout(() => callback(data));
+            return;
+        }
+
+        data.state = dbConsts.OPERATION_SUCCESS;
+        data.msg   = "operation success";
+
+        data.data = toJSON(result)[0][0];
+        setTimeout(() => callback(data));
+    });
+
 }
 
 
@@ -520,6 +545,16 @@ class DatabaseManager {
 
             case getRequests.GET_VERIFICATION: {
                 getVerification(new mssql.Request(), requestData.data.email, callback);
+                break;
+            }
+        
+            case getRequests.GET_ALL_USERS: {
+                getUsers(new mssql.Request(), false, callback);
+                break;
+            }
+
+            case getRequests.GET_VERIFIED_USERS: {
+                getUsers(new mssql.Request(), true, callback);
                 break;
             }
         }
