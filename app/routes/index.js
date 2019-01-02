@@ -272,6 +272,7 @@ router.get('/sync', function(req, res) {
 
                 var finalResponse=JSON.stringify(response.body.value);
                 //console.log(JSON.stringify(response.body.value))
+                console.log(finalResponse.length,'size')
                 console.log('Final respone: '+ JSON.stringify(response.body.value));
                 res.render('calendar/week',{calendarData:finalResponse,loggedIn:true});
                 //res.redirect('/');

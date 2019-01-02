@@ -75,6 +75,7 @@ function appendHours() {
 }
 
 function fillCellsWithData() {
+    console.log(calendarData);
     calendarData.forEach(event=>{
         let data = new CalendarEvent(event.Subject,new Date(event.Start.DateTime),new Date(event.End.DateTime),event.Location ? event.Location.DisplayName : '');
         let id = "cell"+data.start.getHours()+'-'+data.start.getFullYear()+'/'+Number(data.start.getMonth()+1)+'/'+data.start.getDate();
@@ -141,6 +142,7 @@ function next() {
     console.log(startingDate.value)
     appendWeek(date);
     resetCells();
+    fillCellsWithData();
 }
 
 /**
@@ -152,6 +154,7 @@ function previous() {
     startingDate.value = getLocalDateFormat(date);
     appendWeek(date);
     resetCells();
+    fillCellsWithData();
 }
 
 /**
