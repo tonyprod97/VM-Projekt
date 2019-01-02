@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="/css/calendar/teachers.css">
+<link rel="stylesheet" href="/css/calendar/community.css">
 
 {{> calendarNav }}
 <div class="container">
@@ -12,10 +12,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{#each teachers as |teacher|}}
+                    {{#each people as |person|}}
                         <tr>
-                        <th scope="row">{{teacher.index}}.</th>
-                        <td><a href="./teachers?index={{teacher.index}}&fullName={{teacher.fullName}}">{{teacher.fullName}}</a></td>
+                        <th scope="row">{{person.index}}.</th>
+                        <td><a href="./community?index={{person.index}}&fullName={{person.fullName}}">{{person.fullName}}</a></td>
                         </tr>    
                     {{/each}}
                     <tr>

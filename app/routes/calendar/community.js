@@ -11,7 +11,7 @@ router.get('/',(req,res)=>{
 
     if(index && fullName) {
         console.log(index,fullName)
-        res.render('./calendar/week',{teacher: {
+        res.render('./calendar/week',{person: {
             fullName:fullName,
             index:index
         },
@@ -21,9 +21,9 @@ router.get('/',(req,res)=>{
 
     console.log(index,fullName);
 
-    res.render('./calendar/teachers', 
+    res.render('./calendar/community', 
     { loggedIn:true,
-        teachers: [{
+        people: [{
             index:1,
             fullName: 'Vedran Mornar'
         },
