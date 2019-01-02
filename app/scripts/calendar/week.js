@@ -6,11 +6,17 @@ let calendarData;
 let currentDate;
 
 window.onload = ()=>{
+    var dataElement= document.querySelector("#calendarData");
+    
+    calendarData = JSON.parse(dataElement.innerText);
+    dataElement.parentNode.removeChild(dataElement);
+    //localStorage.setItem("calendarData",JSON.stringify(data));
+
     headerRow = document.getElementById('header');
     tableBody = document.getElementsByTagName('tbody')[0];
     startingDate = document.querySelector('#date-picker');
     startingDate.value = getLocalDateFormat(new Date());
-    calendarData = JSON.parse(window.localStorage.getItem("calendarData"));
+    //calendarData = JSON.parse(window.localStorage.getItem("calendarData"));
     appendWeek(new Date());
     fillCellsWithData();
     console.log('DATA: ',calendarData);
