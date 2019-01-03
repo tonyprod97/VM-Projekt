@@ -29,7 +29,7 @@ router.post('/',(req,res) => {
 
                 res.send({
                     userData: JSON.stringify(userData),
-                    redirectUrl: '/home'
+                    redirectUrl: '/calendar'
                 });
    }); 
 

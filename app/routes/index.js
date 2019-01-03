@@ -166,15 +166,6 @@ router.get('/refreshtokens',permit, function (req, res) {
     }
 });
 
-router.get('/logout', function (req, res) {
-    req.session.destroy();
-    res.redirect('/');
-});
-
-router.get('/home', permit, (req,res)=>{
-    res.render('home',{loggedIn:true});
-});
-
 /*
     JSONPathovi.
     za naslov - $.Subject

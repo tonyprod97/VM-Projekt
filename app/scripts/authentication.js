@@ -194,6 +194,6 @@ function validateEmail(email) {
 function homeClicked() {
     let user = localStorage.getItem("user");
 
-    let url = user ? '/home' : '/';
+    let url = user ? '/calendar' : '/';
     window.location.href = url;    
 }
