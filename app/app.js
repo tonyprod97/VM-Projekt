@@ -6,6 +6,7 @@ const path = require('path');
 const hbs = require('express-handlebars');
 const routes = require('./routes/index');
 const bodyParser = require('body-parser');
+const session = require('express-session');
     
 //configuring server
 const port = require('./constants').port;
@@ -16,6 +17,13 @@ const databaseManager = require('./DatabaseManager');
 //configurin parser engine
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(session(
+    {
+        secret: '0dc529ba-5051-4cd6-8b67-c9a901bb8bdf',
+        resave: false,
+        saveUninitialized: false
+    }));
 
 //configuring view engine
 app.engine('hbs',hbs({

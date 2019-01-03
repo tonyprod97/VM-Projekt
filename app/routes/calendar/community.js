@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
+var permit = require('../user/permission');
 
-router.get('/',(req,res)=>{
+router.get('/', permit, (req,res)=>{
 
     //gets index from request
     let index = req.query.index;

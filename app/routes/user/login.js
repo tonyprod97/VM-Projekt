@@ -5,12 +5,12 @@ const databaseManager = require('../../DatabaseManager');
 const sendIds = require('../../constants').databaseSendRequests; 
 const operationStates = require('../../constants').databaseErrors; 
 
-router.get('/', (req, res) => res.render('./user/login'));
+router.get('/', (req, res) =>   res.render('./user/login'));
 
 router.post('/',(req,res) => {
     let user = req.body.user;
     let userData;
-    
+
     databaseManager.sendRequest({
         id: sendIds.LOGIN_REQUEST, 
            data: { 
@@ -24,6 +24,8 @@ router.post('/',(req,res) => {
                     res.send({ redirectUrl: './login', error: answer.msg, email: user.email });
                     return;
                 }
+
+                req.session.user = userData;
 
                 res.send({
                     userData: JSON.stringify(userData),

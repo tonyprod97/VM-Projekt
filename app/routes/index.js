@@ -3,29 +3,19 @@ var router = express.Router();
 
 // var response ="";
 
-router.use('/user',require('./user'));
-router.use('/calendar',require('./calendar'));
-router.get('/home',(req,res)=>{
-    res.render('home',{loggedIn:true});
-})
+router.use('/user', require('./user'));
+router.use('/calendar', require('./calendar'));
 
 const databaseManager = require('../DatabaseManager');
 const ids             = require('../constants').databaseGetRequests;
-const operationStates = require('../constants').databaseErrors; 
+const operationStates = require('../constants').databaseErrors;
+var permit = require('./user/permission');
 
 const authHelper = require('../OutlookManager');
 var outlook = require('node-outlook');
 var moment = require('moment');
-const session = require('express-session');
 
 const mailHelper = require('../EmailManager');
-
-router.use(session(
-    {
-        secret: '0dc529ba-5051-4cd6-8b67-c9a901bb8bdf',
-        resave: false,
-        saveUninitialized: false
-    }));
 
 //const sendIds = require('../constants').databaseSendRequests; // for testing 
 
@@ -129,7 +119,7 @@ router.get('/', function(req, res) {
     });
 });
 
-router.get('/authorize', function (req, res) {
+router.get('/authorize',permit, function (req, res) {
     var authCode = req.query.code;
     if (authCode) {
         console.log('');
@@ -165,7 +155,7 @@ function tokenReceived(req, res, error, token) {
     }
 }
 
-router.get('/refreshtokens', function (req, res) {
+router.get('/refreshtokens',permit, function (req, res) {
     var refresh_token = req.session.refresh_token;
     if (refresh_token === undefined) {
         console.log('no refresh token in session');
@@ -181,7 +171,7 @@ router.get('/logout', function (req, res) {
     res.redirect('/');
 });
 
-router.get('/home', (req,res)=>{
+router.get('/home', permit, (req,res)=>{
     res.render('home',{loggedIn:true});
 });
 
@@ -194,7 +184,7 @@ router.get('/home', (req,res)=>{
 
  */
 
-router.get('/sync', function(req, res) {
+router.get('/sync',permit, function(req, res) {
     var token = req.session.access_token;
     var email = req.session.email;
     if (token === undefined || email === undefined) {
