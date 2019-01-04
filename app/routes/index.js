@@ -189,7 +189,7 @@ router.get('/sync',permit, function(req, res) {
     // Set the user's email as the anchor mailbox
     outlook.base.setAnchorMailbox(req.session.email);
     // Set the preferred time zone
-    outlook.base.setPreferredTimeZone('Eastern Standard Time');
+    outlook.base.setPreferredTimeZone('Europe/Paris');
 
     // Use the syncUrl if available
     var requestUrl = req.session.syncUrl;
@@ -212,7 +212,7 @@ router.get('/sync',permit, function(req, res) {
     var headers = {
         Prefer: [
             // Enables sync functionality
-            'odata.track-changes',
+            //'odata.track-changes',
             // Requests only 5 changes per response
             'odata.maxpagesize=5'
         ]
