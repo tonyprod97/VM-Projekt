@@ -4,21 +4,23 @@ let startingDate;
 let reservedCells = new Array();
 let calendarData;
 let currentDate;
+let daysOfWeek = ["Sunday","Monday", "Tuesday", "Wednesday", 
+"Thursday", "Friday", "Saturday"];
 
 window.onload = ()=>{
     var dataElement= document.querySelector("#calendarData");
-    
-    calendarData = JSON.parse(dataElement.innerText);
-    dataElement.parentNode.removeChild(dataElement);
-    //localStorage.setItem("calendarData",JSON.stringify(data));
-
+    console.log(typeof(dataElement.innerText));
     headerRow = document.getElementById('header');
     tableBody = document.getElementsByTagName('tbody')[0];
     startingDate = document.querySelector('#date-picker');
     startingDate.value = getLocalDateFormat(new Date());
-    //calendarData = JSON.parse(window.localStorage.getItem("calendarData"));
     appendWeek(new Date());
-    fillCellsWithData();
+    try {
+        calendarData = JSON.parse(dataElement.innerText);
+        fillCellsWithData();
+    } catch(ignorable) {}
+
+    dataElement.parentNode.removeChild(dataElement);
     console.log('DATA: ',calendarData);
 };
 
@@ -38,8 +40,7 @@ function appendWeek(date) {
         let tempDay = tempDate.getDate();
         let tempMonth = tempDate.getMonth()+1;
     
-        headerRow.innerHTML += '<th>'+tempMonth+'/'+tempDay+ '</th>';
-        //currentDate.setDate(currentDate.getDate()+1);
+        headerRow.innerHTML += '<th>'+tempMonth+'/'+tempDay+ '<br>'+ daysOfWeek[tempDate.getDay()]+'</th>';
     }
     appendHours();
 }
@@ -76,6 +77,7 @@ function appendHours() {
 
 function fillCellsWithData() {
     console.log(calendarData);
+    if(calendarData === undefined) return;
     calendarData.forEach(event=>{
         let data = new CalendarEvent(event.Subject,new Date(event.Start.DateTime),new Date(event.End.DateTime),event.Location ? event.Location.DisplayName : '');
         let id = "cell"+data.start.getHours()+'-'+data.start.getFullYear()+'/'+Number(data.start.getMonth()+1)+'/'+data.start.getDate();

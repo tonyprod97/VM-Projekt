@@ -14,7 +14,16 @@ window.onload =()=>{
     passwordConfirmInput = document.getElementById("passwordConfirm");
     emailError = document.getElementById("errorEmail");
     errorPassword = document.getElementById("errorPassword");
+    
+    passwordInput.onkeydown = e => {
+        if(e.keyCode == 13) submitButton.click();
+    };
+
+    passwordConfirmInput.onkeydown = e => {
+        if(e.keyCode == 13) submitButton.click();
+    };
 };
+
 
 /**
  *Checking if user is trying to register or log in
