@@ -14,11 +14,17 @@
         <form class="calendar-form">
             <div class="form-group">
                 <label for="date">Pick starting date</label>
-                <input type="date" id="date-picker" class="margin-right" onchange="dateChanged()">
-                <div class="form-group float-right">
+                <input type="date" id="date-picker" class="margin-right">
+                {{#if teacher}}
+                <div class="form-group students-only float-right">
                     <label for="date">Subject:</label>
                     <input type="text" id="subject">
-                    <button class="btn" id="request" type="button" onclick="sendRequestForMeetings()">Request</button>
+                    <button class="btn color-secondary" id="request" type="button" onclick="sendRequestForMeetings()">Request</button>
+                </div>
+                {{/if}}
+                <div class="form-group teachers-only float-right">
+                    <label for="date">Mark selected as available:</label>
+                    <button class="btn color-secondary" id="mark" type="button" onclick="sendMarkAsAvailable()">Sync</button>
                 </div>
             </div>
         </form>

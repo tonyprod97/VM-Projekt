@@ -8,4 +8,6 @@ body {
     --primary-light:#4A6572;
     --secondary:#F9AA33;
     --table-background: #e9ecef;
+    --table-cell: rgb(214, 239, 243);
+    --table-cell-taken: rgb(212, 150, 69);
 }

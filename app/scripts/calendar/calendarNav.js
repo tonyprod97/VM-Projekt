@@ -1,5 +1,23 @@
-window.addEventListener("load",hrefChanged,false);
+let studentsOnlyElements;
+let teachersOnlyElements;
 
+let user =  JSON.parse(localStorage.getItem('user'));
+let role = user.role;
+
+window.addEventListener("load",hrefChanged,false);
+window.addEventListener("load",getRole);
+
+function getRole() {
+    studentsOnlyElements = document.querySelectorAll('.students-only');
+    teachersOnlyElements = document.querySelectorAll('.teachers-only');
+    if(studentsOnlyElements && role) {
+        studentsOnlyElements.forEach(el => el.style.display = "none");
+    }
+
+    if(teachersOnlyElements && !role) {
+        teachersOnlyElements.forEach(el => el.style.display = "none");
+    }
+}
 
 /**
  * ...

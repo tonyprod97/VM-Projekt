@@ -1,31 +1,34 @@
 let headerRow;
 let tableBody;
+let teacherElement;
 let startingDate;
 let reservedCells = new Array();
 let calendarData;
 let currentDate;
 let daysOfWeek = ["Sunday","Monday", "Tuesday", "Wednesday", 
 "Thursday", "Friday", "Saturday"];
-let user;
 
-window.onload = ()=>{
-    user = JSON.parse(localStorage.getItem('user'));
+window.addEventListener('load',initializeData);
+
+function initializeData() {   
+    
+    teacherElement = document.querySelector('#teacherElement');
     headerRow = document.getElementById('header');
     tableBody = document.getElementsByTagName('tbody')[0];
     startingDate = document.querySelector('#date-picker');
     startingDate.value = getLocalDateFormat(new Date());
+    startingDate.addEventListener('change',dateChanged);
     appendWeek(new Date());
     fetchCalendarData();
 };
 
 function fetchCalendarData() {
-    let teacherElement = document.querySelector('#teacherElement');
     let url = '/outlook/calendarData';
     
     if(teacherElement) {
         console.log(teacherElement,teacherElement.innerText)
         url += '?teacher='+teacherElement.innerText; 
-    }
+    } 
     //send http POST
     var http = new XMLHttpRequest();
     http.open("POST", url, true);
@@ -73,6 +76,10 @@ function appendWeek(date) {
  */
 function appendHours() {
     tableBody.innerHTML = '';
+    //teacherElement is displayed only when requesting, role is 0 if student is logged
+    let disabledCell = !teacherElement && !role ? 'disabled': '';
+    console.log('disabledCell ',disabledCell);
+
     for(let i=7;i<21;i++) {
         tableBody.innerHTML += '<tr id="row"'+(i+1)+'>';
         let timeSufix = i>9 ? i+':00' : '0'+i +':00';
@@ -88,7 +95,7 @@ function appendHours() {
             let tempYear = tempDate.getFullYear();
             let dateString = tempYear + '/'+tempMonth+"/"+tempDay;
             
-            row +='<td id="cell'+i+'-'+dateString+'" onclick="cellClicked('+i+','+tempYear+','+tempMonth+','+tempDay+')"></td>';
+            row +='<td id="cell'+i+'-'+dateString+'" class="'+disabledCell+'" onclick="cellClicked('+i+','+tempYear+','+tempMonth+','+tempDay+')"></td>';
         }
         tableBody.innerHTML +=row;
         tableBody.innerHTML +='</tr>';
@@ -102,7 +109,6 @@ function fillCellsWithData() {
         let data = new CalendarEvent(event.Subject,new Date(event.Start.DateTime),new Date(event.End.DateTime),event.Location ? event.Location.DisplayName : '');
         let id = "cell"+data.start.getHours()+'-'+data.start.getFullYear()+'/'+Number(data.start.getMonth()+1)+'/'+data.start.getDate();
         let cell = document.getElementById(id);
-        console.log('filling cells with data: ',id,cell);
         if(cell) {
             if(data.subject) {
                 cell.innerHTML="<div>"+data.subject+"</div>";
@@ -137,7 +143,7 @@ function dateChanged() {
 function cellClicked(startingTimeHour,year,month,day) {
     let cell = document.getElementById('cell'+startingTimeHour+'-'+year+'/'+month+'/'+day);
     console.log('Cell clicked: ',cell.id);
-    if(!cell.classList.contains('taken')) {
+    if(!cell.classList.contains('taken') && !cell.classList.contains('disabled')) {
         cell.classList.toggle('reserved');
 
         let newCellObject = new CellObject(year,month,day,startingTimeHour);
@@ -194,26 +200,23 @@ function getLocalDateFormat(date) {
  */
 function sendRequestForMeetings() {
     console.log(reservedCells);
-
-    reservedCells.forEach(o=>{
-        let cell = document.getElementById('cell'+o.startingTime+'-'+o.year+'/'+o.month+'/'+o.day);
-        cell.classList.toggle('reserved');  
-    })
+    
     let dataToSend = reservedCells.slice();
-    reservedCells = new Array();
-    console.log(dataToSend)
+    cleanCellsReservation();
 
+    console.log(dataToSend);
     let subjectElement = document.querySelector("#subject");
     let subject = subjectElement.value;
     subjectElement.value='';
 
     //send http POST
     var http = new XMLHttpRequest();
-    http.open("POST", '/calendar/week', true);
+    http.open("POST", '/calendar/week?operation=requestMeeting', true);
     http.setRequestHeader('Content-Type', 'application/json');
     http.setRequestHeader('Accept','application/json');
     http.responseType = 'json';
     http.send(JSON.stringify({
+        user: user,
         subject: subject,
         requestedMeetings: dataToSend
     })); 
@@ -223,6 +226,39 @@ function sendRequestForMeetings() {
         }
       }
 
+}
+
+function sendMarkAsAvailable() {
+    console.log(reservedCells);
+
+    let dataToSend = reservedCells.slice();
+    cleanCellsReservation();
+
+    console.log(dataToSend)
+
+    //send http POST
+    var http = new XMLHttpRequest();
+    http.open("POST", '/calendar/week?operation=markAsAvailable', true);
+    http.setRequestHeader('Content-Type', 'application/json');
+    http.setRequestHeader('Accept','application/json');
+    http.responseType = 'json';
+    http.send(JSON.stringify({
+        user: user,
+        available: dataToSend
+    })); 
+    http.onreadystatechange = function () {
+        if (http.readyState === 4) {
+            console.log('Success')
+        }
+      }
+}
+
+function cleanCellsReservation() {
+    reservedCells.forEach(o=>{
+        let cell = document.getElementById('cell'+o.startingTime+'-'+o.year+'/'+o.month+'/'+o.day);
+        cell.classList.toggle('reserved');  
+    });
+    reservedCells = new Array();
 }
 
 /**
