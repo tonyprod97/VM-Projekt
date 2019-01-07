@@ -26,7 +26,6 @@ function fetchCalendarData() {
     let url = '/outlook/calendarData';
     
     if(teacherElement) {
-        console.log(teacherElement,teacherElement.innerText)
         url += '?teacher='+teacherElement.innerText; 
     } 
     //send http POST
@@ -35,7 +34,6 @@ function fetchCalendarData() {
     http.setRequestHeader('Content-Type', 'application/json');
     http.setRequestHeader('Accept','application/json');
     http.responseType = 'json';
-    console.log('logging user: ',user);
     
     http.send(JSON.stringify({user:user})); 
 
@@ -78,7 +76,6 @@ function appendHours() {
     tableBody.innerHTML = '';
     //teacherElement is displayed only when requesting, role is 0 if student is logged
     let disabledCell = !teacherElement && !role ? 'disabled': '';
-    console.log('disabledCell ',disabledCell);
 
     for(let i=7;i<21;i++) {
         tableBody.innerHTML += '<tr id="row"'+(i+1)+'>';
@@ -103,7 +100,6 @@ function appendHours() {
 }
 
 function fillCellsWithData() {
-    console.log(calendarData);
     if(calendarData === undefined) return;
     calendarData.forEach(event=>{
         let data = new CalendarEvent(event.Subject,new Date(event.Start.DateTime),new Date(event.End.DateTime),event.Location ? event.Location.DisplayName : '');
@@ -199,12 +195,10 @@ function getLocalDateFormat(date) {
  * Sending request for meetings
  */
 function sendRequestForMeetings() {
-    console.log(reservedCells);
     
     let dataToSend = reservedCells.slice();
     cleanCellsReservation();
 
-    console.log(dataToSend);
     let subjectElement = document.querySelector("#subject");
     let subject = subjectElement.value;
     subjectElement.value='';
@@ -217,6 +211,7 @@ function sendRequestForMeetings() {
     http.responseType = 'json';
     http.send(JSON.stringify({
         user: user,
+        teacher: teacherElement.innerText,
         subject: subject,
         requestedMeetings: dataToSend
     })); 
@@ -229,12 +224,9 @@ function sendRequestForMeetings() {
 }
 
 function sendMarkAsAvailable() {
-    console.log(reservedCells);
 
     let dataToSend = reservedCells.slice();
     cleanCellsReservation();
-
-    console.log(dataToSend)
 
     //send http POST
     var http = new XMLHttpRequest();

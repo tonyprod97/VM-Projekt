@@ -21,6 +21,7 @@ router.post('/', permit, (req,res)=>{
         //student has requested meeting from teacher
         let subject = req.body.subject;
         let requestedMeetings = req.body.requestedMeetings[0];
+        let teacher = req.body.teacher;
 
         var token = req.session.access_token;
         var email = req.session.email;
