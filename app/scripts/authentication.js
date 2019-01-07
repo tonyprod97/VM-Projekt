@@ -17,13 +17,18 @@ window.onload =()=>{
     errorPassword = document.getElementById("errorPassword");
     roleSelected = document.getElementById("roleSelect");
     
-    passwordInput.onkeydown = e => {
-        if(e.keyCode == 13) submitButton.click();
-    };
+    if(passwordInput) {
+        passwordInput.onkeydown = e => {
+            if(e.keyCode == 13) submitButton.click();
+        };
+    }
 
-    passwordConfirmInput.onkeydown = e => {
-        if(e.keyCode == 13) submitButton.click();
-    };
+    if(passwordConfirmInput) {
+        passwordConfirmInput.onkeydown = e => {
+            if(e.keyCode == 13) submitButton.click();
+        };
+    }
+
 };
 
 

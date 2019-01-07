@@ -6,7 +6,13 @@ var outlook = require('node-outlook');
 const mailHelper = require('../../EmailManager');
 
 router.get('/', permit, (req,res)=>{
-    res.render('./calendar/week', {loggedIn:true, role: 0}); // 0 is student 1 if teacher
+    const teacher = req.query['teacher'];
+    
+    if(teacher) {
+        res.render('./calendar/week', {loggedIn:true,teacher:teacher});
+        return;
+    }
+    res.render('./calendar/week', {loggedIn:true});
 });
 
 router.post('/', permit, (req,res)=>{

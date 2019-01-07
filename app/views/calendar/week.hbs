@@ -6,15 +6,16 @@
 <div class="container">
     <div class="row">
         {{#if teacher}}
-        <h3>Displaying calendar for: {{teacher.fullName}}</h3>
+        <h3>Displaying calendar for: <span id="teacherElement">{{teacher}}</span>
+        </h3>
         {{/if}}
     </div>
     <div class="row justify-content-center">       
         <form class="calendar-form">
             <div class="form-group">
                 <label for="date">Pick starting date</label>
-                <input type="date" id="date-picker" onchange="dateChanged()">
-                <div class="form-group">
+                <input type="date" id="date-picker" class="margin-right" onchange="dateChanged()">
+                <div class="form-group float-right">
                     <label for="date">Subject:</label>
                     <input type="text" id="subject">
                     <button class="btn" id="request" type="button" onclick="sendRequestForMeetings()">Request</button>

@@ -7,7 +7,6 @@ const getIds = require('../../constants').databaseGetRequests;
 const operationStates = require('../../constants').databaseErrors; 
 
 router.get('/', permit, (req,res)=>{
-
     databaseManager.getSingleRequest({ id: getIds.GET_VERIFIED_USERS }, (answer) => {
 
         if (answer.state != operationStates.OPERATION_SUCCESS) {

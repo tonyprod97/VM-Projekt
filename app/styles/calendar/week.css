@@ -30,3 +30,11 @@ th {
 #request {
     background-color: var(--secondary);
 }
+
+.margin-right {
+    margin-right: 10px;
+}
+
+.float-right {
+    float: right;
+}

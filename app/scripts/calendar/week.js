@@ -3,36 +3,42 @@ let tableBody;
 let startingDate;
 let reservedCells = new Array();
 let calendarData;
-let dataFromServer;
 let currentDate;
 let daysOfWeek = ["Sunday","Monday", "Tuesday", "Wednesday", 
 "Thursday", "Friday", "Saturday"];
+let user;
 
 window.onload = ()=>{
+    user = JSON.parse(localStorage.getItem('user'));
     headerRow = document.getElementById('header');
     tableBody = document.getElementsByTagName('tbody')[0];
     startingDate = document.querySelector('#date-picker');
     startingDate.value = getLocalDateFormat(new Date());
     appendWeek(new Date());
     fetchCalendarData();
-    dataElement.parentNode.removeChild(dataElement);
-    console.log('DATA: ',calendarData);
 };
 
 function fetchCalendarData() {
+    let teacherElement = document.querySelector('#teacherElement');
+    let url = '/outlook/calendarData';
+    
+    if(teacherElement) {
+        console.log(teacherElement,teacherElement.innerText)
+        url += '?teacher='+teacherElement.innerText; 
+    }
     //send http POST
     var http = new XMLHttpRequest();
-    http.open("POST", '/outlook/calendarData', true);
+    http.open("POST", url, true);
     http.setRequestHeader('Content-Type', 'application/json');
     http.setRequestHeader('Accept','application/json');
     http.responseType = 'json';
-    http.send(); 
+    console.log('logging user: ',user);
+    
+    http.send(JSON.stringify({user:user})); 
 
     http.onreadystatechange = function() {
         if (http.readyState === 4 && http.status == 200) {
-            dataFromServer = JSON.parse(http.response.calendarData);
-            console.log('from server data: ',dataFromServer);
-            calendarData = dataFromServer;
+            calendarData = JSON.parse(http.response.calendarData);
             fillCellsWithData();
         }
       }
