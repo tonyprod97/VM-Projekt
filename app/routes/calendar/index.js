@@ -3,7 +3,7 @@ var router = express.Router();
 var permit = require('../user/permission');
 
 router.use('/week',require('./week'));
-router.use('/community',require('./community'));
+router.use('/teachers',require('./teachers'));
 
 router.get('/', permit, (req,res)=>res.render('./calendar/index', { loggedIn:true}));
 

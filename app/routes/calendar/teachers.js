@@ -21,7 +21,7 @@ router.get('/', permit, (req,res)=>{
             people.push({ fullName: element.email, index: (index + 1) });
         });
 
-        res.render('./calendar/community', { loggedIn: true, people: people });
+        res.render('./calendar/teachers', { loggedIn: true, people: people });
     });
 
     //gets index from request
@@ -42,7 +42,7 @@ router.get('/', permit, (req,res)=>{
     //
     //console.log(index,fullName);
     //
-    //res.render('./calendar/community', 
+    //res.render('./calendar/teachers', 
     //{ loggedIn:true,
     //    people: [{
     //        index:1,
