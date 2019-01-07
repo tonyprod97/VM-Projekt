@@ -3,9 +3,12 @@ var router = express.Router();
 var permit = require('../user/permission');
 
 var outlook = require('node-outlook');
+const mailHelper = require('../../EmailManager');
 
 router.get('/', permit, (req,res)=>{
-    res.render('./calendar/week', { loggedIn:true});
+    //get finalResponse from db
+    const finalResonse = ....;
+    res.render('./calendar/week', {calendarData: finalResonse, loggedIn:true, role: 0}); // 0 is student 1 if teacher
 });
 
 router.post('/', permit, (req,res)=>{
