@@ -7,7 +7,7 @@ const mailHelper = require('../../EmailManager');
 
 router.get('/', permit, (req,res)=>{
     //get finalResponse from db
-    const finalResonse = ....;
+    //const finalResonse = ....;
     res.render('./calendar/week', {calendarData: finalResonse, loggedIn:true, role: 0}); // 0 is student 1 if teacher
 });
 

@@ -14,7 +14,7 @@ router.get('/', (req, res) => res.render('./user/register'));
 router.post('/',(req,res) => {
     let user = req.body.user;
 
-    databaseManager.sendRequest({id: sendIds.CREATE_NEW_USER, data: { email: user.email, password: user.password}}, (answer) => {
+    databaseManager.sendRequest({id: sendIds.CREATE_NEW_USER, data: { email: user.email, password: user.password, role: user.role}}, (answer) => {
 
         console.log(answer.msg);
 

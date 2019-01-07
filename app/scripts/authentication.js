@@ -5,6 +5,7 @@ let submitButton;
 let passwordConfirmInput;
 let emailError;
 let errorPassword;
+let roleSelected;
 
 window.onload =()=>{
     form = document.querySelector("form");
@@ -14,6 +15,7 @@ window.onload =()=>{
     passwordConfirmInput = document.getElementById("passwordConfirm");
     emailError = document.getElementById("errorEmail");
     errorPassword = document.getElementById("errorPassword");
+    roleSelected = document.getElementById("roleSelect");
     
     passwordInput.onkeydown = e => {
         if(e.keyCode == 13) submitButton.click();
@@ -86,7 +88,8 @@ function onSubmit() {
     xhr.send(JSON.stringify({
         user: {
             email: emailInput.value,
-            password: passwordInput.value
+            password: passwordInput.value,
+            role: roleSelected.value
         }
     })); 
     xhr.onreadystatechange = function () {

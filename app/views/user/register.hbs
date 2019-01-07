@@ -22,9 +22,9 @@
             </div>
             <div class="col-md-3">
                 <div class="form-control-feedback">
-                        <span class="text-danger align-middle">
-                            <p id="errorEmail"></p>
-                        </span>
+                    <span class="text-danger align-middle">
+                        <p id="errorEmail"></p>
+                    </span>
                 </div>
             </div>
         </div>
@@ -55,11 +55,28 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-                            <i class="fa fa-repeat"></i>
-                        </div>
-                        <input type="password" name="password-confirmation" class="form-control"
-                               id="passwordConfirm" placeholder="Password" required>
+                        <i class="fa fa-repeat"></i>
                     </div>
+                    <input type="password" name="password-confirmation" class="form-control"
+                           id="passwordConfirm" placeholder="Password" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 field-label-responsive">
+                <label for="role">Role</label>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                        <i class="fa fa-repeat"></i>
+                    </div>
+                    <select type="role" name="role-selection" id="roleSelect">
+                        <option value="student">Student</option>
+                        <option value="profesor">Profesor</option>
+                    </select>
+                   </div>
                 </div>
             </div>
         </div>
