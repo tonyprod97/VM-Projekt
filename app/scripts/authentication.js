@@ -89,7 +89,7 @@ function onSubmit() {
         user: {
             email: emailInput.value,
             password: passwordInput.value,
-            role: roleSelected.value
+            //role: roleSelected.value
         }
     })); 
     xhr.onreadystatechange = function () {

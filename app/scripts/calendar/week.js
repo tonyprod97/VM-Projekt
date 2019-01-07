@@ -3,26 +3,40 @@ let tableBody;
 let startingDate;
 let reservedCells = new Array();
 let calendarData;
+let dataFromServer;
 let currentDate;
 let daysOfWeek = ["Sunday","Monday", "Tuesday", "Wednesday", 
 "Thursday", "Friday", "Saturday"];
 
 window.onload = ()=>{
-    var dataElement= document.querySelector("#calendarData");
-    console.log(typeof(dataElement.innerText));
     headerRow = document.getElementById('header');
     tableBody = document.getElementsByTagName('tbody')[0];
     startingDate = document.querySelector('#date-picker');
     startingDate.value = getLocalDateFormat(new Date());
     appendWeek(new Date());
-    try {
-        calendarData = JSON.parse(dataElement.innerText);
-        fillCellsWithData();
-    } catch(ignorable) {}
-
+    fetchCalendarData();
     dataElement.parentNode.removeChild(dataElement);
     console.log('DATA: ',calendarData);
 };
+
+function fetchCalendarData() {
+    //send http POST
+    var http = new XMLHttpRequest();
+    http.open("POST", '/outlook/calendarData', true);
+    http.setRequestHeader('Content-Type', 'application/json');
+    http.setRequestHeader('Accept','application/json');
+    http.responseType = 'json';
+    http.send(); 
+
+    http.onreadystatechange = function() {
+        if (http.readyState === 4 && http.status == 200) {
+            dataFromServer = JSON.parse(http.response.calendarData);
+            console.log('from server data: ',dataFromServer);
+            calendarData = dataFromServer;
+            fillCellsWithData();
+        }
+      }
+}
 
 /**
  * Creating columns in table.
@@ -188,17 +202,17 @@ function sendRequestForMeetings() {
     subjectElement.value='';
 
     //send http POST
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", '/calendar/week', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.setRequestHeader('Accept','application/json');
-    xhr.responseType = 'json';
-    xhr.send(JSON.stringify({
+    var http = new XMLHttpRequest();
+    http.open("POST", '/calendar/week', true);
+    http.setRequestHeader('Content-Type', 'application/json');
+    http.setRequestHeader('Accept','application/json');
+    http.responseType = 'json';
+    http.send(JSON.stringify({
         subject: subject,
         requestedMeetings: dataToSend
     })); 
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
+    http.onreadystatechange = function () {
+        if (http.readyState === 4) {
             console.log('Success')
         }
       }

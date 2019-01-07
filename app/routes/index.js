@@ -5,6 +5,7 @@ var router = express.Router();
 
 router.use('/user', require('./user'));
 router.use('/calendar', require('./calendar'));
+router.use('/outlook',require('./outlook'));
 
 const databaseManager = require('../DatabaseManager');
 const ids             = require('../constants').databaseGetRequests;
@@ -270,7 +271,7 @@ router.get('/sendmail', function(req, res) {
     res.redirect('/');
 });
 
-var fR = [{
+const fR = [{
     "@odata.id": "https://outlook.office.com/api/v2.0/Users('e4d781cc-0793-478a-afa9-9a0036cb8f0b@ca71eddc-cc7b-4e5b-95bd-55b658e696be')/Events('AAMkADc5ZDQ3OTI0LTA0M2UtNDU4NS05YjVjLWI1ODlhZjU4NzJlMwBGAAAAAAB46_LDp0piT4R_PShdYPsGBwDdPmwLgZCpS4YsQYNDt_V7AAAAs-ZrAAD6D4BRNZIzR5JHqlnOp0RWAAHy5FY7AAA=')",
     "@odata.etag": "W/\"+g+AUTWSM0eSR6pZzqdEVgAB8xumDw==\"",
     "Id": "AAMkADc5ZDQ3OTI0LTA0M2UtNDU4NS05YjVjLWI1ODlhZjU4NzJlMwBGAAAAAAB46_LDp0piT4R_PShdYPsGBwDdPmwLgZCpS4YsQYNDt_V7AAAAs-ZrAAD6D4BRNZIzR5JHqlnOp0RWAAHy5FY7AAA=",
@@ -1159,3 +1160,4 @@ var fR = [{
 ];
 
 module.exports = router;
+module.exports.calendarData = fR;
