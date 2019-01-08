@@ -28,7 +28,7 @@ router.post('/',(req,res) => {
                 req.session.user = userData;
                 //testing purposes, if role = 0 than you're logged as student, id role = 1 than you're logged as teacher
                 
-                userData.role = 0; //uncomment line for demo purposes
+                userData.role = 1; //uncomment line for demo purposes
 
                 res.send({
                     userData: JSON.stringify(userData),
