@@ -29,6 +29,7 @@ const userTable    = 'Profile';
 const sessionTable = 'Session';
 const unverifiedTable = 'Unverified';
 const visibilityTable = 'Visibility';
+const calendarTable   = 'CalendarData';
 
 const sessionLifeTime = 10;
 
@@ -74,6 +75,21 @@ function randomTokenString(size) {
     return crypto.randomBytes(size).toString('hex');
 }
 
+function getUserEmailFromID(database, userid, callback) {
+
+    database.input('userid', mssql.Int, userid);
+
+    database.query('SELECT email FROM ' + userTable + ' WHERE id = @userid', (error, result) => {
+
+        if (error) {
+            setTimeout(() => callback(null));
+            return;
+        }
+
+        setTimeout(() => callback(toJSON(result)[0][0][0].email));
+    });
+}
+
 /**
  * Stvaranje korisnika u bazi podataka
  * @param {Object}database - objekt koji predstavlja bazu podataka
@@ -81,7 +97,7 @@ function randomTokenString(size) {
  * @param {String}password - lozinka korisnika
  * @param {Function}callback - funkcija koja ce se izvesti
  */
-function createUser(database, email, password, callback) {
+function createUser(database, email, password, isStudent, callback) {
 
     let answer = {
         state: null,
@@ -92,8 +108,9 @@ function createUser(database, email, password, callback) {
     //database.input('username', mssql.VarChar(30), username);
     database.input('email', mssql.VarChar(100), email);
     database.input('hash', mssql.VarChar(70), seededSha256(email, password));
+    database.input('isStudent', mssql.Bit, isStudent);
 
-    database.query('INSERT INTO ' + userTable + ' (email, passwordHash) VALUES (@email, @hash)', (error) => {
+    database.query('INSERT INTO ' + userTable + ' (email, passwordHash, isStudent) VALUES (@email, @hash, @isStudent)', (error) => {
 
         if (error) {
 
@@ -158,6 +175,8 @@ function createUser(database, email, password, callback) {
  */
 function isValidSessionInfo(database, userid, sessionToken, callback) {
 
+    //console.log({ userid: userid, token: sessionToken });
+
     database.input('userid', mssql.Int, userid);
     database.input('sessionToken', mssql.VarChar(70), sessionToken);
 
@@ -165,16 +184,16 @@ function isValidSessionInfo(database, userid, sessionToken, callback) {
 
         if (error) {
             console.log(error);
-            setTimeout(() => callback({ state: dbConsts.OPERATION_FAILED }));
+            setTimeout(() => callback({ state: dbConsts.OPERATION_FAILED, msg: "can't check for valid token" }));
             return;
         }
 
         if (result.rowsAffected[0] == 0) {
-            setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, valid: false }));
+            setTimeout(() => callback({ state: dbConsts.OPERATION_DENIED, msg: "invalid sessionToken" }));
             return;
         }
 
-        setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, valid: true }));
+        setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, msg: "operation success" }));
     });
 }
 
@@ -243,7 +262,7 @@ function login(database,email,password, callback) {
     database.input('email', mssql.VarChar(100), email);
     database.input('hash', mssql.VarChar(70), seededSha256(email, password));
 
-    database.query('SELECT id,email FROM ' + userTable + ' WHERE email = @email and passwordHash = @hash', (error, result) => {
+    database.query('SELECT id,email,isStudent FROM ' + userTable + ' WHERE email = @email and passwordHash = @hash', (error, result) => {
 
         if ((error) || (result.rowsAffected[0] == 0)) {
 
@@ -287,10 +306,10 @@ function getUsersThatSheredCalendarWithYou(database, userid, sessionToken, callb
 
     isValidSessionInfo(new mssql.Request(), sessionToken, (answer) => {
 
-        if (!answer.valid) {
-            setTimeout(() => callback({ state: dbConsts.OPERATION_DENIED, msg: "invalid sessionToken" }), 0);
-            return;
-        }
+        //if (!answer.valid) {
+        //    setTimeout(() => callback({ state: dbConsts.OPERATION_DENIED, msg: "invalid sessionToken" }), 0);
+        //    return;
+        //}
 
         //TODO
 
@@ -346,7 +365,7 @@ function getUsers(database, onlyVerified, callback) {
         data: null
     };
 
-    database.query('SELECT email FROM ' + userTable + ((onlyVerified) ? ' WHERE id NOT IN (SELECT userid FROM ' + unverifiedTable + ' )' : ' '), (error, result) => {
+    database.query('SELECT email FROM ' + userTable + ' WHERE isStudent = 0' + ((onlyVerified) ? ' AND id NOT IN (SELECT userid FROM ' + unverifiedTable + ' )' : ' '), (error, result) => {
 
         if (error) {
 
@@ -365,6 +384,84 @@ function getUsers(database, onlyVerified, callback) {
 
 }
 
+
+function insertCalendarData(userid, token, calendarInfo, callback) {
+
+    let data = {
+        state: dbConsts.OPERATION_SUCCESS,
+        msg: "operation success",
+        data: null
+    };
+
+    isValidSessionInfo(new mssql.Request(), userid, token, (answer) => {
+
+        if (answer.state != dbConsts.OPERATION_SUCCESS) {
+            setTimeout(() => callback(answer));
+            return;
+        }
+
+        let size = calendarInfo.length;
+
+        calendarInfo.forEach((element, index) => {
+
+            let database = new mssql.Request();
+
+            database.input('userid', mssql.Int, userid);
+            database.input('subject', mssql.VarChar(100), element.subject);
+            database.input('startDate', mssql.DateTime2, element.startDate);
+            database.input('endDate', mssql.DateTime2, element.endDate);
+
+            database.query('INSERT INTO ' + calendarTable + '(userid, subject, startDate, endDate) VALUES (@userid, @subject, @startDate, @endDate)', (error) => {
+
+                if (error) {
+                    //console.log(error);
+                    data.state = dbConsts.OPERATION_WARRNING;
+                    data.msg   = "some data was not saved";
+                }
+
+                if (index == (size - 1)) setTimeout(() => callback(data));
+            });
+        });
+    });
+}
+
+function getCalendarData(database, userid, token, from, callback) {
+
+    let data = {
+        state: -1,
+        msg: "",
+        data: null
+    };
+
+    console.log({ userid: userid, email: from });
+
+    isValidSessionInfo(database, userid, token, (answer) => {
+
+        if (answer.state != dbConsts.OPERATION_SUCCESS) {
+            setTimeout(() => callback(answer));
+            return;
+        }
+
+        database.input('email', mssql.VarChar(100), from);
+
+        database.query('SELECT subject, startDate, endDate FROM ' + calendarTable + ' JOIN ' + userTable + ' ON userid = id WHERE email = @email ', (error, result) => {
+
+            if (error) {
+                console.log(error);
+                data.state = dbConsts.OPERATION_FAILED;
+                data.msg   = "failed to get calendar info";
+                setTimeout(() => callback(data));
+                return;
+            }
+
+            data.state = dbConsts.OPERATION_SUCCESS;
+            data.msg   = "operation success";
+            data.data  = toJSON(result)[0][0];
+
+            setTimeout(() => callback(data));
+        });
+    });
+}
 
 //var db = null; //mssql.connect(config).Request();
 var readyForUse = false;
@@ -552,9 +649,22 @@ class DatabaseManager {
                 getUsers(new mssql.Request(), false, callback);
                 break;
             }
-
+                
             case getRequests.GET_VERIFIED_USERS: {
                 getUsers(new mssql.Request(), true, callback);
+                break;
+            }
+
+            case getRequests.GET_CALENDAR: {
+
+                if (!requestData.data.from) {
+                    getUserEmailFromID(new mssql.Request(), requestData.data.userid, (email) => {
+                        getCalendarData(new mssql.Request(), requestData.data.userid, requestData.data.token, email, callback);
+                    });
+                    break;
+                }
+
+                getCalendarData(new mssql.Request(), requestData.data.userid, requestData.data.token, requestData.data.from, callback);
                 break;
             }
         }
@@ -576,7 +686,7 @@ class DatabaseManager {
         switch (sentData.id) {
 
             case sendRequests.CREATE_NEW_USER: {
-                createUser(new mssql.Request(), sentData.data.email, sentData.data.password, callback);
+                createUser(new mssql.Request(), sentData.data.email, sentData.data.password, sentData.data.isStudent, callback);
                 break;
             }
 
@@ -645,6 +755,11 @@ class DatabaseManager {
                     setTimeout(() => callback(response), 0);
                 });
 
+                break;
+            }
+
+            case sendRequests.INSERT_CALENDAR_DATA: {
+                insertCalendarData(sentData.data.userid, sentData.data.token, sentData.data.calendarInfo, callback);
                 break;
             }
         }

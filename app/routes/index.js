@@ -18,7 +18,7 @@ var moment = require('moment');
 
 const mailHelper = require('../EmailManager');
 
-//const sendIds = require('../constants').databaseSendRequests; // for testing 
+const sendIds = require('../constants').databaseSendRequests; // for testing 
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -66,36 +66,71 @@ router.get('/', function(req, res) {
     //            return;
     //        }
     //
-    //        databaseManager.getSingleRequest({ id: ids.GET_VERIFICATION, data: { email: 'test@test.com' } }, (answer) => {
+    //        console.log(answer.data);
+    //
+    //        let userid = answer.data.id;
+    //        let token  = answer.data.sessionToken;
+    //
+    //        databaseManager.sendRequest({
+    //            id: sendIds.INSERT_CALENDAR_DATA,
+    //            data: {
+    //                userid: userid,
+    //                token: token,
+    //                calendarInfo: [
+    //                    { subject: 'test', startDate: '2018-09-23T10:00:00Z', endDate: '2018-09-23T11:00:00Z' },
+    //                    { subject: 'test2', startDate: '2018-09-23T12:00:00Z', endDate: '2018-09-23T13:00:00Z' }
+    //                ]
+    //            }
+    //        }, (answer) => {
     //
     //            if (answer.state != operationStates.OPERATION_SUCCESS) {
     //                console.log(answer.msg);
     //                return;
     //            }
     //
-    //            if (answer.data.verified) {
-    //                console.log('user verified');
-    //                return;
-    //            }
+    //            console.log('save success');
     //
-    //            console.log(answer.data);
+    //            databaseManager.getSingleRequest({ id: ids.GET_CALENDAR, data: { userid: userid, token: token } }, (answer) => {
     //
-    //            databaseManager.sendRequest({ id: sendIds.VERIFY_USER, data: { userid: answer.data.userid, verificationToken: answer.data.token } }, (answer) => {
     //                if (answer.state != operationStates.OPERATION_SUCCESS) {
     //                    console.log(answer.msg);
+    //                    return;
     //                }
+    //
+    //                console.log(answer.data);
     //            });
     //        });
     //
-    //        databaseManager.sendRequest({ id: sendIds.TERMINATE_SESSION, data: { userid: answer.data.id, token: answer.data.sessionToken } }, (answer) => {
+    //        //databaseManager.getSingleRequest({ id: ids.GET_VERIFICATION, data: { email: 'test@test.com' } }, (answer) => {
+    //        //
+    //        //    if (answer.state != operationStates.OPERATION_SUCCESS) {
+    //        //        console.log(answer.msg);
+    //        //        return;
+    //        //    }
+    //        //
+    //        //    if (answer.data.verified) {
+    //        //        console.log('user verified');
+    //        //        return;
+    //        //    }
+    //        //
+    //        //    console.log(answer.data);
+    //        //
+    //        //    databaseManager.sendRequest({ id: sendIds.VERIFY_USER, data: { userid: answer.data.userid, verificationToken: answer.data.token } }, (answer) => {
+    //        //        if (answer.state != operationStates.OPERATION_SUCCESS) {
+    //        //            console.log(answer.msg);
+    //        //        }
+    //        //    });
+    //        //});
     //
-    //            if (answer.state != operationStates.OPERATION_SUCCESS) {
-    //                console.log(answer.msg);
-    //                return
-    //            }
-    //
-    //            console.log("session terminated");
-    //        });
+    //        //databaseManager.sendRequest({ id: sendIds.TERMINATE_SESSION, data: { userid: answer.data.id, token: answer.data.sessionToken } }, (answer) => {
+    //        //
+    //        //    if (answer.state != operationStates.OPERATION_SUCCESS) {
+    //        //        console.log(answer.msg);
+    //        //        return
+    //        //    }
+    //        //
+    //        //    console.log("session terminated");
+    //        //});
     //    });
     //}); 
 

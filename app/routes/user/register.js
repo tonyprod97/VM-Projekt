@@ -11,10 +11,16 @@ const urlParser = require('../../UrlManager');
 
 router.get('/', (req, res) => res.render('./user/register'));
 
-router.post('/',(req,res) => {
-    let user = req.body.user;
+router.post('/', (req, res) => {
 
-    databaseManager.sendRequest({id: sendIds.CREATE_NEW_USER, data: { email: user.email, password: user.password, role: user.role}}, (answer) => {
+    let user = req.body.user;
+    let isStudent = 1;
+
+    if (user.role) {
+        if (user.role === 1) isStudent = 0;
+    }
+
+    databaseManager.sendRequest({id: sendIds.CREATE_NEW_USER, data: { email: user.email, password: user.password, isStudent: isStudent}}, (answer) => {
 
         console.log(answer.msg);
 
