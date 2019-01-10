@@ -18,6 +18,7 @@ function initializeData() {
     startingDate = document.querySelector('#date-picker');
     startingDate.value = getLocalDateFormat(new Date());
     startingDate.addEventListener('change',dateChanged);
+    currentDate = new Date();
     appendWeek(new Date());
     fetchCalendarData();
 };
@@ -50,14 +51,27 @@ function fetchCalendarData() {
  * @param {Object} date
 */
 function appendWeek(date) {
+
+    if(date.getDay() != 1 && date.getTime()>currentDate.getTime()) return; // If not monday neglect the change of date if trying to increase the date.
+    if(date.getTime()<currentDate.getTime() && date.getDay() == 0) {
+        //Set date to previous monday.
+        date.setDate(date.getDate()-6);
+    }
+    
     headerRow.innerHTML = "";
     currentDate = date;
 
     headerRow.innerHTML += '<th> YEAR '+currentDate.getFullYear()+' </th>';
+    let current = new Date(currentDate);
+    let subtract = current.getDay();
+    let monday = new Date(currentDate);
+    monday.setDate(monday.getDate()-subtract+1);
+ 
 
     for(let i = 0;i<7;i++) {
-        let tempDate = new Date(currentDate);
-        tempDate.setDate(tempDate.getDate()+i);
+        let tempDate =new Date(monday);
+        tempDate.setDate(monday.getDate()+i);
+        //tempDate.setDate(tempDate.getDate()+i);
         let tempDay = tempDate.getDate();
         let tempMonth = tempDate.getMonth()+1;
     
@@ -126,7 +140,6 @@ function compareDates(x,y) {
 
 function dateChanged() {
     if(startingDate.value) {
-
         appendWeek(new Date(startingDate.value));
     }else {
         appendWeek(new Date());
