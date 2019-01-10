@@ -18,17 +18,13 @@ router.post('/',(req,res) => {
             } }, 
             (answer) => {
                 userData = answer.data;
-                //console.log(userData);
-
+                
                 if (answer.state != operationStates.OPERATION_SUCCESS) {
                     res.send({ redirectUrl: './login', error: answer.msg, email: user.email });
                     return;
                 }
 
                 req.session.user = userData;
-                //testing purposes, if role = 0 than you're logged as student, id role = 1 than you're logged as teacher
-                
-                userData.role = 0; //uncomment line for demo purposes
 
                 res.send({
                     userData: JSON.stringify(userData),

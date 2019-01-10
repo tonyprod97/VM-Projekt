@@ -58,6 +58,10 @@ function onSubmit() {
     let url;
     let email = emailInput.value;
     let password = passwordInput.value;
+    let user = { user: {
+        email: emailInput.value,
+        password: passwordInput.value,
+    }};
 
     let valid = checkMail(email);
     // If passwordConfirmInput exists user is trying to register else to log in.
@@ -71,6 +75,7 @@ function onSubmit() {
         }
 
         url = './register';
+        user.user.role = roleSelected.value;
     } else {
         // Check if user logged in succesfully.
         if (valid) {
@@ -90,13 +95,8 @@ function onSubmit() {
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Accept','application/json');
     xhr.responseType = 'json';
-    xhr.send(JSON.stringify({
-        user: {
-            email: emailInput.value,
-            password: passwordInput.value,
-            //role: roleSelected.value
-        }
-    })); 
+    
+    xhr.send(JSON.stringify(user)); 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if(!passwordConfirmInput) {

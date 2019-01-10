@@ -16,8 +16,9 @@ router.post('/', (req, res) => {
     let user = req.body.user;
     let isStudent = 1;
 
+    console.log(user.role)
     if (user.role) {
-        if (user.role === 1) isStudent = 0;
+        if (user.role !== 'student') isStudent = 0;
     }
 
     databaseManager.sendRequest({id: sendIds.CREATE_NEW_USER, data: { email: user.email, password: user.password, isStudent: isStudent}}, (answer) => {
