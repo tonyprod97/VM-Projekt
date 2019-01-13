@@ -41,18 +41,22 @@ module.exports.databaseErrors = {
 };
 
 module.exports.databaseGetRequests = {
-    USER             : 1, // request developers
-    VISIBLE_CALENDARS: 2, // returns all users a current user has rights to see there calendar (needs in data field: userid, token)
-    GET_VERIFICATION : 4  //request verification details about user (needs in data field: email) returns (verified, userid *, token *) * -> if not verified 
+    USER: 1,                // request developers
+    VISIBLE_CALENDARS: 2,   // returns all users a current user has rights to see there calendar (needs in data field: userid, token)
+    GET_VERIFICATION : 4,   // request verification details about user (needs in data field: email) returns (verified, userid *, token *) * -> if not verified 
+    GET_ALL_USERS: 8,       // request all registrated teachers
+    GET_VERIFIED_USERS: 16, // request all verified teachers
+    GET_CALENDAR: 32,       // request calendar of user needs(in data field: userid, token , from*) * -> email of user you want calendar off, if not specified then return calendar
 };
 
 module.exports.databaseSendRequests = {
 
-    CREATE_NEW_USER  : 1, // create new user  (needs in data field: username, email, password) 
-    LOGIN_REQUEST    : 2, // login user (needs in data field: email, password)
-    TERMINATE_SESSION: 3, // logout user from session (needs in data field: userid, token)
-    SHARE_CALENDAR   : 4, // share calendar with other user (needs in data field: userid, token, with) with - email of a user you want to share calendar with
-    VERIFY_USER      : 5  // verifie user (needs in data field: userid, verificationToken)
+    CREATE_NEW_USER  : 1,   // create new user  (needs in data field: username, email, password, isStudent*) 
+    LOGIN_REQUEST    : 2,   // login user (needs in data field: email, password)
+    TERMINATE_SESSION: 3,   // logout user from session (needs in data field: userid, token)
+    SHARE_CALENDAR   : 4,   // share calendar with other user (needs in data field: userid, token, with) with - email of a user you want to share calendar with
+    VERIFY_USER      : 5,   // verifie user (needs in data field: userid, verificationToken)
+    INSERT_CALENDAR_DATA: 6 // insert calendar data (needs in data field: userid, token, calendarInfo[] : {subject, startDate, endDate});
 };</code></pre>
         </article>
     </section>
@@ -63,13 +67,13 @@ module.exports.databaseSendRequests = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="cellObject.html">cellObject</a></li><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#appendHours">appendHours</a></li><li><a href="global.html#appendWeek">appendWeek</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#dateChanged">dateChanged</a></li><li><a href="global.html#getLocalDateFormat">getLocalDateFormat</a></li><li><a href="global.html#getUsersThatSheredCalendarWithYou">getUsersThatSheredCalendarWithYou</a></li><li><a href="global.html#getVerification">getVerification</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#next">next</a></li><li><a href="global.html#onFormChange">onFormChange</a></li><li><a href="global.html#onOutlookLogin">onOutlookLogin</a></li><li><a href="global.html#onSubmit">onSubmit</a></li><li><a href="global.html#previous">previous</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#routeChanged">routeChanged</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#sendRequestForMeetings">sendRequestForMeetings</a></li><li><a href="global.html#toJSON">toJSON</a></li><li><a href="global.html#tokenReceived">tokenReceived</a></li><li><a href="global.html#validateEmail">validateEmail</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="CellObject.html">CellObject</a></li><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#appendHours">appendHours</a></li><li><a href="global.html#appendWeek">appendWeek</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#dateChanged">dateChanged</a></li><li><a href="global.html#getLocalDateFormat">getLocalDateFormat</a></li><li><a href="global.html#getUsersThatSheredCalendarWithYou">getUsersThatSheredCalendarWithYou</a></li><li><a href="global.html#getVerification">getVerification</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#next">next</a></li><li><a href="global.html#onFormChange">onFormChange</a></li><li><a href="global.html#onOutlookLogin">onOutlookLogin</a></li><li><a href="global.html#onSubmit">onSubmit</a></li><li><a href="global.html#previous">previous</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#routeChanged">routeChanged</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#sendRequestForMeetings">sendRequestForMeetings</a></li><li><a href="global.html#toJSON">toJSON</a></li><li><a href="global.html#tokenReceived">tokenReceived</a></li><li><a href="global.html#validateEmail">validateEmail</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Dec 16 2018 23:31:44 GMT+0100 (Central European Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Jan 13 2019 21:23:36 GMT+0100 (GMT+01:00)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -1,12 +1,13 @@
-# VM Projekt #
+# **VM Projekt** #
 
-> Web aplikacija razvijena u sklopu kolegija *Projekt iz progranske potpore*
-> Clanovi projektnog tima: * Antionio Kmaber
-                           * Kristijan Vrbanc
-                           * Lovro Knezevic
-                           * Mateo Majnaric
-                           * Lara Lokin
-                           * Martin Srsen
+Web aplikacija razvijena u sklopu kolegija *Projekt iz progranske potpore*. 
+Clanovi projektnog tima: 
+* *Antionio Kmaber*
+* *Kristijan Vrbanc*
+* *Lovro Knezevic*
+* *Mateo Majnaric*
+* *Lara Lokin*
+* *Martin Srsen*
 
 ## Tehnicke znacajke aplikacije ##
 
@@ -77,6 +78,6 @@ Prikaz stabla direktorija aplikacije:
     * poddirektorij **scripts** - definiranje *JavaScript* skripti vezanih za prikaz korisnickog sucelja
     * poddirektorij **styles** - definiranje *CSS* datoteka
     * poddirektorij **UrlManager** 
-    * poddirektorij **views** - definiranje izgleda web stranica 
+    * poddirektorij **views** - *HTML* datoteke koje definiranju izgled web stranica 
 * U direktoriju **node_modules** nalaze se svi *source* kodovi koristenih *JavaScript* paketa.
 * U direktoriju **out** nalazi se dokumentacija aplikacije. Poddirektoriji **fonts**, **scripts**, **styles** sadrze datoteke koje su potrebne kako bi se generirala dokumentacija, a sama dokumentacija nalazi se u *.html* datotekama koje se nalaze u samom direktoriju **out**. 

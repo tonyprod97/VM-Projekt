@@ -57,6 +57,7 @@ const userTable    = 'Profile';
 const sessionTable = 'Session';
 const unverifiedTable = 'Unverified';
 const visibilityTable = 'Visibility';
+const calendarTable   = 'CalendarData';
 
 const sessionLifeTime = 10;
 
@@ -102,6 +103,21 @@ function randomTokenString(size) {
     return crypto.randomBytes(size).toString('hex');
 }
 
+function getUserEmailFromID(database, userid, callback) {
+
+    database.input('userid', mssql.Int, userid);
+
+    database.query('SELECT email FROM ' + userTable + ' WHERE id = @userid', (error, result) => {
+
+        if (error) {
+            setTimeout(() => callback(null));
+            return;
+        }
+
+        setTimeout(() => callback(toJSON(result)[0][0][0].email));
+    });
+}
+
 /**
  * Stvaranje korisnika u bazi podataka
  * @param {Object}database - objekt koji predstavlja bazu podataka
@@ -109,7 +125,7 @@ function randomTokenString(size) {
  * @param {String}password - lozinka korisnika
  * @param {Function}callback - funkcija koja ce se izvesti
  */
-function createUser(database, email, password, callback) {
+function createUser(database, email, password, isStudent, callback) {
 
     let answer = {
         state: null,
@@ -120,8 +136,9 @@ function createUser(database, email, password, callback) {
     //database.input('username', mssql.VarChar(30), username);
     database.input('email', mssql.VarChar(100), email);
     database.input('hash', mssql.VarChar(70), seededSha256(email, password));
+    database.input('isStudent', mssql.Bit, isStudent);
 
-    database.query('INSERT INTO ' + userTable + ' (email, passwordHash) VALUES (@email, @hash)', (error) => {
+    database.query('INSERT INTO ' + userTable + ' (email, passwordHash, isStudent) VALUES (@email, @hash, @isStudent)', (error) => {
 
         if (error) {
 
@@ -186,6 +203,8 @@ function createUser(database, email, password, callback) {
  */
 function isValidSessionInfo(database, userid, sessionToken, callback) {
 
+    //console.log({ userid: userid, token: sessionToken });
+
     database.input('userid', mssql.Int, userid);
     database.input('sessionToken', mssql.VarChar(70), sessionToken);
 
@@ -193,16 +212,16 @@ function isValidSessionInfo(database, userid, sessionToken, callback) {
 
         if (error) {
             console.log(error);
-            setTimeout(() => callback({ state: dbConsts.OPERATION_FAILED }));
+            setTimeout(() => callback({ state: dbConsts.OPERATION_FAILED, msg: "can't check for valid token" }));
             return;
         }
 
         if (result.rowsAffected[0] == 0) {
-            setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, valid: false }));
+            setTimeout(() => callback({ state: dbConsts.OPERATION_DENIED, msg: "invalid sessionToken" }));
             return;
         }
 
-        setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, valid: true }));
+        setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, msg: "operation success" }));
     });
 }
 
@@ -271,7 +290,7 @@ function login(database,email,password, callback) {
     database.input('email', mssql.VarChar(100), email);
     database.input('hash', mssql.VarChar(70), seededSha256(email, password));
 
-    database.query('SELECT id,email FROM ' + userTable + ' WHERE email = @email and passwordHash = @hash', (error, result) => {
+    database.query('SELECT id,email,isStudent FROM ' + userTable + ' WHERE email = @email and passwordHash = @hash', (error, result) => {
 
         if ((error) || (result.rowsAffected[0] == 0)) {
 
@@ -315,10 +334,10 @@ function getUsersThatSheredCalendarWithYou(database, userid, sessionToken, callb
 
     isValidSessionInfo(new mssql.Request(), sessionToken, (answer) => {
 
-        if (!answer.valid) {
-            setTimeout(() => callback({ state: dbConsts.OPERATION_DENIED, msg: "invalid sessionToken" }), 0);
-            return;
-        }
+        //if (!answer.valid) {
+        //    setTimeout(() => callback({ state: dbConsts.OPERATION_DENIED, msg: "invalid sessionToken" }), 0);
+        //    return;
+        //}
 
         //TODO
 
@@ -366,6 +385,111 @@ function getVerification(database, email, callback) {
     });
 }
 
+function getUsers(database, onlyVerified, callback) {
+
+    let data = {
+        state: null,
+        msg: "",
+        data: null
+    };
+
+    database.query('SELECT email FROM ' + userTable + ' WHERE isStudent = 0' + ((onlyVerified) ? ' AND id NOT IN (SELECT userid FROM ' + unverifiedTable + ' )' : ' '), (error, result) => {
+
+        if (error) {
+
+            data.state = dbConsts.OPERATION_FAILED;
+            data.msg   = "Failed to get users";
+            setTimeout(() => callback(data));
+            return;
+        }
+
+        data.state = dbConsts.OPERATION_SUCCESS;
+        data.msg   = "operation success";
+
+        data.data = toJSON(result)[0][0];
+        setTimeout(() => callback(data));
+    });
+
+}
+
+
+function insertCalendarData(userid, token, calendarInfo, callback) {
+
+    let data = {
+        state: dbConsts.OPERATION_SUCCESS,
+        msg: "operation success",
+        data: null
+    };
+
+    isValidSessionInfo(new mssql.Request(), userid, token, (answer) => {
+
+        if (answer.state != dbConsts.OPERATION_SUCCESS) {
+            setTimeout(() => callback(answer));
+            return;
+        }
+
+        let size = calendarInfo.length;
+
+        calendarInfo.forEach((element, index) => {
+
+            let database = new mssql.Request();
+
+            database.input('userid', mssql.Int, userid);
+            database.input('subject', mssql.VarChar(100), element.subject);
+            database.input('startDate', mssql.DateTime2, element.startDate);
+            database.input('endDate', mssql.DateTime2, element.endDate);
+
+            database.query('INSERT INTO ' + calendarTable + '(userid, subject, startDate, endDate) VALUES (@userid, @subject, @startDate, @endDate)', (error) => {
+
+                if (error) {
+                    //console.log(error);
+                    data.state = dbConsts.OPERATION_WARRNING;
+                    data.msg   = "some data was not saved";
+                }
+
+                if (index == (size - 1)) setTimeout(() => callback(data));
+            });
+        });
+    });
+}
+
+function getCalendarData(database, userid, token, from, callback) {
+
+    let data = {
+        state: -1,
+        msg: "",
+        data: null
+    };
+
+    console.log({ userid: userid, email: from });
+
+    isValidSessionInfo(database, userid, token, (answer) => {
+
+        if (answer.state != dbConsts.OPERATION_SUCCESS) {
+            setTimeout(() => callback(answer));
+            return;
+        }
+
+        database.input('email', mssql.VarChar(100), from);
+
+        database.query('SELECT subject, startDate, endDate FROM ' + calendarTable + ' JOIN ' + userTable + ' ON userid = id WHERE email = @email ', (error, result) => {
+
+            if (error) {
+                console.log(error);
+                data.state = dbConsts.OPERATION_FAILED;
+                data.msg   = "failed to get calendar info";
+                setTimeout(() => callback(data));
+                return;
+            }
+
+            data.state = dbConsts.OPERATION_SUCCESS;
+            data.msg   = "operation success";
+            data.data  = toJSON(result)[0][0];
+
+            setTimeout(() => callback(data));
+        });
+    });
+}
 
 //var db = null; //mssql.connect(config).Request();
 var readyForUse = false;
@@ -396,7 +520,7 @@ class DatabaseManager {
             }
 
             console.log(errorMSG);
-            console.log(error);
+            //console.log(error);
 
 
             if (errorState == dbConsts.OPERATION_SUCCESS) {
@@ -548,6 +672,29 @@ class DatabaseManager {
                 getVerification(new mssql.Request(), requestData.data.email, callback);
                 break;
             }
+        
+            case getRequests.GET_ALL_USERS: {
+                getUsers(new mssql.Request(), false, callback);
+                break;
+            }
+                
+            case getRequests.GET_VERIFIED_USERS: {
+                getUsers(new mssql.Request(), true, callback);
+                break;
+            }
+
+            case getRequests.GET_CALENDAR: {
+
+                if (!requestData.data.from) {
+                    getUserEmailFromID(new mssql.Request(), requestData.data.userid, (email) => {
+                        getCalendarData(new mssql.Request(), requestData.data.userid, requestData.data.token, email, callback);
+                    });
+                    break;
+                }
+
+                getCalendarData(new mssql.Request(), requestData.data.userid, requestData.data.token, requestData.data.from, callback);
+                break;
+            }
         }
     }
 
@@ -567,7 +714,7 @@ class DatabaseManager {
         switch (sentData.id) {
 
             case sendRequests.CREATE_NEW_USER: {
-                createUser(new mssql.Request(), sentData.data.email, sentData.data.password, callback);
+                createUser(new mssql.Request(), sentData.data.email, sentData.data.password, sentData.data.isStudent, callback);
                 break;
             }
 
@@ -610,12 +757,21 @@ class DatabaseManager {
                 database.input('userid', mssql.Int, sentData.data.userid);
                 database.input('token', mssql.VarChar(70), sentData.data.verificationToken);
 
-                database.query('DELETE FROM ' + unverifiedTable + ' WHERE userid = @userid and token = @token', (error) => {
+                database.query('DELETE FROM ' + unverifiedTable + ' WHERE userid = @userid and token = @token', (error,result) => {
 
                     if (error) {
 
                         response.state = dbConsts.OPERATION_FAILED;
                         response.msg   = "failed to verify user";
+
+                        setTimeout(() => callback(response));
+                        return;
+                    }
+
+                    if ((result.rowsAffected[0] == 0)) {
+
+                        response.state = dbConsts.OPERATION_FAILED;
+                        response.msg = "already verified or invalid params";
 
                         setTimeout(() => callback(response));
                         return;
@@ -627,6 +783,11 @@ class DatabaseManager {
                     setTimeout(() => callback(response), 0);
                 });
 
+                break;
+            }
+
+            case sendRequests.INSERT_CALENDAR_DATA: {
+                insertCalendarData(sentData.data.userid, sentData.data.token, sentData.data.calendarInfo, callback);
                 break;
             }
         }
@@ -644,13 +805,13 @@ module.exports  = new DatabaseManager();
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="cellObject.html">cellObject</a></li><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#appendHours">appendHours</a></li><li><a href="global.html#appendWeek">appendWeek</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#dateChanged">dateChanged</a></li><li><a href="global.html#getLocalDateFormat">getLocalDateFormat</a></li><li><a href="global.html#getUsersThatSheredCalendarWithYou">getUsersThatSheredCalendarWithYou</a></li><li><a href="global.html#getVerification">getVerification</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#next">next</a></li><li><a href="global.html#onFormChange">onFormChange</a></li><li><a href="global.html#onOutlookLogin">onOutlookLogin</a></li><li><a href="global.html#onSubmit">onSubmit</a></li><li><a href="global.html#previous">previous</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#routeChanged">routeChanged</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#sendRequestForMeetings">sendRequestForMeetings</a></li><li><a href="global.html#toJSON">toJSON</a></li><li><a href="global.html#tokenReceived">tokenReceived</a></li><li><a href="global.html#validateEmail">validateEmail</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="CellObject.html">CellObject</a></li><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#appendHours">appendHours</a></li><li><a href="global.html#appendWeek">appendWeek</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#dateChanged">dateChanged</a></li><li><a href="global.html#getLocalDateFormat">getLocalDateFormat</a></li><li><a href="global.html#getUsersThatSheredCalendarWithYou">getUsersThatSheredCalendarWithYou</a></li><li><a href="global.html#getVerification">getVerification</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#next">next</a></li><li><a href="global.html#onFormChange">onFormChange</a></li><li><a href="global.html#onOutlookLogin">onOutlookLogin</a></li><li><a href="global.html#onSubmit">onSubmit</a></li><li><a href="global.html#previous">previous</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#routeChanged">routeChanged</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#sendRequestForMeetings">sendRequestForMeetings</a></li><li><a href="global.html#toJSON">toJSON</a></li><li><a href="global.html#tokenReceived">tokenReceived</a></li><li><a href="global.html#validateEmail">validateEmail</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Dec 16 2018 23:31:44 GMT+0100 (Central European Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Jan 13 2019 21:23:36 GMT+0100 (GMT+01:00)
 </footer>
 
 <script> prettyPrint(); </script>
