@@ -1,5 +1,5 @@
 /**
- * @file varijable i metode za upravljanje endpointovima
+ * @file Ovdje se nalaze varijable i metode za upravljanje route-ovima
  */
 
 var express = require('express');

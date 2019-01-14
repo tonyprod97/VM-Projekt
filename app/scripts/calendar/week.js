@@ -1,3 +1,7 @@
+/**
+ * @file Ovdje se nalaze varijable i metode za upravljanje celijama kalendara
+ */
+
 let headerRow;
 let tableBody;
 let teacherElement;
