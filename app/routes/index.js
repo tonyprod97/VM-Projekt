@@ -1,3 +1,7 @@
+/**
+ * @file varijable i metode za upravljanje endpointovima
+ */
+
 var express = require('express');
 var router = express.Router();
 
@@ -170,7 +174,7 @@ router.get('/authorize',permit, function (req, res) {
 });
 
 /**
- * Checking if token is received
+ * Provjera je li token primljen
  * @param {Object} req
  * @param {Object} res
  * @param {Object} error
@@ -305,6 +309,10 @@ router.get('/sendmail', function(req, res) {
     mailHelper.sendVerificationMail(subjectMail,'added url');
     res.redirect('/');
 });
+
+/**
+ * @constant ...
+ */
 
 const fR = [{
     "@odata.id": "https://outlook.office.com/api/v2.0/Users('e4d781cc-0793-478a-afa9-9a0036cb8f0b@ca71eddc-cc7b-4e5b-95bd-55b658e696be')/Events('AAMkADc5ZDQ3OTI0LTA0M2UtNDU4NS05YjVjLWI1ODlhZjU4NzJlMwBGAAAAAAB46_LDp0piT4R_PShdYPsGBwDdPmwLgZCpS4YsQYNDt_V7AAAAs-ZrAAD6D4BRNZIzR5JHqlnOp0RWAAHy5FY7AAA=')",

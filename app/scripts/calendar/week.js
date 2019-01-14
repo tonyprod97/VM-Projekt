@@ -10,6 +10,9 @@ let daysOfWeek = ["Sunday","Monday", "Tuesday", "Wednesday",
 
 window.addEventListener('load',initializeData);
 
+/**
+ * Inicijalizacija elemenata kalendara
+ */
 function initializeData() {   
     
     teacherElement = document.querySelector('#teacherElement');
@@ -23,6 +26,10 @@ function initializeData() {
     fetchCalendarData();
 };
 
+
+/**
+ * Dohvat podataka kalendara
+ */
 function fetchCalendarData() {
     let url = '/outlook/calendarData';
     
@@ -47,8 +54,8 @@ function fetchCalendarData() {
 }
 
 /**
- * Creating columns in table.
- * @param {Object} date
+ * Stvaranje stupaca po danima
+ * @param {Object} date - trenutni datum
 */
 function appendWeek(date) {
 
@@ -81,10 +88,7 @@ function appendWeek(date) {
 }
 
 /**
- * Creating rows in table.
-/**
- *
- *
+ * Stvaranje redaka po satima
  */
 function appendHours() {
     tableBody.innerHTML = '';
@@ -113,6 +117,9 @@ function appendHours() {
     }
 }
 
+/**
+ * Dodavanje podataka celijama
+ */
 function fillCellsWithData() {
     if(calendarData === undefined) return;
     calendarData.forEach(event=>{
@@ -131,13 +138,19 @@ function fillCellsWithData() {
     })
 }
 
+/**
+ * Usporedba dva datuma
+ * @param {Object} x - prvi datum
+ * @param {Object} y - drugi datum
+ * @returns {boolean}
+ */
 function compareDates(x,y) {
     return x.getDate()==y.getDate() && x.getFullYear() == y.getFullYear() && x.getMonth() == y.getMonth();
 }
-/**
- * Changing date
- */
 
+/**
+ * Izmjena datuma kalendara
+ */
 function dateChanged() {
     if(startingDate.value) {
         appendWeek(new Date(startingDate.value));
@@ -148,7 +161,13 @@ function dateChanged() {
     fillCellsWithData();
 }
 
-
+/**
+ * Rezervacija termina klikom na celiju
+ * @param {Object} startingTimeHour - izabrano pocetno vrijeme 
+ * @param {Object} year - izabrana godina
+ * @param {Object} month - izabran mjesec
+ * @param {Object} day - izabran dan
+ */
 function cellClicked(startingTimeHour,year,month,day) {
     let cell = document.getElementById('cell'+startingTimeHour+'-'+year+'/'+month+'/'+day);
     console.log('Cell clicked: ',cell.id);
@@ -163,6 +182,9 @@ function cellClicked(startingTimeHour,year,month,day) {
     }
 }
 
+/**
+ * Brisanje zauzetosti izabranih celija
+ */
 function resetCells() {
     let cells = document.querySelectorAll('table td');
     cells.forEach(cell=>{cell.classList.remove('reserved');cell.classList.remove('taken');cell.innerHTML=''});
@@ -170,7 +192,7 @@ function resetCells() {
 }
 
 /**
- * Showing next 7 days
+ * Prikaz sljedecih 7 dana 
  */
 function next() {
     let date = new Date(startingDate.value);
@@ -183,7 +205,7 @@ function next() {
 }
 
 /**
- * Showing past 7 days
+ * Prikaz prethodnih 7 dana
  */
 function previous() {
     let date = new Date(startingDate.value);
@@ -195,7 +217,7 @@ function previous() {
 }
 
 /**
- * Returning correct date format for HTML date input
+ * Vracanje ispravnog formata datuma za HTML input datuma
  * @param {Object} date
  * @returns {Object}
  */
@@ -205,7 +227,7 @@ function getLocalDateFormat(date) {
 }
 
 /**
- * Sending request for meetings
+ * Slanje zahtjeva za sastancima
  */
 function sendRequestForMeetings() {
     
@@ -236,6 +258,10 @@ function sendRequestForMeetings() {
 
 }
 
+/**
+ * Postavljanje dosptupnosti termina
+ */
+
 function sendMarkAsAvailable() {
 
     let dataToSend = reservedCells.slice();
@@ -258,6 +284,10 @@ function sendMarkAsAvailable() {
       }
 }
 
+/**
+ * Uklanjanje rezerviranih termina
+ */
+
 function cleanCellsReservation() {
     reservedCells.forEach(o=>{
         let cell = document.getElementById('cell'+o.startingTime+'-'+o.year+'/'+o.month+'/'+o.day);
@@ -267,7 +297,7 @@ function cleanCellsReservation() {
 }
 
 /**
- * @class Class representing a cell
+ * @class Klasa koja predstavlja celiju
  */
 class CellObject {
  
@@ -287,6 +317,10 @@ class CellObject {
         return this.year===obj.year && this.month === obj.month && this.day === obj.day && this.startingTime === obj.startingTime;
     }
 }
+
+/**
+ * @class Klasa koja predstavlja dogadaj u kalendaru
+ */
 
 class CalendarEvent {
     constructor(subject,start,end,location) {
