@@ -25,11 +25,12 @@ const sendRequests = require('../constants').databaseSendRequests;
 
 const crypto = require('crypto');
 
-const userTable    = 'Profile';
-const sessionTable = 'Session';
+const userTable       = 'Profile';
+const sessionTable    = 'Session';
 const unverifiedTable = 'Unverified';
 const visibilityTable = 'Visibility';
 const calendarTable   = 'CalendarData';
+const meetingTable    = 'MeetingRequest';
 
 const sessionLifeTime = 10;
 
@@ -87,6 +88,21 @@ function getUserEmailFromID(database, userid, callback) {
         }
 
         setTimeout(() => callback(toJSON(result)[0][0][0].email));
+    });
+}
+
+function getUserIDFromEmail(database, email, callback) {
+
+    database.input('email', mssql.VarChar(100), email);
+
+    database.query('SELECT id FROM ' + userTable + ' WHERE email = @email', (error, result) => {
+
+        if (error) {
+            setTimeout(() => callback(null));
+            return;
+        }
+
+        setTimeout(() => callback(toJSON(result)[0][0][0].id));
     });
 }
 
@@ -166,6 +182,7 @@ function createUser(database, email, password, isStudent, callback) {
 //        setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, username: toJSON(result)[0][0][0].username}), 0);
 //    });
 //}
+
 /**
  * Provjera ako je sjednica vazeca
  * @param {Object}database - objekt koji predstavlja bazu podataka
@@ -457,6 +474,137 @@ function getCalendarData(database, userid, token, from, callback) {
             data.state = dbConsts.OPERATION_SUCCESS;
             data.msg   = "operation success";
             data.data  = toJSON(result)[0][0];
+
+            setTimeout(() => callback(data));
+        });
+    });
+}
+
+
+function sendMeetingRequest(database,userid, token, toEmail, startDate, callback) {
+
+    let data = {
+        state: -1,
+        msg: "",
+        data: null
+    };
+
+    isValidSessionInfo(database, userid, token, (answer) => {
+
+        if (answer.state != dbConsts.OPERATION_SUCCESS) {
+            setTimeout(() => callback(answer));
+            return;
+        }
+
+        getUserIDFromEmail(database, toEmail, (toid) => {
+
+            let strToken = randomTokenString(64);
+
+            database.input('meetingToken', mssql.VarChar(130), strToken);
+            database.input('toid', mssql.Int, toid);
+            database.input('date', mssql.DateTime2, startDate);
+
+            database.query('INSERT INTO ' + meetingTable + ' (userid,senderid,startDate,token) VALUES (@toid,@userid,@date,@meetingToken)', (error) => {
+
+                if (error) {
+                    data.state = dbConsts.OPERATION_FAILED;
+                    data.msg   = 'failed to send request, request already sent or time is not available any more';
+                    setTimeout(() => callback(data));
+                    return;
+                }
+
+                data.state = dbConsts.OPERATION_SUCCESS;
+                data.msg   = 'operation success';
+                data.data  = {};
+
+                getUserEmailFromID(new mssql.Request(), userid, (email) => {
+
+                    data.data.email = email;
+                    data.data.token = strToken;
+
+                    setTimeout(() => callback(data));
+                });
+            });
+        });
+    });
+}
+
+function answerMeetingRequest(database,token,accept,callback) {
+
+    let data = {
+        state: -1,
+        msg: "",
+        data: null
+    };
+
+    database.input('token', mssql.VarChar(130), token);
+
+    database.query('SELECT senderid, userid , startDate FROM ' + meetingTable + ' WHERE token = @token', (error, result) => {
+
+        if (error) {
+            data.state = dbConsts.OPERATION_FAILED;
+            data.msg   = 'failed to answer a request';
+            setTimeout(() => callback(data));
+            return;
+        }
+
+        if (result.rowsAffected[0] == 0) {
+            data.state = dbConsts.OPERATION_FAILED;
+            data.msg   = 'invalid request or request not available any more';
+            setTimeout(() => callback(data));
+            return;
+        }
+
+        let tempResult = toJSON(result)[0][0][0];
+
+        database.input('userid', mssql.VarChar(130), tempResult.userid);
+        database.input('senderid', mssql.VarChar(130), tempResult.senderid);
+        database.input('startDate', mssql.VarChar(130), tempResult.startDate);
+
+        database.query('DELETE FROM ' + meetingTable + ' WHERE userid = @userid AND startDate = @startDate AND senderid = @senderid', (error, result) => {
+
+            if (error) { // shouldn't happen
+                console.log(error);
+            }
+
+            data.state = dbConsts.OPERATION_SUCCESS;
+            data.msg   = 'operation success';
+
+            if (accept) {
+
+                data.data = {};
+
+                data.data.startDate = tempResult.startDate;
+
+                database.query('SELECT endDate FROM ' + calendarTable + ' WHERE userid = @userid AND startDate = @startDate', (error, result) => {
+
+                    if (error) { // shouldn't happen
+                        console.log(error);
+                    }
+
+                    data.data.endDate = toJSON(result)[0][0][0].endDate;
+
+                    database.query('DELETE FROM ' + calendarTable + ' WHERE userid = @userid AND startDate = @startDate', (error) => {
+
+                        if (error) { // shouldn't happen
+                            console.log(error);
+                        }
+
+                        getUserEmailFromID(new mssql.Request(), tempResult.userid, (profMail) => {
+
+                            data.data.profMail = profMail;
+
+                            getUserEmailFromID(new mssql.Request(), tempResult.senderid, (senderEmail) => {
+
+                                data.data.senderEmail = senderEmail;
+
+                                setTimeout(() => callback(data));
+                            });
+                        });
+                    });
+                });
+                return;
+            }
 
             setTimeout(() => callback(data));
         });
@@ -760,6 +908,16 @@ class DatabaseManager {
 
             case sendRequests.INSERT_CALENDAR_DATA: {
                 insertCalendarData(sentData.data.userid, sentData.data.token, sentData.data.calendarInfo, callback);
+                break;
+            }
+
+            case sendRequests.SEND_MEETING_REQUEST: {
+                sendMeetingRequest(new mssql.Request(), sentData.data.userid, sentData.data.token, sentData.data.toEmail, sentData.data.startDate, callback);
+                break;
+            }
+
+            case sendRequests.SEND_MEETING_ANSWER: {
+                answerMeetingRequest(new mssql.Request(), sentData.data.token, sentData.data.accept, callback);
                 break;
             }
         }
