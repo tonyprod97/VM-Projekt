@@ -1,0 +1,99 @@
+@import "../style.less";
+
+
+.hover-shadow:hover {
+    color: white;
+    text-shadow: 2px 2px 4px #000000;
+}
+
+td {
+    border: 1px solid black;
+    background-color: @table-cell;
+
+    &:hover {
+        background-color: rgb(97, 96, 94);
+        cursor: pointer;
+    }
+
+    &.taken {
+        background-color: @table-cell-taken;
+        border: 2px solid blue !important;
+        font-style: italic;
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        font-weight: bold;
+        text-align: center;
+        cursor: pointer;
+        
+        &:hover {
+            background-color: red;
+            cursor: default;
+        }
+    }
+
+    &.reserved {
+        background-color: rgb(74, 81, 175);
+    }
+    
+    
+    
+    &.disabled {
+        cursor: default;
+    
+        &:hover {
+            background-color: @table-cell;
+            cursor: default;
+    
+            &.taken {
+                background-color: @table-cell-taken;
+                cursor: default;
+            }
+        }
+    }
+}
+
+th {
+    text-align: center;
+    background-color: @table-background;
+}
+
+
+.color-secondary {
+    background-color: @secondary;
+}
+
+.margin-right {
+    margin-right: 10px;
+}
+
+.float-right {
+    float: right;
+}
+
+.backgorund-main {
+    background-color: @backgorund-main-color;
+}
+
+.float-left {
+    float: left;
+}
+
+div {
+    &.background-gradient {
+        background-image: linear-gradient(to right,aliceblue,skyblue);
+        margin-bottom: 15px;
+    }
+}
+
+form {
+    &.calendar-form {
+        width: -webkit-fill-available;
+    }
+}
+
+h3 {
+    margin-left: 25%;
+}
+
+.container {
+    height: -webkit-fill-available;
+}

@@ -1,0 +1,21 @@
+@import "../style.less";
+
+
+td {
+    &:hover {
+        color: rgb(14, 14, 158);
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    a {
+        color: rgb(77, 75, 75);
+        font-style: italic;
+    }
+}
+
+.backgorund-main {
+    background-color: @backgorund-main-color;
+    height: -webkit-fill-available;
+    background-image: linear-gradient(@backgorund-main-color, rgb(154, 219, 243) 75%);
+}
