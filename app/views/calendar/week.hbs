@@ -1,4 +1,5 @@
 <link rel="stylesheet/less" type="text/css" href="/css/calendar/week.less" />
+<link rel="stylesheet/less" type="text/css" href="/css/calendar/popup.less" />
 <script src="/scripts/calendar/calendarNav.js"></script>
 <script src="/scripts/calendar/week.js"></script>
 <div class="backgorund-main">
@@ -18,15 +19,22 @@
                     <label for="date">Pick starting date</label>
                     <input type="date" id="date-picker" class="margin-right">
                 </div>
+                </div>
                 {{#if teacher}}
                 <div class="form-group students-only float-right">
                     <label for="date">Subject:</label>
                     <input type="text" id="subject">
+                    <div class="popup">
+                        <span class="popuptext" id="sendPopup">Request was succesfully send!</span>
+                    </div>
                     <button class="btn color-secondary hover-shadow" id="request" type="button" onclick="sendRequestForMeetings()">Request</button>
                 </div>
                 {{/if}}
                 <div class="form-group teachers-only float-right">
                     <label for="date">Mark selected as available:</label>
+                    <div class="popup">
+                        <span class="popuptext" id="sendPopup">Request was succesfully send!</span>
+                    </div>
                     <button class="btn color-secondary hover-shadow" id="mark" type="button" onclick="sendMarkAsAvailable()">Sync</button>
                 </div>
             </div>

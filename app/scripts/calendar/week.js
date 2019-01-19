@@ -266,6 +266,7 @@ function sendRequestForMeetings() {
     })); 
     http.onreadystatechange = function () {
         if (http.readyState === 4) {
+            openPopup();
             console.log('Success')
         }
       }
@@ -292,7 +293,7 @@ function sendMarkAsAvailable() {
     })); 
     http.onreadystatechange = function () {
         if (http.readyState === 4) {
-            alert('added');
+            openPopup();
             console.log('Success')
         }
       }
@@ -330,6 +331,14 @@ class CellObject {
     equals(obj) {
         return this.year===obj.year && this.month === obj.month && this.day === obj.day && this.startingTime === obj.startingTime;
     }
+}
+
+function openPopup() {
+    var popup = document.getElementById("sendPopup");
+    popup.classList.toggle("show");
+    setTimeout(()=>{
+        popup.classList.toggle("show");
+    },3000);
 }
 
 /**
