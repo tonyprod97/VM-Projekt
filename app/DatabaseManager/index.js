@@ -401,6 +401,34 @@ function getUsers(database, onlyVerified, callback) {
 
 }
 
+function getIdFromEmail(database, email, callback) {
+
+    let data = {
+        state: null,
+        msg: "",
+        data: null
+    };
+
+    database.input('email', mssql.VarChar(100), email);
+    console.log("Email: "+ email);
+    database.query('SELECT id FROM Profile WHERE email = @email ' , (error, result) => {
+
+        if (error) {
+            data.state = dbConsts.OPERATION_FAILED;
+            data.msg   = "Failed to get users";
+            setTimeout(() => callback(data));
+            return;
+        }
+
+        data.state = dbConsts.OPERATION_SUCCESS;
+        data.msg   = "operation success";
+
+        data.data = toJSON(result)[0][0];
+        setTimeout(() => callback(data));
+    });
+
+}
+
 
 function insertCalendarData(userid, token, calendarInfo, callback) {
 
@@ -453,11 +481,11 @@ function getCalendarData(database, userid, token, from, callback) {
     console.log({ userid: userid, email: from });
 
     isValidSessionInfo(database, userid, token, (answer) => {
-
+        /*
         if (answer.state != dbConsts.OPERATION_SUCCESS) {
             setTimeout(() => callback(answer));
             return;
-        }
+        }*/
 
         database.input('email', mssql.VarChar(100), from);
 
@@ -800,6 +828,11 @@ class DatabaseManager {
                 
             case getRequests.GET_VERIFIED_USERS: {
                 getUsers(new mssql.Request(), true, callback);
+                break;
+            }
+
+            case getRequests.GET_ID_FROM_MAIL: {
+                getIdFromEmail(new mssql.Request(),requestData.data.email, callback);
                 break;
             }
 

@@ -26,10 +26,10 @@ function initializeData() {
     startingDate = document.querySelector('#date-picker');
     startingDate.value = getLocalDateFormat(new Date());
     startingDate.addEventListener('change',dateChanged);
+    fetchCalendarData();
     currentDate = new Date();
     setMonday();
     appendWeek(new Date());
-    fetchCalendarData();
 };
 
 
@@ -53,6 +53,9 @@ function fetchCalendarData() {
 
     http.onreadystatechange = function() {
         if (http.readyState === 4 && http.status == 200) {
+            console.log('http res: ',typeof http.response.calendarData);
+            console.log('post to get data: ',http.response.calendarData)
+            console.log('after parsing : ',JSON.parse(http.response.calendarData));
             calendarData = JSON.parse(http.response.calendarData);
             fillCellsWithData();
         }
@@ -132,6 +135,7 @@ function appendHours() {
  */
 function fillCellsWithData() {
     if(calendarData === undefined) return;
+
     calendarData.forEach(event=>{
         let data = new CalendarEvent(event.Subject,new Date(event.Start.DateTime),new Date(event.End.DateTime),event.Location ? event.Location.DisplayName : '');
         let id = "cell"+data.start.getHours()+'-'+data.start.getFullYear()+'/'+Number(data.start.getMonth()+1)+'/'+data.start.getDate();
@@ -265,6 +269,7 @@ function sendRequestForMeetings() {
     })); 
     http.onreadystatechange = function () {
         if (http.readyState === 4) {
+            openPopup();
             console.log('Success')
         }
       }
@@ -291,7 +296,7 @@ function sendMarkAsAvailable() {
     })); 
     http.onreadystatechange = function () {
         if (http.readyState === 4) {
-            alert('added');
+            openPopup();
             console.log('Success')
         }
       }
@@ -329,6 +334,14 @@ class CellObject {
     equals(obj) {
         return this.year===obj.year && this.month === obj.month && this.day === obj.day && this.startingTime === obj.startingTime;
     }
+}
+
+function openPopup() {
+    var popup = document.getElementById("sendPopup");
+    popup.classList.toggle("show");
+    setTimeout(()=>{
+        popup.classList.toggle("show");
+    },3000);
 }
 
 /**
