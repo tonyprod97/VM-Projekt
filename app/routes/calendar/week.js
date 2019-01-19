@@ -10,7 +10,10 @@ var outlook = require('node-outlook');
 const mailHelper = require('../../EmailManager');
 
 router.get('/', permit, (req,res)=>{
+
     const teacher = req.query['teacher'];
+    //console.log("techer:" + user.email);
+    //console.log(teacher.id);
 
     if(teacher) {
         res.render('./calendar/week', {loggedIn:true,teacher:teacher});
@@ -122,45 +125,52 @@ router.post('/', permit, (req,res)=>{
 
     } else {
         //teacher wants to mark when is available for consultations
-        let requestedMeetings = req.body.available[0];
+        let requestedMeetings = req.body.available;
         let user = req.body.user;
+        console.log("User je: "+user);
 
         console.log("ID: "+ user.id);
         console.log("User :" + user.sessionToken);
 
-        var event = {
-            "Subject": "Test from App",
-            "startDate": "",
-            "endDate": ""
-        };
 
 
-        var calculatedEndTime = parseInt(requestedMeetings.startingTime,10)+1;
-        var startTime = requestedMeetings.year+'-0'+requestedMeetings.month+'-'
-            +requestedMeetings.day+'T'+requestedMeetings.startingTime+':00:00'+'.23Z';
-        var endTime = requestedMeetings.year+'-0'+requestedMeetings.month+'-'
-            +requestedMeetings.day+'T'+calculatedEndTime+':00:00'+'.23Z';
+        for (var i=0;i <requestedMeetings.length;i++) {
 
-        console.log("startTime: "+startTime);
+            var event = {
+                "Subject": "Test from App",
+                "startDate": "",
+                "endDate": ""
+            };
 
-        event.startDate=startTime;
-        event.endDate=endTime;
+            var meeting=requestedMeetings[i];
+            console.log("Starting time: "+meeting);
 
-        databaseManager.sendRequest({
-                id: sendIds.INSERT_CALENDAR_DATA,
-                data: {
-                    userid: user.id,
-                    token: user.sessionToken,
-                    calendarInfo: [event],
-                } },
-            (answer) => {
-                console.log(answer.state);
-            });
+            var calculatedEndTime = parseInt(meeting.startingTime, 10) + 1;
+            var startTime = meeting.year + '-0' + meeting.month + '-'
+                + meeting.day + 'T' + meeting.startingTime + ':00:00' + '.23Z';
+            var endTime = meeting.year + '-0' + meeting.month + '-'
+                + meeting.day + 'T' + calculatedEndTime + ':00:00' + '.23Z';
 
+            console.log("startTime: " + startTime);
+            console.log("EndTime: " + endTime);
+
+            event.startDate = startTime;
+            event.endDate = endTime;
+
+            databaseManager.sendRequest({
+                    id: sendIds.INSERT_CALENDAR_DATA,
+                    data: {
+                        userid: user.id,
+                        token: user.sessionToken,
+                        calendarInfo: [event],
+                    }
+                },
+                (answer) => {
+                    console.log(answer.state);
+                });
+        }
         console.log([requestedMeetings]);
     }
-    
-
 });
 
 module.exports = router;
