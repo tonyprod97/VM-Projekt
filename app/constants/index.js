@@ -19,6 +19,7 @@ module.exports.databaseGetRequests = {
     GET_ALL_USERS: 8,       // request all registrated teachers
     GET_VERIFIED_USERS: 16, // request all verified teachers
     GET_CALENDAR: 32,       // request calendar of user needs(in data field: userid, token , from*) * -> email of user you want calendar off, if not specified then return calendar
+    GET_ID_FROM_MAIL: 64
 };
 
 module.exports.databaseSendRequests = {
