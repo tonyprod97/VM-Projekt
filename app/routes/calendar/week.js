@@ -2,12 +2,16 @@ var express = require('express');
 var router = express.Router();
 var permit = require('../user/permission');
 
+const databaseManager = require('../../DatabaseManager');
+const sendIds = require('../../constants').databaseSendRequests;
+const operationStates = require('../../constants').databaseErrors;
+
 var outlook = require('node-outlook');
 const mailHelper = require('../../EmailManager');
 
 router.get('/', permit, (req,res)=>{
     const teacher = req.query['teacher'];
-    
+
     if(teacher) {
         res.render('./calendar/week', {loggedIn:true,teacher:teacher});
         return;
@@ -73,9 +77,9 @@ router.post('/', permit, (req,res)=>{
 
         event.Subject=subject;
         var startTime = requestedMeetings.year+'-'+requestedMeetings.month+'-'
-            +requestedMeetings.day+'T'+requestedMeetings.startingTime+':00:00';
+            +requestedMeetings.day+'T'+requestedMeetings.startingTime+':00:00'+'Z';
         var endTime = requestedMeetings.year+'-'+requestedMeetings.month+'-'
-            +requestedMeetings.day+'T'+calculatedEndTime+':00:00';
+            +requestedMeetings.day+'T'+calculatedEndTime+':00:00'+'Z';
 
         event.Start.DateTime=startTime;
         event.End.DateTime=endTime;
@@ -115,11 +119,45 @@ router.post('/', permit, (req,res)=>{
         console.log('subject: ',subject,'requested meetings: ',requestedMeetings);
 
         res.redirect('/sync');
+
     } else {
         //teacher wants to mark when is available for consultations
-        let availableMarks = req.body.available;
+        let requestedMeetings = req.body.available[0];
         let user = req.body.user;
-        console.log(availableMarks);
+
+        console.log("ID: "+ user.id);
+        console.log("User :" + user.sessionToken);
+
+        var event = {
+            "Subject": "Test from App",
+            "startDate": "",
+            "endDate": ""
+        };
+
+
+        var calculatedEndTime = parseInt(requestedMeetings.startingTime,10)+1;
+        var startTime = requestedMeetings.year+'-0'+requestedMeetings.month+'-'
+            +requestedMeetings.day+'T'+requestedMeetings.startingTime+':00:00'+'.23Z';
+        var endTime = requestedMeetings.year+'-0'+requestedMeetings.month+'-'
+            +requestedMeetings.day+'T'+calculatedEndTime+':00:00'+'.23Z';
+
+        console.log("startTime: "+startTime);
+
+        event.startDate=startTime;
+        event.endDate=endTime;
+
+        databaseManager.sendRequest({
+                id: sendIds.INSERT_CALENDAR_DATA,
+                data: {
+                    userid: user.id,
+                    token: user.sessionToken,
+                    calendarInfo: [event],
+                } },
+            (answer) => {
+                console.log(answer.state);
+            });
+
+        console.log([requestedMeetings]);
     }
     
 
