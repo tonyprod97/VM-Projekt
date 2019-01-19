@@ -296,9 +296,10 @@ router.get('/sync',permit, function(req, res) {
                 console.log(finalResponse.length,'size')
                 console.log('Final respone: '+ JSON.stringify(response.body.value));
                 //save in database final response
-                //res.render('./calendar/week',{calendarData:finalResponse,loggedIn:true});
-                res.redirect('/calendar/week');
-
+                res.render('./calendar/week',{calendarData:JSON.stringify(finalResponse),loggedIn:true});
+                /*res.send({
+                    calendarData: JSON.stringify(finalResponse)
+                });*/
             }
         }
     });
