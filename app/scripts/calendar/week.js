@@ -52,12 +52,14 @@ function fetchCalendarData() {
     http.send(JSON.stringify({user:user})); 
 
     http.onreadystatechange = function() {
-        if (http.readyState === 4 && http.status == 200) {
+        if (http.readyState === 4 && http.status == 200 && http.response) {
             console.log('http res: ',typeof http.response.calendarData);
             console.log('post to get data: ',http.response.calendarData)
             console.log('after parsing : ',JSON.parse(http.response.calendarData));
             calendarData = JSON.parse(http.response.calendarData);
             fillCellsWithData();
+        } else {
+            if(http.readyState === 4 && http.status == 200) appendWeek(currentDate);
         }
       }
 }
@@ -106,7 +108,9 @@ function appendWeek(date) {
 function appendHours() {
     tableBody.innerHTML = '';
     //teacherElement is displayed only when requesting, role is 0 if student is logged
+    //let disabledCell = !teacherElement && !role ? 'disabled': '';
     let disabledCell = !teacherElement && !role ? 'disabled': '';
+    let freeCell = teacherElement && !role ? 'free' : '';
 
     for(let i=7;i<21;i++) {
         tableBody.innerHTML += '<tr id="row"'+(i+1)+'>';
@@ -123,7 +127,7 @@ function appendHours() {
             let tempYear = tempDate.getFullYear();
             let dateString = tempYear + '/'+tempMonth+"/"+tempDay;
             
-            row +='<td id="cell'+i+'-'+dateString+'" class="'+disabledCell+'" onclick="cellClicked('+i+','+tempYear+','+tempMonth+','+tempDay+')"></td>';
+            row +='<td id="cell'+i+'-'+dateString+'" class="'+freeCell+' '+disabledCell+'" onclick="cellClicked('+i+','+tempYear+','+tempMonth+','+tempDay+')"></td>';
         }
         tableBody.innerHTML +=row;
         tableBody.innerHTML +='</tr>';
@@ -146,7 +150,10 @@ function fillCellsWithData() {
             } else {
                 cell.innerHTML="<div>taken</div>";
             }
+            
             cell.classList.add('taken');
+            cell.classList.remove('free');
+            
         }
         
     })
@@ -185,13 +192,25 @@ function dateChanged() {
 function cellClicked(startingTimeHour,year,month,day) {
     let cell = document.getElementById('cell'+startingTimeHour+'-'+year+'/'+month+'/'+day);
     if(!cell.classList.contains('taken') && !cell.classList.contains('disabled')) {
+        if(!teacherElement) {
+            cell.classList.toggle('reserved');
+    
+            let newCellObject = new CellObject(year,month,day,startingTimeHour);
+            let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
+    
+            if(reservedCells.length == newArray.length) newArray.push(newCellObject);
+            reservedCells = newArray;
+        }
+    }
+
+    if(cell.classList.contains('taken' && !cell.classList.contains('disabled'))) {
         cell.classList.toggle('reserved');
-
-        let newCellObject = new CellObject(year,month,day,startingTimeHour);
-        let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
-
-        if(reservedCells.length == newArray.length) newArray.push(newCellObject);
-        reservedCells = newArray;
+    
+            let newCellObject = new CellObject(year,month,day,startingTimeHour);
+            let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
+    
+            if(reservedCells.length == newArray.length) newArray.push(newCellObject);
+            reservedCells = newArray;
     }
 }
 
@@ -250,6 +269,7 @@ function sendRequestForMeetings() {
     
     let dataToSend = reservedCells.slice();
     cleanCellsReservation();
+    console.log('data to send: ',dataToSend);
 
     let subjectElement = document.querySelector("#subject");
     let subject = subjectElement.value;
@@ -270,6 +290,7 @@ function sendRequestForMeetings() {
     http.onreadystatechange = function () {
         if (http.readyState === 4) {
             openPopup();
+            cleanCellsReservation();
             console.log('Success')
         }
       }
@@ -297,6 +318,7 @@ function sendMarkAsAvailable() {
     http.onreadystatechange = function () {
         if (http.readyState === 4) {
             openPopup();
+            cleanCellsReservation();
             console.log('Success')
         }
       }

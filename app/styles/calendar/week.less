@@ -11,8 +11,11 @@ td {
     background-color: @table-cell;
 
     &:hover {
-        background-color: rgb(97, 96, 94);
         cursor: pointer;
+    }
+
+    &.free {
+        cursor: not-allowed;
     }
 
     &.taken {
@@ -25,8 +28,8 @@ td {
         cursor: pointer;
         
         &:hover {
-            background-color: red;
-            cursor: default;
+            background-color: rgb(104, 209, 104);
+            cursor: pointer;
         }
     }
 
