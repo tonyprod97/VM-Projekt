@@ -278,7 +278,6 @@ function sendRequestForMeetings() {
 function sendMarkAsAvailable() {
 
     let dataToSend = reservedCells.slice();
-    cleanCellsReservation();
     console.log(dataToSend);
     //send http POST
     var http = new XMLHttpRequest();
@@ -292,6 +291,7 @@ function sendMarkAsAvailable() {
     })); 
     http.onreadystatechange = function () {
         if (http.readyState === 4) {
+            alert('added');
             console.log('Success')
         }
       }
