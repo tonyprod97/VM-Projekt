@@ -64,7 +64,6 @@ function setMonday() {
     let subtract = current.getDay();
     monday = new Date(currentDate);
     monday.setDate(monday.getDate()-subtract+1);
-    console.log('Monday is: ',monday,' data:',current,subtract)
 }
 
 /**
@@ -181,7 +180,6 @@ function dateChanged() {
  */
 function cellClicked(startingTimeHour,year,month,day) {
     let cell = document.getElementById('cell'+startingTimeHour+'-'+year+'/'+month+'/'+day);
-    console.log('Cell clicked: ',cell.id);
     if(!cell.classList.contains('taken') && !cell.classList.contains('disabled')) {
         cell.classList.toggle('reserved');
 
@@ -208,11 +206,10 @@ function resetCells() {
 function next() {
     //let date = new Date(startingDate.value);
     setMonday();
-    let date = new Date();
+    let date = new Date(currentDate);
     date.setDate(monday.getDate()+7);
     startingDate.value = getLocalDateFormat(date);
     currentDate = new Date(date);
-    console.log(startingDate.value, monday)
     appendWeek(date);
     resetCells();
     fillCellsWithData();
@@ -223,11 +220,10 @@ function next() {
  */
 function previous() {
     setMonday();
-    let date = new Date();
+    let date = new Date(currentDate);
     date.setDate(monday.getDate()-7);
     startingDate.value = getLocalDateFormat(date);
     currentDate = new Date(date);
-    console.log(monday,'/n',currentDate)
     appendWeek(date);
     resetCells();
     fillCellsWithData();
@@ -283,7 +279,7 @@ function sendMarkAsAvailable() {
 
     let dataToSend = reservedCells.slice();
     cleanCellsReservation();
-
+    console.log(dataToSend);
     //send http POST
     var http = new XMLHttpRequest();
     http.open("POST", '/calendar/week?operation=markAsAvailable', true);
