@@ -11,9 +11,9 @@ router.post('/', permit, (req,res)=>{
     let user = req.body.user;
     console.log('Current user data:',user);
     const teacher = req.query['teacher'];
+    var arrayResponses =[];
     if(teacher) {
         //send data for profesor with name teacher
-        var arrayResponses =[];
         databaseManager.getSingleRequest({
                 id: getRequests.GET_ID_FROM_MAIL,
                 data: {
@@ -58,17 +58,20 @@ router.post('/', permit, (req,res)=>{
 
                         }
                         console.log(arrayResponses);
+                        res.send({
+                            calendarData: JSON.stringify(arrayResponses)
+                        });
+                        return;
                     });
             });
+        
+    } else {
+
         res.send({
-            calendarData: JSON.stringify(require('../index').arrayResponses)
+            //send data for user
+            calendarData: JSON.stringify(require('../index').calendarData)
         });
-        return;
     }
-    res.send({
-        //send data for user
-        calendarData: JSON.stringify(require('../index').calendarData)
-    });
 });
 
 module.exports = router;

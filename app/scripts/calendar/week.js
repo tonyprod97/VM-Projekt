@@ -53,6 +53,7 @@ function fetchCalendarData() {
 
     http.onreadystatechange = function() {
         if (http.readyState === 4 && http.status == 200) {
+            console.log('http res: ',http);
             calendarData = JSON.parse(http.response.calendarData);
             fillCellsWithData();
         }
