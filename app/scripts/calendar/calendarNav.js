@@ -1,8 +1,8 @@
-let studentsOnlyElements;
-let teachersOnlyElements;
+var studentsOnlyElements;
+var teachersOnlyElements;
 
-let user =  JSON.parse(localStorage.getItem('user'));
-let role = user.isStudent ? 0:1; // if student 0, if teacher 1
+var user =  JSON.parse(localStorage.getItem('user'));
+var role = user.isStudent ? 0:1; // if student 0, if teacher 1
 
 window.addEventListener("load",hrefChanged,false);
 window.addEventListener("load",getRole);

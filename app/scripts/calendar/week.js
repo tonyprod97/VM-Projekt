@@ -11,6 +11,7 @@ let calendarData;
 let currentDate;
 let daysOfWeek = ["Sunday","Monday", "Tuesday", "Wednesday", 
 "Thursday", "Friday", "Saturday"];
+let monday;
 
 window.addEventListener('load',initializeData);
 
@@ -26,6 +27,7 @@ function initializeData() {
     startingDate.value = getLocalDateFormat(new Date());
     startingDate.addEventListener('change',dateChanged);
     currentDate = new Date();
+    setMonday();
     appendWeek(new Date());
     fetchCalendarData();
 };
@@ -57,6 +59,14 @@ function fetchCalendarData() {
       }
 }
 
+function setMonday() {
+    let current = new Date(currentDate);
+    let subtract = current.getDay();
+    monday = new Date(currentDate);
+    monday.setDate(monday.getDate()-subtract+1);
+    console.log('Monday is: ',monday,' data:',current,subtract)
+}
+
 /**
  * Stvaranje stupaca po danima
  * @param {Object} date - trenutni datum
@@ -73,10 +83,7 @@ function appendWeek(date) {
     currentDate = date;
 
     headerRow.innerHTML += '<th> YEAR '+currentDate.getFullYear()+' </th>';
-    let current = new Date(currentDate);
-    let subtract = current.getDay();
-    let monday = new Date(currentDate);
-    monday.setDate(monday.getDate()-subtract+1);
+    setMonday();
  
 
     for(let i = 0;i<7;i++) {
@@ -107,7 +114,7 @@ function appendHours() {
         let row ='<th scope="row">'+timeSufix+'</th>';
         
         for(let j=0;j<7;j++) {
-            let tempDate = new Date(currentDate);
+            let tempDate = new Date(monday);
             tempDate.setDate(tempDate.getDate()+j);
             let tempDay = tempDate.getDate();
             let tempMonth = tempDate.getMonth()+1;
@@ -199,10 +206,13 @@ function resetCells() {
  * Prikaz sljedecih 7 dana 
  */
 function next() {
-    let date = new Date(startingDate.value);
-    date.setDate(date.getDate()+7);
+    //let date = new Date(startingDate.value);
+    setMonday();
+    let date = new Date();
+    date.setDate(monday.getDate()+7);
     startingDate.value = getLocalDateFormat(date);
-    console.log(startingDate.value)
+    currentDate = new Date(date);
+    console.log(startingDate.value, monday)
     appendWeek(date);
     resetCells();
     fillCellsWithData();
@@ -212,9 +222,12 @@ function next() {
  * Prikaz prethodnih 7 dana
  */
 function previous() {
-    let date = new Date(startingDate.value);
-    date.setDate(date.getDate()-7);
+    setMonday();
+    let date = new Date();
+    date.setDate(monday.getDate()-7);
     startingDate.value = getLocalDateFormat(date);
+    currentDate = new Date(date);
+    console.log(monday,'/n',currentDate)
     appendWeek(date);
     resetCells();
     fillCellsWithData();
