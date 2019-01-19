@@ -61,7 +61,7 @@ router.post('/', permit, (req,res)=>{
                             arrayResponses.push(event);
 
                         }
-                        console.log(arrayResponses);
+                        console.log('array for frontend: ',typeof arrayResponses,arrayResponses);
                         res.send({
                             calendarData: JSON.stringify(arrayResponses)
                         });
@@ -151,7 +151,7 @@ router.post('/', permit, (req,res)=>{
                     //save in database final response
                     //res.render('./calendar/week',{calendarData:JSON.stringify(finalResponse),loggedIn:true});
                     res.send({
-                        calendarData: JSON.stringify(finalResponse)
+                        calendarData: finalResponse
                     });
                 }
             }
