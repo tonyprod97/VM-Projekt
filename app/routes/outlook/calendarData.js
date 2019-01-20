@@ -11,6 +11,8 @@ const authHelper = require('../../OutlookManager');
 var outlook = require('node-outlook');
 var moment = require('moment');
 
+
+
 router.post('/', permit, (req,res)=>{
     let user = req.body.user;
     console.log('Current user data:',user);
@@ -73,8 +75,8 @@ router.post('/', permit, (req,res)=>{
     },
         (answer) => {
 
-            console.log(answer);
-            console.log(answer.length);
+            //console.log(answer);
+            //console.log(answer.length);
             for (var i = 0; i < answer.data.length; i++) {
                 var event = {
                     "Subject": "Odabrani termin",
@@ -93,7 +95,7 @@ router.post('/', permit, (req,res)=>{
                 arrayResponses.push(event);
 
             }
-            console.log('array for frontend: ', typeof arrayResponses, arrayResponses);
+            //console.log('array for frontend: ', typeof arrayResponses, arrayResponses);
             callback(arrayResponses);
         });
 }
@@ -131,7 +133,6 @@ function getOutlookData(req, res, callback) {
         startDateTime: startDate.toISOString(),
         endDateTime: endDate.toISOString()
     };
-
     // Set the required headers for sync
     var headers = {
         Prefer: [
@@ -184,7 +185,6 @@ function getOutlookData(req, res, callback) {
         }
     });
 }
-
 /*
 res.send({
     calendarData: finalResponse

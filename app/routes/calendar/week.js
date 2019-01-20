@@ -25,103 +25,9 @@ router.get('/', permit, (req,res)=>{
 router.post('/', permit, (req,res)=>{
 
     if(req.query['operation']=='requestMeeting') {
-        //student has requested meeting from teacher
         let subject = req.body.subject;
         let requestedMeetings = req.body.requestedMeetings[0];
-        let teacher = req.body.teacher;
-
-        var token = req.session.access_token;
-        var email = req.session.email;
-        if (token === undefined || email === undefined) {
-            console.log('/post on Outlook called while not logged in');
-            res.redirect('/');
-            return;
-        }
-
-        // Set the endpoint to API v2
-        outlook.base.setApiEndpoint('https://outlook.office.com/api/v2.0');
-        // Set the user's email as the anchor mailbox
-        outlook.base.setAnchorMailbox(req.session.email);
-        // Set the preferred time zone
-        outlook.base.setPreferredTimeZone('Europe/Paris');
-
-        // Use the syncUrl if available
-        var requestUrl = req.session.syncUrl;
-        if (requestUrl === undefined) {
-            // Calendar sync works on the CalendarView endpoint
-            requestUrl = outlook.base.apiEndpoint() + '/me/events';
-        }
-
-        // Set the required headers for sync
-        var headers = {
-            Prefer: [
-                // Requests only 5 changes per response
-                'odata.maxpagesize=5'
-            ]
-        };
-
-        var event = {
-            "Subject": "Test from App",
-            "Body": {
-                "ContentType": "HTML",
-                "Content": "Pokušaj stavljanja na outlook!"
-            },
-            "Start": {
-                "DateTime": "2019-01-04T12:00:00",
-                "TimeZone": "Europe/Paris"
-            },
-            "End": {
-                "DateTime": "2019-01-04T13:00:00",
-                "TimeZone": "Europe/Paris"
-            }
-        };
-
-        var calculatedEndTime = parseInt(requestedMeetings.startingTime,10)+1;
-
-        event.Subject=subject;
-        var startTime = requestedMeetings.year+'-'+requestedMeetings.month+'-'
-            +requestedMeetings.day+'T'+requestedMeetings.startingTime+':00:00'+'Z';
-        var endTime = requestedMeetings.year+'-'+requestedMeetings.month+'-'
-            +requestedMeetings.day+'T'+calculatedEndTime+':00:00'+'Z';
-
-        event.Start.DateTime=startTime;
-        event.End.DateTime=endTime;
-
-        console.log("CalculatedEndTime: "+ calculatedEndTime);
-        console.log("Start time: "+ startTime);
-        console.log("End time: "+ endTime);
-        console.log(event);
-
-        var apiOptions = {
-            url: requestUrl,
-            token: token,
-            headers: headers,
-            event: event
-        };
-
-        let createEventParameters = {
-            token: token,
-            event: event
-        };
-
-        console.log('requestUrl ' + apiOptions.url);
-        console.log('token ' + apiOptions.token);
-        console.log('headers ' + apiOptions.headers);
-
-        console.log("Došao");
-
-        outlook.calendar.createEvent(createEventParameters, function (error, event) {
-            if(error) {
-                console.log(error);
-            } else {
-                console.log(event);
-            }
-        });
-
-        console.log("prošao");
-        console.log('subject: ',subject,'requested meetings: ',requestedMeetings);
-
-        res.redirect('/sync');
+        postOutlookData(req,res,subject,requestedMeetings);
 
     } else {
         //teacher wants to mark when is available for consultations
@@ -172,5 +78,103 @@ router.post('/', permit, (req,res)=>{
         console.log([requestedMeetings]);
     }
 });
+
+function postOutlookData(req, res, subject,requestedMeetings, recallback) {
+    //student has requested meeting from teacher
+    //let teacher = req.body.teacher;
+    //console.log("Request: "+req.body.subject)
+    //console.log("Requested meeeting: "+req.body.requestedMeetings[0].day);
+    //console.log("Requested meeeting: "+req.body.rerequestedMeetings)
+    var token = req.session.access_token;
+    var email = req.session.email;
+    if (token === undefined || email === undefined) {
+        console.log('/post on Outlook called while not logged in');
+        res.redirect('/');
+        return;
+    }
+
+    // Set the endpoint to API v2
+    outlook.base.setApiEndpoint('https://outlook.office.com/api/v2.0');
+    // Set the user's email as the anchor mailbox
+    outlook.base.setAnchorMailbox(req.session.email);
+    // Set the preferred time zone
+    console.log("Zona je : " + outlook.base.preferredTimeZone());
+    outlook.base.setPreferredTimeZone('Europe/Berlin');
+    console.log("Zona je : " + outlook.base.preferredTimeZone());
+
+    // Use the syncUrl if available
+    var requestUrl = req.session.syncUrl;
+    if (requestUrl === undefined) {
+        // Calendar sync works on the CalendarView endpoint
+        requestUrl = outlook.base.apiEndpoint() + '/me/events';
+    }
+
+    // Set the required headers for sync
+    var headers = {
+        Prefer: [
+            // Requests only 5 changes per response
+            'odata.maxpagesize=5'
+        ]
+    };
+
+    var event = {
+        "Subject": "Test from App",
+        "Start": {
+            "DateTime": "2019-01-04T12:00:00",
+            "TimeZone": "Europe/Berlin"
+        },
+        "End": {
+            "DateTime": "2019-01-04T13:00:00",
+            "TimeZone": "Europe/Berlin"
+        }
+    };
+
+    var calculatedStartTime = parseInt(requestedMeetings.startingTime,10)-1;
+    var calculatedEndTime = parseInt(requestedMeetings.startingTime,10);
+
+    event.Subject=subject;
+    var startTime = requestedMeetings.year+'-'+requestedMeetings.month+'-'
+        +requestedMeetings.day+'T'+calculatedStartTime+':00:00'+'Z';
+    var endTime = requestedMeetings.year+'-'+requestedMeetings.month+'-'
+        +requestedMeetings.day+'T'+calculatedEndTime+':00:00'+'Z';
+
+    event.Start.DateTime=startTime;
+    event.End.DateTime=endTime;
+
+    //console.log("")
+    //console.log("CalculatedEndTime: "+ calculatedEndTime);
+    //console.log("Start time: "+ startTime);
+    //console.log("End time: "+ endTime);
+    console.log("Event je:"+JSON.stringify(event, null, 2));
+
+    var apiOptions = {
+        url: requestUrl,
+        token: token,
+        headers: headers,
+        event: event
+    };
+
+    let createEventParameters = {
+        token: token,
+        event: event
+    };
+
+    //console.log('requestUrl ' + apiOptions.url);
+    //console.log('token ' + apiOptions.token);
+    //console.log('headers ' + apiOptions.headers);
+    //console.log("Došao");
+
+    outlook.calendar.createEvent(createEventParameters, function (error, event) {
+        if(error) {
+            console.log(error);
+        } else {
+            console.log(event);
+        }
+    });
+
+    //console.log("prošao");
+    //console.log('subject: ',subject,'requested meetings: ',requestedMeetings);
+    //res.redirect('/sync');
+}
 
 module.exports = router;
