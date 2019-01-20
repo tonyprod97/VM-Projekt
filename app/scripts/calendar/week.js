@@ -200,10 +200,11 @@ function cellClicked(startingTimeHour,year,month,day) {
     
             if(reservedCells.length == newArray.length) newArray.push(newCellObject);
             reservedCells = newArray;
+            return;
         }
     }
 
-    if(cell.classList.contains('taken' && !cell.classList.contains('disabled'))) {
+    if(cell.classList.contains('taken') && !cell.classList.contains('disabled')) {
         cell.classList.toggle('reserved');
     
             let newCellObject = new CellObject(year,month,day,startingTimeHour);
