@@ -509,7 +509,7 @@ function getCalendarData(database, userid, token, from, callback) {
 }
 
 
-function sendMeetingRequest(database,userid, token, toEmail, startDate, callback) {
+function sendMeetingRequest(database,userid, token, toEmail, startDate,subject, callback) {
 
     let data = {
         state: -1,
@@ -531,8 +531,9 @@ function sendMeetingRequest(database,userid, token, toEmail, startDate, callback
             database.input('meetingToken', mssql.VarChar(130), strToken);
             database.input('toid', mssql.Int, toid);
             database.input('date', mssql.DateTime2, startDate);
+            database.input('subject', mssql.VarChar(100), subject);
 
-            database.query('INSERT INTO ' + meetingTable + ' (userid,senderid,startDate,token) VALUES (@toid,@userid,@date,@meetingToken)', (error) => {
+            database.query('INSERT INTO ' + meetingTable + ' (userid,senderid,startDate,token,subject) VALUES (@toid,@userid,@date,@meetingToken,@subject)', (error) => {
 
                 if (error) {
                     data.state = dbConsts.OPERATION_FAILED;
@@ -567,7 +568,7 @@ function answerMeetingRequest(database,token,accept,callback) {
 
     database.input('token', mssql.VarChar(130), token);
 
-    database.query('SELECT senderid, userid , startDate FROM ' + meetingTable + ' WHERE token = @token', (error, result) => {
+    database.query('SELECT senderid, userid , startDate, subject FROM ' + meetingTable + ' WHERE token = @token', (error, result) => {
 
         if (error) {
             data.state = dbConsts.OPERATION_FAILED;
@@ -603,6 +604,7 @@ function answerMeetingRequest(database,token,accept,callback) {
                 data.data = {};
 
                 data.data.startDate = tempResult.startDate;
+                data.data.subject   = tempResult.subject;
 
                 database.query('SELECT endDate FROM ' + calendarTable + ' WHERE userid = @userid AND startDate = @startDate', (error, result) => {
 
@@ -945,7 +947,8 @@ class DatabaseManager {
             }
 
             case sendRequests.SEND_MEETING_REQUEST: {
-                sendMeetingRequest(new mssql.Request(), sentData.data.userid, sentData.data.token, sentData.data.toEmail, sentData.data.startDate, callback);
+                console.log(sentData.data);
+                sendMeetingRequest(new mssql.Request(), sentData.data.userid, sentData.data.token, sentData.data.toEmail, sentData.data.startDate,sentData.data.subject, callback);
                 break;
             }
 

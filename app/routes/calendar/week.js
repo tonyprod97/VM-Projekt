@@ -9,6 +9,8 @@ const operationStates = require('../../constants').databaseErrors;
 var outlook = require('node-outlook');
 const mailHelper = require('../../EmailManager');
 
+const urlParser = require('../../UrlManager');
+
 router.get('/', permit, (req,res)=>{
 
     const teacher = req.query['teacher'];
@@ -22,13 +24,100 @@ router.get('/', permit, (req,res)=>{
     res.render('./calendar/week', {loggedIn:true});
 });
 
+function parseDate(dateSent) {
+
+    let date = new Date(dateSent);
+
+    let month = '' + (date.getMonth() + 1);
+    let day = '' + date.getDate();
+    let year = '' + date.getFullYear();
+
+    let hours = '' + date.getHours();
+    let min = '' + date.getMinutes();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    if (hours.length < 2) hours = '0' + hours;
+    if (min.length < 2) min = '0' + min;
+
+    return [day, month, year].join('.') + " starting at " + (hours - 1) + ":" + min;
+}
+
+function constructIso8601(meeting) {
+
+    let year  = '' + meeting.year;
+    let month = '' + meeting.month;
+    let day   = '' + meeting.day;
+    let hour  = '' + meeting.startingTime;
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    if (hour.length < 2) hour = '0' + hour;
+
+    return [year, month, day].join('-') + "T" + hour + ":00:00Z"; 
+}
+
+function dateToMeetingFormat(dateSent) {
+
+    let date = new Date(dateSent);
+
+    let month = '' + (date.getMonth() + 1);
+    let day = '' + date.getDate();
+    let year = '' + date.getFullYear();
+
+    let hours = '' + date.getHours();
+
+    return { year: year, month: month, day: day, startingTime: hours };
+}
+
 router.post('/', permit, (req,res)=>{
 
-    if(req.query['operation']=='requestMeeting') {
-        let subject = req.body.subject;
-        let requestedMeetings = req.body.requestedMeetings[0];
-        postOutlookData(req,res,subject,requestedMeetings);
+    console.log(req.body);
 
+    console.log(req.session);
+
+    if(req.query['operation']=='requestMeeting') {
+        //let subject = req.body.subject;
+        //let requestedMeetings = req.body.requestedMeetings[0];
+        //postOutlookData(req,res,subject,requestedMeetings);
+
+        let size = req.body.requestedMeetings.length;
+
+        for (let counter = 0; counter < size; counter++) {
+
+            let body = req.body;
+
+            let iso8601String = constructIso8601(req.body.requestedMeetings[counter]);
+
+            databaseManager.sendRequest({ id: sendIds.SEND_MEETING_REQUEST, data: { userid: body.user.id, token: body.user.sessionToken, startDate: iso8601String, toEmail: body.teacher, subject: body.subject } }, (answer) => {
+
+                if (answer.state != operationStates.OPERATION_SUCCESS) {
+                    //res.send({ error: answer.msg });
+                    console.log(answer.msg);
+                    if (counter == (size - 1)) res.send({ error: null });
+                    return;
+                }
+
+                console.log(answer);
+
+                let data = urlParser.getUrlDataFromRequest(req);
+
+                let url_accept = data.protocol + '://' + data.host + '/calendar/week/' + answer.data.token + '/1';
+                let url_refuse = data.protocol + '://' + data.host + '/calendar/week/' + answer.data.token + '/0';
+
+                //html for accepting or refusing
+
+                let htmlStr = answer.data.email + " want's to have a meeting at " + parseDate(iso8601String);
+                htmlStr += '<br> click here to accept: <a href = "' + url_accept + '"> Accept </a> <br> or here to refuse: <a href = "' + url_refuse + '"> Refuse </a>';
+
+                mailHelper.sendMailForMeetingConfirmation(body.teacher, htmlStr);
+
+                if (counter == (size - 1)) res.send({ error: null });
+
+                //res.redirect('/');
+            });
+        }
+        return;
     } else {
         //teacher wants to mark when is available for consultations
         let requestedMeetings = req.body.available;
@@ -37,8 +126,6 @@ router.post('/', permit, (req,res)=>{
 
         console.log("ID: "+ user.id);
         console.log("User :" + user.sessionToken);
-
-
 
         for (var i=0;i <requestedMeetings.length;i++) {
 
@@ -51,11 +138,16 @@ router.post('/', permit, (req,res)=>{
             var meeting=requestedMeetings[i];
             console.log("Starting time: "+meeting);
 
-            var calculatedEndTime = parseInt(meeting.startingTime, 10) + 1;
-            var startTime = meeting.year + '-0' + meeting.month + '-'
-                + meeting.day + 'T' + meeting.startingTime + ':00:00' + '.23Z';
-            var endTime = meeting.year + '-0' + meeting.month + '-'
-                + meeting.day + 'T' + calculatedEndTime + ':00:00' + '.23Z';
+            //var calculatedEndTime = parseInt(meeting.startingTime, 10) + 1;
+            //var startTime = meeting.year + '-0' + meeting.month + '-'
+            //    + meeting.day + 'T' + meeting.startingTime + ':00:00' + 'Z';
+            //var endTime = meeting.year + '-0' + meeting.month + '-'
+            //    + meeting.day + 'T' + calculatedEndTime + ':00:00' + 'Z';
+
+
+            let startTime = constructIso8601(meeting);
+            meeting.startingTime++;
+            let endTime   = constructIso8601(meeting);
 
             console.log("startTime: " + startTime);
             console.log("EndTime: " + endTime);
@@ -77,6 +169,56 @@ router.post('/', permit, (req,res)=>{
         }
         console.log([requestedMeetings]);
     }
+});
+
+router.get('/student/:date/:subject', (req, res) => {
+
+    console.log("called");
+
+    postOutlookData(req, res, req.params.subject, dateToMeetingFormat(req.params.date));
+
+    res.redirect('/');
+});
+
+router.get('/:token/:answer', (req, res) => {
+
+    let accept = true;
+    if (req.params.answer == 0) accept = false;
+
+    console.log(req.session);
+
+    databaseManager.sendRequest({ id: sendIds.SEND_MEETING_ANSWER, data: { token: req.params.token, accept: accept } }, (answer) => {
+
+        if (answer.state != operationStates.OPERATION_SUCCESS) {
+            res.send({ error: answer.msg });
+            return;
+        }
+
+        console.log(answer);
+
+        if (answer.data) {
+
+            let reciveEmail = answer.data.profEmail;
+            let senderEmail = answer.data.senderEmail;
+            let startDate = answer.data.startDate;
+            let subject = answer.data.subject;
+
+            let data = urlParser.getUrlDataFromRequest(req);
+
+            let url_accept = data.protocol + '://' + data.host + '/calendar/week/student/' + startDate + '/' + subject;
+
+            htmlStr = 'your meeting request for ' + parseDate(startDate) + ' has been accepted <br>';
+            htmlStr += 'click here to add it to your outlook calendar: <a href = "' + url_accept + '"> Add </a>';
+
+            mailHelper.sendMailForMeetingConfirmation(senderEmail, htmlStr);
+
+            // deal with outlook calendar
+            postOutlookData(req, res, subject, dateToMeetingFormat(startDate));
+
+        }
+
+        res.redirect('/');
+    });
 });
 
 function postOutlookData(req, res, subject,requestedMeetings, recallback) {
@@ -129,14 +271,19 @@ function postOutlookData(req, res, subject,requestedMeetings, recallback) {
         }
     };
 
-    var calculatedStartTime = parseInt(requestedMeetings.startingTime,10)-1;
-    var calculatedEndTime = parseInt(requestedMeetings.startingTime,10);
+    //var calculatedStartTime = parseInt(requestedMeetings.startingTime,10)-1;
+    //var calculatedEndTime = parseInt(requestedMeetings.startingTime,10);
 
     event.Subject=subject;
-    var startTime = requestedMeetings.year+'-'+requestedMeetings.month+'-'
-        +requestedMeetings.day+'T'+calculatedStartTime+':00:00'+'Z';
-    var endTime = requestedMeetings.year+'-'+requestedMeetings.month+'-'
-        +requestedMeetings.day+'T'+calculatedEndTime+':00:00'+'Z';
+    //var startTime = requestedMeetings.year+'-'+requestedMeetings.month+'-'
+    //    +requestedMeetings.day+'T'+calculatedStartTime+':00:00'+'Z';
+    //var endTime = requestedMeetings.year+'-'+requestedMeetings.month+'-'
+    //    +requestedMeetings.day+'T'+calculatedEndTime+':00:00'+'Z';
+
+    requestedMeetings.startingTime--;
+    let endTime = constructIso8601(requestedMeetings);
+    requestedMeetings.startingTime--;
+    let startTime = constructIso8601(requestedMeetings);
 
     event.Start.DateTime=startTime;
     event.End.DateTime=endTime;

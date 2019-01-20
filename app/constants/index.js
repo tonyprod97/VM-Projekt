@@ -31,6 +31,6 @@ module.exports.databaseSendRequests = {
     SHARE_CALENDAR      : 4, // share calendar with other user (needs in data field: userid, token, with) with - email of a user you want to share calendar with
     VERIFY_USER         : 5, // verifie user (needs in data field: userid, verificationToken)
     INSERT_CALENDAR_DATA: 6, // insert calendar data (needs in data field: userid, token, calendarInfo[] : {subject, startDate, endDate});
-    SEND_MEETING_REQUEST: 7, // send Meeting Request (needs in data field: toEmail, userid, token, startDate);
+    SEND_MEETING_REQUEST: 7, // send Meeting Request (needs in data field: toEmail, userid, token, startDate, subject);
     SEND_MEETING_ANSWER : 8  // send answer to meeting request (needs in data field: token,accept);
 };
