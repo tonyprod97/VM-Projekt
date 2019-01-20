@@ -39,6 +39,7 @@ let calendarData;
 let currentDate;
 let daysOfWeek = ["Sunday","Monday", "Tuesday", "Wednesday", 
 "Thursday", "Friday", "Saturday"];
+let monday;
 
 window.addEventListener('load',initializeData);
 
@@ -53,9 +54,10 @@ function initializeData() {
     startingDate = document.querySelector('#date-picker');
     startingDate.value = getLocalDateFormat(new Date());
     startingDate.addEventListener('change',dateChanged);
-    currentDate = new Date();
-    appendWeek(new Date());
     fetchCalendarData();
+    currentDate = new Date();
+    setMonday();
+    appendWeek(new Date());
 };
 
 
@@ -78,11 +80,23 @@ function fetchCalendarData() {
     http.send(JSON.stringify({user:user})); 
 
     http.onreadystatechange = function() {
-        if (http.readyState === 4 &amp;&amp; http.status == 200) {
+        if (http.readyState === 4 &amp;&amp; http.status == 200 &amp;&amp; http.response) {
+            console.log('http res: ',typeof http.response.calendarData);
+            console.log('post to get data: ',http.response.calendarData)
+            console.log('after parsing : ',JSON.parse(http.response.calendarData));
             calendarData = JSON.parse(http.response.calendarData);
             fillCellsWithData();
+        } else {
+            if(http.readyState === 4 &amp;&amp; http.status == 200) appendWeek(currentDate);
         }
       }
+}
+
+function setMonday() {
+    let current = new Date(currentDate);
+    let subtract = current.getDay();
+    monday = new Date(currentDate);
+    monday.setDate(monday.getDate()-subtract+1);
 }
 
 /**
@@ -101,10 +115,7 @@ function appendWeek(date) {
     currentDate = date;
 
     headerRow.innerHTML += '&lt;th> YEAR '+currentDate.getFullYear()+' &lt;/th>';
-    let current = new Date(currentDate);
-    let subtract = current.getDay();
-    let monday = new Date(currentDate);
-    monday.setDate(monday.getDate()-subtract+1);
+    setMonday();
  
 
     for(let i = 0;i&lt;7;i++) {
@@ -125,7 +136,9 @@ function appendWeek(date) {
 function appendHours() {
     tableBody.innerHTML = '';
     //teacherElement is displayed only when requesting, role is 0 if student is logged
+    //let disabledCell = !teacherElement &amp;&amp; !role ? 'disabled': '';
     let disabledCell = !teacherElement &amp;&amp; !role ? 'disabled': '';
+    let freeCell = teacherElement &amp;&amp; !role ? 'free' : '';
 
     for(let i=7;i&lt;21;i++) {
         tableBody.innerHTML += '&lt;tr id="row"'+(i+1)+'>';
@@ -135,14 +148,14 @@ function appendHours() {
         let row ='&lt;th scope="row">'+timeSufix+'&lt;/th>';
         
         for(let j=0;j&lt;7;j++) {
-            let tempDate = new Date(currentDate);
+            let tempDate = new Date(monday);
             tempDate.setDate(tempDate.getDate()+j);
             let tempDay = tempDate.getDate();
             let tempMonth = tempDate.getMonth()+1;
             let tempYear = tempDate.getFullYear();
             let dateString = tempYear + '/'+tempMonth+"/"+tempDay;
             
-            row +='&lt;td id="cell'+i+'-'+dateString+'" class="'+disabledCell+'" onclick="cellClicked('+i+','+tempYear+','+tempMonth+','+tempDay+')">&lt;/td>';
+            row +='&lt;td id="cell'+i+'-'+dateString+'" class="'+freeCell+' '+disabledCell+'" onclick="cellClicked('+i+','+tempYear+','+tempMonth+','+tempDay+')">&lt;/td>';
         }
         tableBody.innerHTML +=row;
         tableBody.innerHTML +='&lt;/tr>';
@@ -154,6 +167,7 @@ function appendHours() {
  */
 function fillCellsWithData() {
     if(calendarData === undefined) return;
+
     calendarData.forEach(event=>{
         let data = new CalendarEvent(event.Subject,new Date(event.Start.DateTime),new Date(event.End.DateTime),event.Location ? event.Location.DisplayName : '');
         let id = "cell"+data.start.getHours()+'-'+data.start.getFullYear()+'/'+Number(data.start.getMonth()+1)+'/'+data.start.getDate();
@@ -164,7 +178,10 @@ function fillCellsWithData() {
             } else {
                 cell.innerHTML="&lt;div>taken&lt;/div>";
             }
+            
             cell.classList.add('taken');
+            cell.classList.remove('free');
+            
         }
         
     })
@@ -202,15 +219,27 @@ function dateChanged() {
  */
 function cellClicked(startingTimeHour,year,month,day) {
     let cell = document.getElementById('cell'+startingTimeHour+'-'+year+'/'+month+'/'+day);
-    console.log('Cell clicked: ',cell.id);
     if(!cell.classList.contains('taken') &amp;&amp; !cell.classList.contains('disabled')) {
+        if(!teacherElement) {
+            cell.classList.toggle('reserved');
+    
+            let newCellObject = new CellObject(year,month,day,startingTimeHour);
+            let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
+    
+            if(reservedCells.length == newArray.length) newArray.push(newCellObject);
+            reservedCells = newArray;
+            return;
+        }
+    }
+
+    if(cell.classList.contains('taken') &amp;&amp; !cell.classList.contains('disabled')) {
         cell.classList.toggle('reserved');
-
-        let newCellObject = new CellObject(year,month,day,startingTimeHour);
-        let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
-
-        if(reservedCells.length == newArray.length) newArray.push(newCellObject);
-        reservedCells = newArray;
+    
+            let newCellObject = new CellObject(year,month,day,startingTimeHour);
+            let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
+    
+            if(reservedCells.length == newArray.length) newArray.push(newCellObject);
+            reservedCells = newArray;
     }
 }
 
@@ -227,10 +256,12 @@ function resetCells() {
  * Prikaz sljedecih 7 dana 
  */
 function next() {
-    let date = new Date(startingDate.value);
-    date.setDate(date.getDate()+7);
+    //let date = new Date(startingDate.value);
+    setMonday();
+    let date = new Date(currentDate);
+    date.setDate(monday.getDate()+7);
     startingDate.value = getLocalDateFormat(date);
-    console.log(startingDate.value)
+    currentDate = new Date(date);
     appendWeek(date);
     resetCells();
     fillCellsWithData();
@@ -240,9 +271,11 @@ function next() {
  * Prikaz prethodnih 7 dana
  */
 function previous() {
-    let date = new Date(startingDate.value);
-    date.setDate(date.getDate()-7);
+    setMonday();
+    let date = new Date(currentDate);
+    date.setDate(monday.getDate()-7);
     startingDate.value = getLocalDateFormat(date);
+    currentDate = new Date(date);
     appendWeek(date);
     resetCells();
     fillCellsWithData();
@@ -265,6 +298,7 @@ function sendRequestForMeetings() {
     
     let dataToSend = reservedCells.slice();
     cleanCellsReservation();
+    console.log('data to send: ',dataToSend);
 
     let subjectElement = document.querySelector("#subject");
     let subject = subjectElement.value;
@@ -284,6 +318,8 @@ function sendRequestForMeetings() {
     })); 
     http.onreadystatechange = function () {
         if (http.readyState === 4) {
+            openPopup();
+            cleanCellsReservation();
             console.log('Success')
         }
       }
@@ -297,8 +333,7 @@ function sendRequestForMeetings() {
 function sendMarkAsAvailable() {
 
     let dataToSend = reservedCells.slice();
-    cleanCellsReservation();
-
+    console.log(dataToSend);
     //send http POST
     var http = new XMLHttpRequest();
     http.open("POST", '/calendar/week?operation=markAsAvailable', true);
@@ -311,9 +346,31 @@ function sendMarkAsAvailable() {
     })); 
     http.onreadystatechange = function () {
         if (http.readyState === 4) {
-            console.log('Success')
+            openPopup();
+            cleanCellsReservation();
+            console.log('Success');
         }
       }
+}
+
+/**
+ * Uklanja slobodne termine
+ */
+function deleteAvailable() {
+    var http = new XMLHttpRequest();
+    http.open("POST", '/calendar/week?operation=deleteAvailable', true);
+    http.setRequestHeader('Content-Type', 'application/json');
+    http.setRequestHeader('Accept', 'application/json');
+    http.responseType = 'json';
+    http.send(JSON.stringify({
+        user: user
+    }));
+    http.onreadystatechange = function () {
+        if (http.readyState === 4) {
+            openPopup();
+            console.log('Success');
+        }
+    }
 }
 
 /**
@@ -350,6 +407,14 @@ class CellObject {
     }
 }
 
+function openPopup() {
+    var popup = document.getElementById("sendPopup");
+    popup.classList.toggle("show");
+    setTimeout(()=>{
+        popup.classList.toggle("show");
+    },3000);
+}
+
 /**
  * @class Klasa koja predstavlja dogadaj u kalendaru
  */
@@ -371,13 +436,13 @@ class CalendarEvent {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="CalendarEvent.html">CalendarEvent</a></li><li><a href="CellObject.html">CellObject</a></li><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#appendHours">appendHours</a></li><li><a href="global.html#appendWeek">appendWeek</a></li><li><a href="global.html#cellClicked">cellClicked</a></li><li><a href="global.html#checkMail">checkMail</a></li><li><a href="global.html#checkPassword">checkPassword</a></li><li><a href="global.html#checkPasswordConf">checkPasswordConf</a></li><li><a href="global.html#cleanCellsReservation">cleanCellsReservation</a></li><li><a href="global.html#compareDates">compareDates</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#dateChanged">dateChanged</a></li><li><a href="global.html#fetchCalendarData">fetchCalendarData</a></li><li><a href="global.html#fillCellsWithData">fillCellsWithData</a></li><li><a href="global.html#getLocalDateFormat">getLocalDateFormat</a></li><li><a href="global.html#getUsersThatSheredCalendarWithYou">getUsersThatSheredCalendarWithYou</a></li><li><a href="global.html#getVerification">getVerification</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#initializeData">initializeData</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#next">next</a></li><li><a href="global.html#onFormChange">onFormChange</a></li><li><a href="global.html#onOutlookLogin">onOutlookLogin</a></li><li><a href="global.html#onSubmit">onSubmit</a></li><li><a href="global.html#previous">previous</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#resetCells">resetCells</a></li><li><a href="global.html#routeChanged">routeChanged</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#sendMarkAsAvailable">sendMarkAsAvailable</a></li><li><a href="global.html#sendRequestForMeetings">sendRequestForMeetings</a></li><li><a href="global.html#toJSON">toJSON</a></li><li><a href="global.html#tokenReceived">tokenReceived</a></li><li><a href="global.html#validateEmail">validateEmail</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="CalendarEvent.html">CalendarEvent</a></li><li><a href="CellObject.html">CellObject</a></li><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#appendHours">appendHours</a></li><li><a href="global.html#appendWeek">appendWeek</a></li><li><a href="global.html#cellClicked">cellClicked</a></li><li><a href="global.html#checkMail">checkMail</a></li><li><a href="global.html#checkPassword">checkPassword</a></li><li><a href="global.html#checkPasswordConf">checkPasswordConf</a></li><li><a href="global.html#cleanCellsReservation">cleanCellsReservation</a></li><li><a href="global.html#compareDates">compareDates</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#dateChanged">dateChanged</a></li><li><a href="global.html#deleteAvailable">deleteAvailable</a></li><li><a href="global.html#fetchCalendarData">fetchCalendarData</a></li><li><a href="global.html#fillCellsWithData">fillCellsWithData</a></li><li><a href="global.html#getLocalDateFormat">getLocalDateFormat</a></li><li><a href="global.html#getUsersThatSheredCalendarWithYou">getUsersThatSheredCalendarWithYou</a></li><li><a href="global.html#getVerification">getVerification</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#initializeData">initializeData</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#next">next</a></li><li><a href="global.html#onFormChange">onFormChange</a></li><li><a href="global.html#onOutlookLogin">onOutlookLogin</a></li><li><a href="global.html#onSubmit">onSubmit</a></li><li><a href="global.html#previous">previous</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#resetCells">resetCells</a></li><li><a href="global.html#routeChanged">routeChanged</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#sendMarkAsAvailable">sendMarkAsAvailable</a></li><li><a href="global.html#sendRequestForMeetings">sendRequestForMeetings</a></li><li><a href="global.html#toJSON">toJSON</a></li><li><a href="global.html#tokenReceived">tokenReceived</a></li><li><a href="global.html#validateEmail">validateEmail</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jan 14 2019 11:35:17 GMT+0100 (Central European Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Jan 20 2019 23:16:35 GMT+0100 (GMT+01:00)
 </footer>
 
 <script> prettyPrint(); </script>

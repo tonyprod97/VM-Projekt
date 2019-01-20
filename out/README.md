@@ -23,17 +23,15 @@ Postoje tri tipa korisnika sustava:
 3. Administrator sustava
 
 Svi korisnici **prijavljuju** se u sustav svojim adresama elektronicke poste i odgovarajucim lozinkama. Ukoliko ne posjeduju racun, korisnici se mogu **registrirati** ispunjujuci odgovarajuci web obrazac. Nakon registracije korisnik je obavezan **potvrditi** svoj račun klikom na verifikacijski link koji mu je poslan na adresu elektronicke poste.
-Svaki korisnik, nakon registracije, dobiva status *STUDENTA*. *NASTAVNIK* je korisnik sustava kojega je nakon prijave administrator sustava odobrio kao nastavnika.
-Svaki korisnik ima mogucnost sinkronizacije svoga **Outlook racuna** sa aplikacijom, kako bi se u kalendar aplikacije sinkronizirao sa kalendarom aplikacije *Outlook*. Svaki korisnik je u mogucnosti dodavati dogadaje u kalendar i brisati dogadaje iz kalendara koristeci aplikaciju.
+Svaki korisnik, prilikom registracije, odavire svoju ulogu u sustavu ( *STUDENT* ili *NASTAVNIK*).
+Svaki korisnik ima mogucnost sinkronizacije svoga **Outlook racuna** sa aplikacijom, kako bi se u kalendar aplikacije sinkronizirao sa kalendarom aplikacije *Outlook*.
 Osnovni slijed komunikacije korisnika sustava:  
-* Nakon prijave u sustav, student je u mogucnosti **odabrati** nastavnika kojeg zeli pratiti ( vidjeti njegov kalendar, odnosno njegove zauzete termine). Student odabire nastavnika te odabire razlog pracenja. Nastavniku se salje obavijest na adresu elektronicke poste u kojoj nastavnik moze prihvatiti ili odbiti pracenje. Ukoliko nastavnik **prihvati**, student dobiva na uvid kalendar nastavnika.
-* Nakon sto je studentu odobreno pracenje nastavnika, student je u mogucnosti **rezervirati** termin u vremenu koje je nastavnik odredio kao slobodno. Osnovni tijek aktivnosti prilikom rezervacije termina:
+* Nakon prijave u sustav, student je u mogucnosti **odabrati** nastavnika kojeg zeli pratiti ( vidjeti njegov kalendar, odnosno njegove zauzete termine).
+* Studen dobiva na uvid kalendar nastavnika te ukoliko postoje slobodni termini predodredeni za sastanke ( odreduje nastavnik), student je u mogucnosti **rezervirati** termin. Osnovni tijek aktivnosti prilikom rezervacije termina:
    * Student odabire slobodan termin u kalendaru nastavnika te odabire vremensko trajanje i uzrok rezervacije
-   * Na kalendaru nastanika automatski se naznacuje mjesto koje student pokusava rezervirati- poprimi sivu boju
-   * Na adresu elektronicke poste nastavnika salje se obavijest u kojoj nastavnik dobiva na izbor prihvat, odbijanje rezervacije ili predlaganje nekog drugog termina rezervacije
-        * Ukoliko nastavnik **prihvati** rezervaciju, azuriraju se kalendari studenta i nastavnika tako da se zauzmu vremena u kojima se dogovorila rezervacija. Na adresu elektronicke poste studenta se salje obavijest o uspjesnoj rezervaciji.
-        * Ukoliko nastavnik **odbije** rezervaciju, u kalendaru nastavnika se brise pokusaj rezervacije. Na adresu elektronice poste studenta se salje obavijest o neuspjesnoj rezervaciji.
-        * Ukoliko nastavnik **predlozi neki drugi termin**, obavijest sa prijedlogom se salje na adresu elektronicke poste studenta te ukoliko student prihvati promjenu termina, azuriraju se kalendari nastavnika i studenta na mjestu gdje je dogovoren novi termin.   
+   * Na adresu elektronicke poste nastavnika salje se obavijest u kojoj nastavnik dobiva na izbor prihvat ili odbijanje rezervacije
+        * Ukoliko nastavnik **prihvati** rezervaciju, na adresu elektronicke poste studenta se salje obavijest o uspjesnoj rezervaciji sa gdje student dobiva odabir zeli li azurirati svoj kalendar ovim dogadajem. Ukoliko student odabere opciju azuriranja, azuriraju se kalendari studenta i nastavnika tako da se zauzmu vremena u kojima se dogovorila rezervacija.
+        * Ukoliko nastavnik **odbije** rezervaciju, u kalendaru nastavnika se brise pokusaj rezervacije.
 
 ### Stablo direktorija aplikacije ###
 
@@ -55,6 +53,7 @@ Prikaz stabla direktorija aplikacije:
 |   |   |---calendar
 |   |---styles
 |   |   |---calendar
+|   |   |---pictures
 |   |---UrlManager
 |   |---views
 |       |---calendar
@@ -77,7 +76,7 @@ Prikaz stabla direktorija aplikacije:
     * poddirektorij **routes** - definiranje globalih objekata
     * poddirektorij **scripts** - definiranje *JavaScript* skripti vezanih za prikaz korisnickog sucelja
     * poddirektorij **styles** - definiranje *CSS* datoteka
-    * poddirektorij **UrlManager** 
+    * poddirektorij **UrlManager** -definiranje URL mappinga
     * poddirektorij **views** - *HTML* datoteke koje definiranju izgled web stranica 
 * U direktoriju **node_modules** nalaze se svi *source* kodovi koristenih *JavaScript* paketa.
 * U direktoriju **out** nalazi se dokumentacija aplikacije. Poddirektoriji **fonts**, **scripts**, **styles** sadrze datoteke koje su potrebne kako bi se generirala dokumentacija, a sama dokumentacija nalazi se u *.html* datotekama koje se nalaze u samom direktoriju **out**. 

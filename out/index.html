@@ -63,18 +63,16 @@ Postoje tri tipa korisnika sustava:</p>
 <li>Administrator sustava</li>
 </ol>
 <p>Svi korisnici <strong>prijavljuju</strong> se u sustav svojim adresama elektronicke poste i odgovarajucim lozinkama. Ukoliko ne posjeduju racun, korisnici se mogu <strong>registrirati</strong> ispunjujuci odgovarajuci web obrazac. Nakon registracije korisnik je obavezan <strong>potvrditi</strong> svoj račun klikom na verifikacijski link koji mu je poslan na adresu elektronicke poste.
-Svaki korisnik, nakon registracije, dobiva status <em>STUDENTA</em>. <em>NASTAVNIK</em> je korisnik sustava kojega je nakon prijave administrator sustava odobrio kao nastavnika.
-Svaki korisnik ima mogucnost sinkronizacije svoga <strong>Outlook racuna</strong> sa aplikacijom, kako bi se u kalendar aplikacije sinkronizirao sa kalendarom aplikacije <em>Outlook</em>. Svaki korisnik je u mogucnosti dodavati dogadaje u kalendar i brisati dogadaje iz kalendara koristeci aplikaciju.
+Svaki korisnik, prilikom registracije, odavire svoju ulogu u sustavu ( <em>STUDENT</em> ili <em>NASTAVNIK</em>).
+Svaki korisnik ima mogucnost sinkronizacije svoga <strong>Outlook racuna</strong> sa aplikacijom, kako bi se u kalendar aplikacije sinkronizirao sa kalendarom aplikacije <em>Outlook</em>.
 Osnovni slijed komunikacije korisnika sustava:  </p>
 <ul>
-<li>Nakon prijave u sustav, student je u mogucnosti <strong>odabrati</strong> nastavnika kojeg zeli pratiti ( vidjeti njegov kalendar, odnosno njegove zauzete termine). Student odabire nastavnika te odabire razlog pracenja. Nastavniku se salje obavijest na adresu elektronicke poste u kojoj nastavnik moze prihvatiti ili odbiti pracenje. Ukoliko nastavnik <strong>prihvati</strong>, student dobiva na uvid kalendar nastavnika.</li>
-<li>Nakon sto je studentu odobreno pracenje nastavnika, student je u mogucnosti <strong>rezervirati</strong> termin u vremenu koje je nastavnik odredio kao slobodno. Osnovni tijek aktivnosti prilikom rezervacije termina:<ul>
+<li>Nakon prijave u sustav, student je u mogucnosti <strong>odabrati</strong> nastavnika kojeg zeli pratiti ( vidjeti njegov kalendar, odnosno njegove zauzete termine).</li>
+<li>Studen dobiva na uvid kalendar nastavnika te ukoliko postoje slobodni termini predodredeni za sastanke ( odreduje nastavnik), student je u mogucnosti <strong>rezervirati</strong> termin. Osnovni tijek aktivnosti prilikom rezervacije termina:<ul>
 <li>Student odabire slobodan termin u kalendaru nastavnika te odabire vremensko trajanje i uzrok rezervacije</li>
-<li>Na kalendaru nastanika automatski se naznacuje mjesto koje student pokusava rezervirati- poprimi sivu boju</li>
-<li>Na adresu elektronicke poste nastavnika salje se obavijest u kojoj nastavnik dobiva na izbor prihvat, odbijanje rezervacije ili predlaganje nekog drugog termina rezervacije<ul>
-<li>Ukoliko nastavnik <strong>prihvati</strong> rezervaciju, azuriraju se kalendari studenta i nastavnika tako da se zauzmu vremena u kojima se dogovorila rezervacija. Na adresu elektronicke poste studenta se salje obavijest o uspjesnoj rezervaciji.</li>
-<li>Ukoliko nastavnik <strong>odbije</strong> rezervaciju, u kalendaru nastavnika se brise pokusaj rezervacije. Na adresu elektronice poste studenta se salje obavijest o neuspjesnoj rezervaciji.</li>
-<li>Ukoliko nastavnik <strong>predlozi neki drugi termin</strong>, obavijest sa prijedlogom se salje na adresu elektronicke poste studenta te ukoliko student prihvati promjenu termina, azuriraju se kalendari nastavnika i studenta na mjestu gdje je dogovoren novi termin.   </li>
+<li>Na adresu elektronicke poste nastavnika salje se obavijest u kojoj nastavnik dobiva na izbor prihvat ili odbijanje rezervacije<ul>
+<li>Ukoliko nastavnik <strong>prihvati</strong> rezervaciju, na adresu elektronicke poste studenta se salje obavijest o uspjesnoj rezervaciji sa gdje student dobiva odabir zeli li azurirati svoj kalendar ovim dogadajem. Ukoliko student odabere opciju azuriranja, azuriraju se kalendari studenta i nastavnika tako da se zauzmu vremena u kojima se dogovorila rezervacija.</li>
+<li>Ukoliko nastavnik <strong>odbije</strong> rezervaciju, u kalendaru nastavnika se brise pokusaj rezervacije.</li>
 </ul>
 </li>
 </ul>
@@ -97,6 +95,7 @@ Osnovni slijed komunikacije korisnika sustava:  </p>
 |   |   |---calendar
 |   |---styles
 |   |   |---calendar
+|   |   |---pictures
 |   |---UrlManager
 |   |---views
 |       |---calendar
@@ -117,7 +116,7 @@ Osnovni slijed komunikacije korisnika sustava:  </p>
 <li>poddirektorij <strong>routes</strong> - definiranje globalih objekata</li>
 <li>poddirektorij <strong>scripts</strong> - definiranje <em>JavaScript</em> skripti vezanih za prikaz korisnickog sucelja</li>
 <li>poddirektorij <strong>styles</strong> - definiranje <em>CSS</em> datoteka</li>
-<li>poddirektorij <strong>UrlManager</strong> </li>
+<li>poddirektorij <strong>UrlManager</strong> -definiranje URL mappinga</li>
 <li>poddirektorij <strong>views</strong> - <em>HTML</em> datoteke koje definiranju izgled web stranica </li>
 </ul>
 </li>
@@ -785,13 +784,13 @@ Osnovni slijed komunikacije korisnika sustava:  </p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="CalendarEvent.html">CalendarEvent</a></li><li><a href="CellObject.html">CellObject</a></li><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#appendHours">appendHours</a></li><li><a href="global.html#appendWeek">appendWeek</a></li><li><a href="global.html#cellClicked">cellClicked</a></li><li><a href="global.html#checkMail">checkMail</a></li><li><a href="global.html#checkPassword">checkPassword</a></li><li><a href="global.html#checkPasswordConf">checkPasswordConf</a></li><li><a href="global.html#cleanCellsReservation">cleanCellsReservation</a></li><li><a href="global.html#compareDates">compareDates</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#dateChanged">dateChanged</a></li><li><a href="global.html#fetchCalendarData">fetchCalendarData</a></li><li><a href="global.html#fillCellsWithData">fillCellsWithData</a></li><li><a href="global.html#getLocalDateFormat">getLocalDateFormat</a></li><li><a href="global.html#getUsersThatSheredCalendarWithYou">getUsersThatSheredCalendarWithYou</a></li><li><a href="global.html#getVerification">getVerification</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#initializeData">initializeData</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#next">next</a></li><li><a href="global.html#onFormChange">onFormChange</a></li><li><a href="global.html#onOutlookLogin">onOutlookLogin</a></li><li><a href="global.html#onSubmit">onSubmit</a></li><li><a href="global.html#previous">previous</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#resetCells">resetCells</a></li><li><a href="global.html#routeChanged">routeChanged</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#sendMarkAsAvailable">sendMarkAsAvailable</a></li><li><a href="global.html#sendRequestForMeetings">sendRequestForMeetings</a></li><li><a href="global.html#toJSON">toJSON</a></li><li><a href="global.html#tokenReceived">tokenReceived</a></li><li><a href="global.html#validateEmail">validateEmail</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="CalendarEvent.html">CalendarEvent</a></li><li><a href="CellObject.html">CellObject</a></li><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#appendHours">appendHours</a></li><li><a href="global.html#appendWeek">appendWeek</a></li><li><a href="global.html#cellClicked">cellClicked</a></li><li><a href="global.html#checkMail">checkMail</a></li><li><a href="global.html#checkPassword">checkPassword</a></li><li><a href="global.html#checkPasswordConf">checkPasswordConf</a></li><li><a href="global.html#cleanCellsReservation">cleanCellsReservation</a></li><li><a href="global.html#compareDates">compareDates</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#dateChanged">dateChanged</a></li><li><a href="global.html#deleteAvailable">deleteAvailable</a></li><li><a href="global.html#fetchCalendarData">fetchCalendarData</a></li><li><a href="global.html#fillCellsWithData">fillCellsWithData</a></li><li><a href="global.html#getLocalDateFormat">getLocalDateFormat</a></li><li><a href="global.html#getUsersThatSheredCalendarWithYou">getUsersThatSheredCalendarWithYou</a></li><li><a href="global.html#getVerification">getVerification</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#initializeData">initializeData</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#next">next</a></li><li><a href="global.html#onFormChange">onFormChange</a></li><li><a href="global.html#onOutlookLogin">onOutlookLogin</a></li><li><a href="global.html#onSubmit">onSubmit</a></li><li><a href="global.html#previous">previous</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#resetCells">resetCells</a></li><li><a href="global.html#routeChanged">routeChanged</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#sendMarkAsAvailable">sendMarkAsAvailable</a></li><li><a href="global.html#sendRequestForMeetings">sendRequestForMeetings</a></li><li><a href="global.html#toJSON">toJSON</a></li><li><a href="global.html#tokenReceived">tokenReceived</a></li><li><a href="global.html#validateEmail">validateEmail</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jan 14 2019 11:35:17 GMT+0100 (Central European Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Jan 20 2019 23:16:36 GMT+0100 (GMT+01:00)
 </footer>
 
 <script> prettyPrint(); </script>
