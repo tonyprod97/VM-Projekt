@@ -1,0 +1,3 @@
+C:\Users\Martn\Desktop\VMprojekt\VM-Projekt\app\obj\Debug\FromExistingCode18.njsprojAssemblyReference.cache
+C:\Users\Martn\Desktop\VMprojekt\VM-Projekt\app\obj\Debug\FromExistingCode18.njsproj.CoreCompileInputs.cache
+C:\Users\Martn\Desktop\VMprojekt\VM-Projekt\app\bin\Microsoft.NodejsTools.WebRole.dll

@@ -429,6 +429,29 @@ function getIdFromEmail(database, email, callback) {
 
 }
 
+function deleteAvailable(database, token, userid, callback) {
+    let data = {
+        state: dbConsts.OPERATION_SUCCESS,
+        msg: "operation success",
+        data: null
+    };
+
+    isValidSessionInfo(database, userid, token, (answer) => {
+
+        if (answer.state != dbConsts.OPERATION_SUCCESS) {
+            setTimeout(() => callback(answer));
+            return;
+        }
+
+        database.query('DELETE FROM ' + calendarTable + ' WHERE userid=@userid', (error) => {
+            if (error) {
+                console.log(error);
+            }
+
+            setTimeout(() => callback(data));
+        });
+    });
+}
 
 function insertCalendarData(userid, token, calendarInfo, callback) {
 
@@ -947,7 +970,6 @@ class DatabaseManager {
             }
 
             case sendRequests.SEND_MEETING_REQUEST: {
-                console.log(sentData.data);
                 sendMeetingRequest(new mssql.Request(), sentData.data.userid, sentData.data.token, sentData.data.toEmail, sentData.data.startDate,sentData.data.subject, callback);
                 break;
             }
@@ -956,6 +978,11 @@ class DatabaseManager {
                 answerMeetingRequest(new mssql.Request(), sentData.data.token, sentData.data.accept, callback);
                 break;
             }
+
+            case sendRequests.DELETE_AVAILABLE: {
+                deleteAvailable(new mssql.Request(), sentData.data.token, sentData.data.userid, callback);
+                break;
+            } 
         }
     }
 }

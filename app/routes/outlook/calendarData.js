@@ -17,50 +17,48 @@ router.post('/', permit, (req,res)=>{
     let user = req.body.user;
     console.log('Current user data:',user);
     const teacher = req.query['teacher'];
-    var arrayResponses =[];
 
-    getOutlookData(req, res, (data) => {
-        for (var i = 0; i < data.length; i++) {
-            arrayResponses.push(data[i]);
-        }
+    if (teacher) {
+        databaseManager.getSingleRequest({
+            id: getRequests.GET_ID_FROM_MAIL,
+            data: {
+                email: teacher,
+            }
+        },
+            (answer) => {
+                var teacherID = answer.data[0].id;
 
-        if (teacher) {
-            //send data for profesor with name teacher
-            databaseManager.getSingleRequest({
-                id: getRequests.GET_ID_FROM_MAIL,
-                data: {
-                    email: teacher,
-                }
-            },
-                (answer) => {
-                    var teacherID = answer.data[0].id;
-
-                    getTeacherChecked(teacherID, teacher, user, (data) => {
-                        for (var i = 0; i < data.length; i++) {
-                            arrayResponses.push(data[i]);
-                        }
-
-                        res.send({
-                            calendarData: JSON.stringify(arrayResponses)
-                        });
+                getTeacherChecked(teacherID, teacher, user, (data) => {
+                    res.send({
+                        calendarData: JSON.stringify(data)
                     });
                 });
-        } else if (!user.isStudent) {
-            getTeacherChecked(user.id, user.email, user, (data) => {
-                for (var i = 0; i < data.length; i++) {
-                    arrayResponses.push(data[i]);
-                }
+            });
+    } else {
+        var arrayResponses = [];
 
+        getOutlookData(req, res, (data) => {
+            for (var i = 0; i < data.length; i++) {
+                arrayResponses.push(data[i]);
+            }
+
+            if (!user.isStudent) {
+                getTeacherChecked(user.id, user.email, user, (data) => {
+                    for (var i = 0; i < data.length; i++) {
+                        arrayResponses.unshift(data[i]);
+                    }
+
+                    res.send({
+                        calendarData: JSON.stringify(arrayResponses)
+                    });
+                });
+            } else {
                 res.send({
                     calendarData: JSON.stringify(arrayResponses)
                 });
-            });
-        } else {
-            res.send({
-                calendarData: JSON.stringify(arrayResponses)
-            });
-        }
-    });
+            }
+        });
+    }
 });
 
  function getTeacherChecked(teacherID, teacher, user, callback) {
