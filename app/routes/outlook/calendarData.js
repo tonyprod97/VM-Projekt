@@ -37,7 +37,7 @@ router.post('/', permit, (req,res)=>{
 
                     getTeacherChecked(teacherID, teacher, user, (data) => {
                         for (var i = 0; i < data.length; i++) {
-                            arrayResponses.push(data[i]);
+                            arrayResponses.unshift(data[i]);
                         }
 
                         res.send({
@@ -48,7 +48,7 @@ router.post('/', permit, (req,res)=>{
         } else if (!user.isStudent) {
             getTeacherChecked(user.id, user.email, user, (data) => {
                 for (var i = 0; i < data.length; i++) {
-                    arrayResponses.push(data[i]);
+                    arrayResponses.unshift(data[i]);
                 }
 
                 res.send({
