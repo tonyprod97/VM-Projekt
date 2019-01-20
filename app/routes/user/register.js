@@ -41,7 +41,7 @@ router.post('/', (req, res) => {
 
             //console.log(data);
 
-            url = data.protocol + '://' + data.host  + '/user/verify/' + answer.data.userid + '/' + answer.data.token;
+            let url = data.protocol + '://' + data.host  + '/user/verify/' + answer.data.userid + '/' + answer.data.token + '    ';
 
             console.log("account verification url: " + url);
 

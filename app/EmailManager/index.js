@@ -1,5 +1,7 @@
 var nodemailer = require('nodemailer');
 
+const verificationText = 'To verify your account please click on the link: ';
+
 var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -29,8 +31,8 @@ var confirmMeetingOptions = {
 module.exports = {
 
     sendVerificationMail: function(subjectMail, confirm_url) {
-        mailVerificationOptions.to=subjectMail;
-        mailVerificationOptions.text=mailVerificationOptions.text+confirm_url;
+        mailVerificationOptions.to = subjectMail;
+        mailVerificationOptions.text = verificationText + confirm_url;
 
         transporter.sendMail(mailVerificationOptions, function(error, info){
             if (error) {
