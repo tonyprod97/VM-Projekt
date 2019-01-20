@@ -320,9 +320,29 @@ function sendMarkAsAvailable() {
         if (http.readyState === 4) {
             openPopup();
             cleanCellsReservation();
-            console.log('Success')
+            console.log('Success');
         }
       }
+}
+
+/**
+ * Uklanja slobodne termine
+ */
+function deleteAvailable() {
+    var http = new XMLHttpRequest();
+    http.open("POST", '/calendar/week?operation=deleteAvailable', true);
+    http.setRequestHeader('Content-Type', 'application/json');
+    http.setRequestHeader('Accept', 'application/json');
+    http.responseType = 'json';
+    http.send(JSON.stringify({
+        user: user
+    }));
+    http.onreadystatechange = function () {
+        if (http.readyState === 4) {
+            openPopup();
+            console.log('Success');
+        }
+    }
 }
 
 /**

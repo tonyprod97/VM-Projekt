@@ -24,11 +24,23 @@ router.get('/', permit, (req,res)=>{
 
 router.post('/', permit, (req,res)=>{
 
-    if(req.query['operation']=='requestMeeting') {
+    if (req.query['operation'] == 'requestMeeting') {
         let subject = req.body.subject;
         let requestedMeetings = req.body.requestedMeetings[0];
-        postOutlookData(req,res,subject,requestedMeetings);
+        postOutlookData(req, res, subject, requestedMeetings);
 
+    } else if (req.query['operation'] == 'deleteAvailable') {
+        let user = req.body.user;
+
+        databaseManager.sendRequest({
+            id: sendIds.DELETE_AVAILABLE,
+            data: {
+                userid: user.id,
+                token: user.sessionToken
+            }
+        }, (answer) => {
+            console.log(answer);
+            });
     } else {
         //teacher wants to mark when is available for consultations
         let requestedMeetings = req.body.available;
