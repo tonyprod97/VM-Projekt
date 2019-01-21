@@ -1,10 +1,12 @@
 @import "../style.less";
 
+@headers-color:#E0E0E0;
+@busy-cell:#616161;
+@requestable-cell: #A5D6A7;
+@requested-cell: #2E7D32;
+@button-submit: #81D4FA;
 
-.hover-shadow:hover {
-    color: white;
-    text-shadow: 2px 2px 4px #000000;
-}
+/*
 
 td {
     border: 1px solid black;
@@ -77,11 +79,12 @@ th {
 .float-left {
     float: left;
 }
-
+*/
 div {
-    &.background-gradient {
-        background-image: linear-gradient(to right,aliceblue,skyblue);
-        margin-bottom: 15px;
+    &.backgorund-main {
+        background-color: @backgorund-main-color;
+        height: -webkit-fill-available;
+        font-family: sans-serif;
     }
 }
 
@@ -93,4 +96,87 @@ form {
 
 h3 {
     margin-left: 25%;
+}
+
+
+td {
+    text-align: center;
+    background-color: white;
+
+    &.clickable {
+        cursor: pointer;
+    }
+    &.marked {
+        background-color: gray; 
+    }
+
+    &.student {
+        &.personal-view {
+            &:hover {
+                cursor: auto;
+            }
+            &.busy {
+                background-color: @busy-cell;
+                color: white;
+            }
+        }
+    
+        &.teacher-view {
+            //disable if not busy
+            
+            &.busy {
+                background-color: @requestable-cell;
+                color: white;
+
+                &.marked {
+                    background-color: @requested-cell;
+                    color: black;
+                }
+            }
+        }
+    }
+
+    &.teacher {
+        &.busy {
+            background-color: @busy-cell;
+            color: white;
+        }
+        &.available {
+            background-color: white;
+
+            &:hover {
+                background-color: @requestable-cell;
+            }
+        }
+        &.marked {
+            background-color: @requested-cell;
+            &:hover {
+                background-color: @requested-cell;
+            }
+        }
+    }
+}
+
+.table-responsive {
+    margin: 0px 25px;
+}
+
+.quarter-time {
+    border: 1px solid red;
+    display: block;
+    height: -webkit-fill-available;
+}
+
+th, .time-column {
+    text-align: center;
+    background-color: @headers-color;
+}
+
+.color-submit {
+    background-color: @button-submit;
+}
+
+.hover-shadow:hover {
+    color: white;
+    text-shadow: 2px 2px 4px #000000;
 }

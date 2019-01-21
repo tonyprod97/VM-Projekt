@@ -33,6 +33,204 @@ function initializeData() {
 };
 
 
+
+/**
+ * Stvaranje stupaca po danima
+ * @param {Object} date - trenutni datum
+*/
+function appendWeek(date) {
+
+    if(date.getDay() != 1 && date.getTime()>currentDate.getTime()) return; // If not monday neglect the change of date if trying to increase the date.
+    if(date.getTime()<currentDate.getTime() && date.getDay() == 0) {
+        //Set date to previous monday.
+        date.setDate(date.getDate()-6);
+    }
+    headerRow.innerHTML = '';
+    
+    currentDate = date;
+
+    let thElement = document.createElement('th');
+    thElement.innerHTML = 'YEAR' + currentDate.getFullYear();
+    thElement.className +=' col-auto';
+    headerRow.appendChild(thElement);
+    setMonday();
+    
+    //append dates of week
+    for(let i = 0;i<7;i++) {
+        let tempDate =new Date(monday);
+        tempDate.setDate(monday.getDate()+i);
+
+        let tempDay = tempDate.getDate();
+        let tempMonth = tempDate.getMonth()+1;
+        let thElement = document.createElement('th');
+        thElement.className +='col-auto';
+
+        thElement.innerText += tempMonth+'/'+tempDay;
+        thElement.innerText += ' - '+ daysOfWeek[tempDate.getDay()];
+
+        headerRow.appendChild(thElement);
+    }
+    tableBody.innerHTML = '';
+    appendHours();
+}
+
+/**
+ * Stvaranje redaka po satima
+ */
+function appendHours() {
+    //teacherElement is displayed only when requesting, role is 0 if student is logged
+    let roleClass = !role ? 'student': 'teacher';
+
+    //displaying personal calendar for student
+    let viewClass;
+    let availableClass;
+    let clickableClass;
+
+    console.log('role:', role)
+    viewClass = teacherElement ? 'teacher-view' : 'personal-view';
+    if(!role) {
+        //student is logged
+        if(teacherElement) clickableClass = 'clickable';
+    } else {
+        //teacher is logged
+        clickableClass = 'clickable';
+    } 
+    console.log('clickableClass:', clickableClass)
+
+    let disabledCell = !teacherElement && !role ? 'disabled': '';
+    let freeCell = teacherElement && !role ? 'free' : '';
+    
+    for(let i=8;i<20;i++) {
+        let trElement = document.createElement('tr');
+        trElement.id = 'row'+i;
+        tableBody.appendChild(trElement);
+
+        let timeSufix = i>9 ? i+':00' : '0'+i +':00';
+        timeSufix +='-';
+        timeSufix += i+1>9 ? (i+1)+':00' : '0'+(i+1)+':00';
+        let tdTimeElement = document.createElement('td');
+        tdTimeElement.innerText =  timeSufix;
+        tdTimeElement.className += 'time-column';
+        trElement.appendChild(tdTimeElement);
+
+        for(let j=0;j<7;j++) {
+            let tempDate = new Date(monday);
+            tempDate.setDate(tempDate.getDate()+j);
+            let tempDay = tempDate.getDate();
+            let tempMonth = tempDate.getMonth()+1;
+            let tempYear = tempDate.getFullYear();
+            let dateString = tempYear + '/'+tempMonth+"/"+tempDay;
+            
+            let tdElement = document.createElement('td');
+            //id exp. 8-2019/1/25 -> format: startingTime - year/month/dayOfMonth
+            tdElement.id = i+'-'+dateString;
+            tdElement.classList.add('available',roleClass,viewClass);
+            if(clickableClass) tdElement.classList.add(clickableClass);
+
+            let divContainer = document.createElement('div');
+            divContainer.className +='quarter-time-container';
+            tdElement.appendChild(divContainer);
+
+            /*for(let k = 0; k < 4; k++) {
+                let div = document.createElement('div');
+                div.id = i+':'+k*15+'-'+dateString;
+                div.className +='quarter-time row';
+                divContainer.appendChild(div);
+                
+                div.addEventListener('click',function() {
+                    cellClicked(i+':'+k*15,tempYear,tempMonth,tempDay)
+                });
+            }*/
+
+            tdElement.addEventListener('click',function() {
+                cellClicked(i,tempYear,tempMonth,tempDay)
+            });
+
+            trElement.appendChild(tdElement);
+        }
+        
+        tableBody.appendChild(trElement);
+    }
+}
+
+/**
+ * Dodavanje podataka celijama
+ */
+function fillCellsWithData() {
+    if(calendarData === undefined) return;
+    if(calendarData.length === 0) return;
+    resetCells();
+    
+    calendarData.forEach(event=>{
+        let data = new CalendarEvent(event.Subject,new Date(event.Start.DateTime),new Date(event.End.DateTime),event.Location ? event.Location.DisplayName : '');
+        let id = data.start.getHours()+'-'+data.start.getFullYear()+'/'+Number(data.start.getMonth()+1)+'/'+data.start.getDate();
+        let cell = document.getElementById(id);
+        let div = document.createElement('div');
+
+        if(cell) {
+            if(data.subject) {
+                div.innerHTML=data.subject;
+            } else {
+                div.innerHTML="taken";
+            }
+            cell.appendChild(div);
+            cell.classList.add('busy');
+            if(!role) cell.classList.add('clickable');
+            cell.classList.remove('available');
+        }
+    })
+}
+
+/**
+ * Rezervacija termina klikom na celiju
+ * @param {Object} startingTimeHour - izabrano pocetno vrijeme 
+ * @param {Object} year - izabrana godina
+ * @param {Object} month - izabran mjesec
+ * @param {Object} day - izabran dan
+ */
+
+function cellClicked(startingTimeHour,year,month,day) {
+    //let cell = document.getElementById('cell'+startingTimeHour+'-'+year+'/'+month+'/'+day);
+    let cell = document.getElementById(startingTimeHour+'-'+year+'/'+month+'/'+day);
+    console.log('cell is clicked: ',cell);
+    if(!cell.classList.contains('clickable')) return;
+    cell.classList.toggle('marked');
+
+    
+
+    if(!cell.classList.contains('taken') && !cell.classList.contains('disabled')) {
+        if(!teacherElement) {
+            cell.classList.toggle('reserved');
+    
+            let newCellObject = new CellObject(year,month,day,startingTimeHour);
+            let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
+    
+            if(reservedCells.length == newArray.length) newArray.push(newCellObject);
+            reservedCells = newArray;
+            return;
+        }
+    }
+
+    if(cell.classList.contains('taken') && !cell.classList.contains('disabled')) {
+        cell.classList.toggle('reserved');
+    
+            let newCellObject = new CellObject(year,month,day,startingTimeHour);
+            let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
+    
+            if(reservedCells.length == newArray.length) newArray.push(newCellObject);
+            reservedCells = newArray;
+    }
+}
+/**
+ * Usporedba dva datuma
+ * @param {Object} x - prvi datum
+ * @param {Object} y - drugi datum
+ * @returns {boolean}
+ */
+function compareDates(x,y) {
+    return x.getDate()==y.getDate() && x.getFullYear() == y.getFullYear() && x.getMonth() == y.getMonth();
+}
+
 /**
  * Dohvat podataka kalendara
  */
@@ -72,104 +270,6 @@ function setMonday() {
 }
 
 /**
- * Stvaranje stupaca po danima
- * @param {Object} date - trenutni datum
-*/
-function appendWeek(date) {
-
-    if(date.getDay() != 1 && date.getTime()>currentDate.getTime()) return; // If not monday neglect the change of date if trying to increase the date.
-    if(date.getTime()<currentDate.getTime() && date.getDay() == 0) {
-        //Set date to previous monday.
-        date.setDate(date.getDate()-6);
-    }
-    
-    headerRow.innerHTML = "";
-    currentDate = date;
-
-    headerRow.innerHTML += '<th> YEAR '+currentDate.getFullYear()+' </th>';
-    setMonday();
- 
-
-    for(let i = 0;i<7;i++) {
-        let tempDate =new Date(monday);
-        tempDate.setDate(monday.getDate()+i);
-        //tempDate.setDate(tempDate.getDate()+i);
-        let tempDay = tempDate.getDate();
-        let tempMonth = tempDate.getMonth()+1;
-    
-        headerRow.innerHTML += '<th>'+tempMonth+'/'+tempDay+ '<br>'+ daysOfWeek[tempDate.getDay()]+'</th>';
-    }
-    appendHours();
-}
-
-/**
- * Stvaranje redaka po satima
- */
-function appendHours() {
-    tableBody.innerHTML = '';
-    //teacherElement is displayed only when requesting, role is 0 if student is logged
-    //let disabledCell = !teacherElement && !role ? 'disabled': '';
-    let disabledCell = !teacherElement && !role ? 'disabled': '';
-    let freeCell = teacherElement && !role ? 'free' : '';
-
-    for(let i=7;i<21;i++) {
-        tableBody.innerHTML += '<tr id="row"'+(i+1)+'>';
-        let timeSufix = i>9 ? i+':00' : '0'+i +':00';
-        timeSufix +='-';
-        timeSufix += i+1>9 ? (i+1)+':00' : '0'+(i+1)+':00';
-        let row ='<th scope="row">'+timeSufix+'</th>';
-        
-        for(let j=0;j<7;j++) {
-            let tempDate = new Date(monday);
-            tempDate.setDate(tempDate.getDate()+j);
-            let tempDay = tempDate.getDate();
-            let tempMonth = tempDate.getMonth()+1;
-            let tempYear = tempDate.getFullYear();
-            let dateString = tempYear + '/'+tempMonth+"/"+tempDay;
-            
-            row +='<td id="cell'+i+'-'+dateString+'" class="'+freeCell+' '+disabledCell+'" onclick="cellClicked('+i+','+tempYear+','+tempMonth+','+tempDay+')"></td>';
-        }
-        tableBody.innerHTML +=row;
-        tableBody.innerHTML +='</tr>';
-    }
-}
-
-/**
- * Dodavanje podataka celijama
- */
-function fillCellsWithData() {
-    if(calendarData === undefined) return;
-
-    calendarData.forEach(event=>{
-        let data = new CalendarEvent(event.Subject,new Date(event.Start.DateTime),new Date(event.End.DateTime),event.Location ? event.Location.DisplayName : '');
-        let id = "cell"+data.start.getHours()+'-'+data.start.getFullYear()+'/'+Number(data.start.getMonth()+1)+'/'+data.start.getDate();
-        let cell = document.getElementById(id);
-        if(cell) {
-            if(data.subject) {
-                cell.innerHTML="<div>"+data.subject+"</div>";
-            } else {
-                cell.innerHTML="<div>taken</div>";
-            }
-            
-            cell.classList.add('taken');
-            cell.classList.remove('free');
-            
-        }
-        
-    })
-}
-
-/**
- * Usporedba dva datuma
- * @param {Object} x - prvi datum
- * @param {Object} y - drugi datum
- * @returns {boolean}
- */
-function compareDates(x,y) {
-    return x.getDate()==y.getDate() && x.getFullYear() == y.getFullYear() && x.getMonth() == y.getMonth();
-}
-
-/**
  * Izmjena datuma kalendara
  */
 function dateChanged() {
@@ -178,49 +278,23 @@ function dateChanged() {
     }else {
         appendWeek(new Date());
     }
-    resetCells();
-    fillCellsWithData();
+    //fillCellsWithData();
 }
 
-/**
- * Rezervacija termina klikom na celiju
- * @param {Object} startingTimeHour - izabrano pocetno vrijeme 
- * @param {Object} year - izabrana godina
- * @param {Object} month - izabran mjesec
- * @param {Object} day - izabran dan
- */
-function cellClicked(startingTimeHour,year,month,day) {
-    let cell = document.getElementById('cell'+startingTimeHour+'-'+year+'/'+month+'/'+day);
-    if(!cell.classList.contains('taken') && !cell.classList.contains('disabled')) {
-        if(!teacherElement) {
-            cell.classList.toggle('reserved');
-    
-            let newCellObject = new CellObject(year,month,day,startingTimeHour);
-            let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
-    
-            if(reservedCells.length == newArray.length) newArray.push(newCellObject);
-            reservedCells = newArray;
-            return;
-        }
-    }
 
-    if(cell.classList.contains('taken') && !cell.classList.contains('disabled')) {
-        cell.classList.toggle('reserved');
-    
-            let newCellObject = new CellObject(year,month,day,startingTimeHour);
-            let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
-    
-            if(reservedCells.length == newArray.length) newArray.push(newCellObject);
-            reservedCells = newArray;
-    }
-}
 
 /**
  * Brisanje zauzetosti izabranih celija
  */
 function resetCells() {
-    let cells = document.querySelectorAll('table td');
-    cells.forEach(cell=>{cell.classList.remove('reserved');cell.classList.remove('taken');cell.innerHTML=''});
+    let cells = document.querySelectorAll('td');
+    cells.forEach(cell=>{
+        if(cell.classList.contains('time-column')) return;
+        cell.classList.remove('marked','busy');
+        if(!role) cell.classList.remove('clickable');
+        cell.classList.add('available');
+        cell.innerHTML=''
+    });
     reservedCells = new Array();
 }
 
@@ -234,8 +308,8 @@ function next() {
     date.setDate(monday.getDate()+7);
     startingDate.value = getLocalDateFormat(date);
     currentDate = new Date(date);
-    appendWeek(date);
     resetCells();
+    appendWeek(date);
     fillCellsWithData();
 }
 
@@ -248,8 +322,8 @@ function previous() {
     date.setDate(monday.getDate()-7);
     startingDate.value = getLocalDateFormat(date);
     currentDate = new Date(date);
-    appendWeek(date);
     resetCells();
+    appendWeek(date);
     fillCellsWithData();
 }
 
@@ -341,6 +415,7 @@ function deleteAvailable() {
         if (http.readyState === 4) {
             openPopup();
             console.log('Success');
+            resetCells();
         }
     }
 }
@@ -351,8 +426,8 @@ function deleteAvailable() {
 
 function cleanCellsReservation() {
     reservedCells.forEach(o=>{
-        let cell = document.getElementById('cell'+o.startingTime+'-'+o.year+'/'+o.month+'/'+o.day);
-        cell.classList.toggle('reserved');  
+        let cell = document.getElementById(o.startingTime+'-'+o.year+'/'+o.month+'/'+o.day);
+        cell.classList.toggle('marked');  
     });
     reservedCells = new Array();
 }

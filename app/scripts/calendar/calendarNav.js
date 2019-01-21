@@ -36,8 +36,12 @@ function hrefChanged() {
     urlName = urlName[urlName.length-1];
     let activeTab = document.querySelector("#tabsNav");
     let children = activeTab.querySelectorAll("a");
+    console.log('urlName:', urlName)
+    urlName = urlName.split('?')[0];
+    if(urlName == 'sync') urlName = 'week';
 
     children.forEach(el => {
+        console.log('el:', el)
         let state = el.name == urlName;
         if(state) {
             el.classList.add('active');

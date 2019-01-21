@@ -14,11 +14,9 @@
     </div>
     <div class="row justify-content-center">       
         <form class="calendar-form">
-            <div class="form-group">
-                <div class="float-left">
+            <div class="form-group float-left">
                     <label for="date">Pick starting date</label>
                     <input type="date" id="date-picker" class="margin-right">
-                </div>
                 </div>
                 {{#if teacher}}
                 <div class="form-group students-only float-right">
@@ -27,7 +25,7 @@
                     <div class="popup">
                         <span class="popuptext" id="sendPopup">Request was succesfully send!</span>
                     </div>
-                    <button class="btn color-secondary hover-shadow" id="request" type="button" onclick="sendRequestForMeetings()">Request</button>
+                    <button class="btn color-submit hover-shadow" id="request" type="button" onclick="sendRequestForMeetings()">Request</button>
                 </div>
                 {{/if}}
                 <div class="form-group teachers-only float-right">
@@ -35,21 +33,17 @@
                     <div class="popup">
                         <span class="popuptext" id="sendPopup">Request was succesfully send!</span>
                     </div>
-                    <button class="btn color-secondary hover-shadow" id="mark" type="button" onclick="sendMarkAsAvailable()">Sync</button>
-                    <button class="btn btn-warning hover-shadow" id="delete" type="button" onclick="deleteAvailable()">Delete</button>
+                    <button class="btn color-submit hover-shadow" id="mark" type="button" onclick="sendMarkAsAvailable()">Sync</button>
+                    <button class="btn color-submit hover-shadow" id="delete" type="button" onclick="deleteAvailable()">Delete</button>
                 </div>
             </div>
         </form>
     </div>
-    <div class="row justify-content-center">       
-        <form class="calendar-form">
-        </form>
-    </div>
     <div class="row">
         <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-                <thead class="thead-light">
-                    <tr id="header" class="table-active"></tr>
+            <table class="table table-bordered">
+                <thead>
+                    <tr id="header"></tr>
                 </thead>
                 <tbody>
                 </tbody>
