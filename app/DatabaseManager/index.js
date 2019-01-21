@@ -726,6 +726,42 @@ function answerMeetingRequest(database,token,accept,callback) {
     });
 }
 
+function getMeetingRequests(database, userid, token, forid , callback) {
+
+    let data = {
+        state: -1,
+        msg: "",
+        data: null
+    };
+
+    isValidSessionInfo(database, userid, token, (answer) => {
+
+        if (answer.state != dbConsts.OPERATION_SUCCESS) {
+            setTimeout(() => callback(answer));
+            return;
+        }
+
+        database.input("forid", mssql.Int, forid);
+
+        database.query('SELECT startDate FROM ' + meetingTable + ' WHERE userid = @forid' , (error, result) => {
+
+            if (error) {
+
+                data.state = dbConsts.OPERATION_FAILED;
+                data.msg   = "Failed to get meeting data";
+                setTimeout(() => callback(data), 0);
+                return;
+            }
+
+            data.state = dbConsts.OPERATION_SUCCESS;
+            data.msg   = "operation success";
+            data.data  = toJSON(result)[0][0];
+
+            setTimeout(() => callback(data), 0);
+        }); 
+    });
+}
+
 //var db = null; //mssql.connect(config).Request();
 var readyForUse = false;
 var databesDown = false;
@@ -756,7 +792,6 @@ class DatabaseManager {
 
             console.log(errorMSG);
             //console.log(error);
-
 
             if (errorState == dbConsts.OPERATION_SUCCESS) {
 
@@ -934,6 +969,20 @@ class DatabaseManager {
 
                 getCalendarData(new mssql.Request(), requestData.data.userid, requestData.data.token, requestData.data.from, callback);
                 break;
+            }
+
+            case getRequests.GET_MEETING_REQUEST: {
+
+                if (!requestData.data.mentFor) {
+                    getMeetingRequests(new mssql.Request(), requestData.data.userid, requestData.data.token, requestData.data.userid, callback);
+                    break;
+                }
+
+                getUserIDFromEmail(new mssql.Request(), requestData.data.mentFor, (forid) => {
+                    getMeetingRequests(new mssql.Request(), requestData.data.userid, requestData.data.token, forid, callback);
+                    break;
+                });
+
             }
         }
     }

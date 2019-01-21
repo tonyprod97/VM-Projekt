@@ -4,6 +4,7 @@ var permit = require('../user/permission');
 
 const databaseManager = require('../../DatabaseManager');
 const sendIds = require('../../constants').databaseSendRequests;
+const getIds = require('../../constants').databaseGetRequests;
 const operationStates = require('../../constants').databaseErrors;
 
 var outlook = require('node-outlook');
@@ -77,13 +78,31 @@ function dateToMeetingFormat(dateSent) {
     let date = new Date(dateSent);
 
     let month = '' + (date.getMonth() + 1);
-    let day = '' + date.getDate();
-    let year = '' + date.getFullYear();
+    let day   = '' + date.getDate();
+    let year  = '' + date.getFullYear();
 
     let hours = '' + date.getHours();
 
     return { year: year, month: month, day: day, startingTime: hours };
 }
+
+router.post('/get_meetings', (req, res) => {
+
+
+    let user = req.body.user;
+
+    databaseManager.sendRequest({ id: getIds.GET_MEETING_REQUEST, data: { userid: user.id, token: user.sessionToken, mentFor: user.mentFor } }, (answer) => {
+
+        if (anser.state != operationStates.OPERATION_SUCCESS) {
+            req.send({ error: answer.msg });
+            return;
+        }
+
+        req.send(answer.data);
+
+    });
+
+});
 
 router.post('/', permit, (req,res)=>{
 
