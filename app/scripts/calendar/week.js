@@ -134,18 +134,21 @@ function appendHours() {
             let divContainer = document.createElement('div');
             divContainer.className +='quarter-time-container';
             tdElement.appendChild(divContainer);
-
-            /*for(let k = 0; k < 4; k++) {
-                let div = document.createElement('div');
-                div.id = i+':'+k*15+'-'+dateString;
-                div.className +='quarter-time row';
+/*
+            for(let k = 0; k < 4; k++) {
+                let div = document.createElement('td');
+                let minutes = k*15;
+                if(minutes === 0) minutes = '00';
+                div.id = i+':'+minutes+'-'+dateString;
+                div.className +='quarter-time';
                 divContainer.appendChild(div);
                 
                 div.addEventListener('click',function() {
                     cellClicked(i+':'+k*15,tempYear,tempMonth,tempDay)
                 });
-            }*/
+            } */
 
+            
             tdElement.addEventListener('click',function() {
                 cellClicked(i,tempYear,tempMonth,tempDay)
             });
@@ -171,6 +174,7 @@ function fillCellsWithData() {
         let cell = document.getElementById(id);
         let div = document.createElement('div');
 
+        console.log('new Date(event.Start.DateTime):', new Date(event.Start.DateTime))
         if(cell) {
             if(data.subject) {
                 div.innerHTML=data.subject;
@@ -178,6 +182,7 @@ function fillCellsWithData() {
                 div.innerHTML="taken";
             }
             cell.appendChild(div);
+            
             cell.classList.add('busy');
             if(!role) cell.classList.add('clickable');
             cell.classList.remove('available');
@@ -201,29 +206,14 @@ function cellClicked(startingTimeHour,year,month,day) {
     cell.classList.toggle('marked');
 
     
-
-    if(!cell.classList.contains('taken') && !cell.classList.contains('disabled')) {
-        if(!teacherElement) {
-            cell.classList.toggle('reserved');
-    
-            let newCellObject = new CellObject(year,month,day,startingTimeHour);
-            let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
-    
-            if(reservedCells.length == newArray.length) newArray.push(newCellObject);
-            reservedCells = newArray;
-            return;
-        }
-    }
-
-    if(cell.classList.contains('taken') && !cell.classList.contains('disabled')) {
         cell.classList.toggle('reserved');
-    
-            let newCellObject = new CellObject(year,month,day,startingTimeHour);
-            let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
-    
-            if(reservedCells.length == newArray.length) newArray.push(newCellObject);
-            reservedCells = newArray;
-    }
+
+        let newCellObject = new CellObject(year,month,day,startingTimeHour);
+        let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
+
+        if(reservedCells.length == newArray.length) newArray.push(newCellObject);
+        reservedCells = newArray;
+
 }
 /**
  * Usporedba dva datuma
@@ -383,7 +373,7 @@ function sendRequestForMeetings() {
 function sendMarkAsAvailable() {
 
     let dataToSend = reservedCells.slice();
-    console.log(dataToSend);
+    console.log('data to send: ',dataToSend);
     //send http POST
     var http = new XMLHttpRequest();
     http.open("POST", '/calendar/week?operation=markAsAvailable', true);
