@@ -39,11 +39,15 @@ function initializeData() {
  * @param {Object} date - trenutni datum
 */
 function appendWeek(date) {
-
-    if(date.getDay() != 1 && date.getTime()>currentDate.getTime()) return; // If not monday neglect the change of date if trying to increase the date.
-    if(date.getTime()<currentDate.getTime() && date.getDay() == 0) {
-        //Set date to previous monday.
-        date.setDate(date.getDate()-6);
+    if(date.getMonth() == currentDate.getMonth() && date.getFullYear() == currentDate.getFullYear()) {
+        if(date.getDay() != 1 && date.getTime()>currentDate.getTime()) return; // If not monday neglect the change of date if trying to increase the date.
+        if(date.getTime()<currentDate.getTime() && date.getDay() == 0) {
+            //Set date to previous monday.
+            date.setDate(date.getDate()-6);
+        }
+    } else {
+        currentDate = date;
+        setMonday();
     }
     headerRow.innerHTML = '';
     
@@ -278,7 +282,7 @@ function dateChanged() {
     }else {
         appendWeek(new Date());
     }
-    //fillCellsWithData();
+    fillCellsWithData();
 }
 
 
@@ -395,6 +399,7 @@ function sendMarkAsAvailable() {
             openPopup();
             cleanCellsReservation();
             console.log('Success');
+            document.location.reload();
         }
       }
 }
