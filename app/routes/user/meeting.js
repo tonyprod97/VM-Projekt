@@ -8,6 +8,11 @@ const operationStates = require('../../constants').databaseErrors;
 const emailManager = require('../../EmailManager');
 const urlParser = require('../../UrlManager');
 
+/**
+ * Parsiranje datuma
+ * @param {Object} dateSent 
+ * @returns {String} datum i pocetno vrijeme
+ */
 function parseDate(dateSent) {
 
     let date = new Date(dateSent);

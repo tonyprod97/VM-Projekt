@@ -20,7 +20,7 @@ function getRole() {
 }
 
 /**
- * ...
+ * Promjena puta
  * @param {Object} ref
  */
 function routeChanged(ref) {
@@ -28,6 +28,9 @@ function routeChanged(ref) {
     ref.classList.toggle('active');
 }
 
+/**
+ * Promjena href reference
+ */
 function hrefChanged() {
     let urlName = window.location.href.split('/');
     urlName = urlName[urlName.length-1];

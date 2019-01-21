@@ -97,6 +97,12 @@ function getUserEmailFromID(database, userid, callback) {
     });
 }
 
+/**
+ * Dohvati e-mail korisnika
+ * @param {Object} database 
+ * @param {Object} email 
+ * @param {Object} callback 
+ */
 function getUserIDFromEmail(database, email, callback) {
 
     database.input('email', mssql.VarChar(100), email);
@@ -413,6 +419,12 @@ function getUsers(database, onlyVerified, callback) {
 
 }
 
+/**
+ * Dohvati ID korisnika iz e-mail adrese
+ * @param {Object} database 
+ * @param {Object} email 
+ * @param {Object} callback 
+ */
 function getIdFromEmail(database, email, callback) {
 
     let data = {
@@ -441,6 +453,13 @@ function getIdFromEmail(database, email, callback) {
 
 }
 
+/**
+ * Izbrisi dostupnost
+ * @param {Object} database 
+ * @param {Object} token 
+ * @param {Object} userid 
+ * @param {Object} callback 
+ */
 function deleteAvailable(database, token, userid, callback) {
     let data = {
         state: dbConsts.OPERATION_SUCCESS,
@@ -465,6 +484,13 @@ function deleteAvailable(database, token, userid, callback) {
     });
 }
 
+/**
+ * Unesi podatke kalendara
+ * @param {Object} userid 
+ * @param {Object} token 
+ * @param {Object} calendarInfo 
+ * @param {Object} callback 
+ */
 function insertCalendarData(userid, token, calendarInfo, callback) {
 
     let data = {
@@ -551,7 +577,16 @@ function getCalendarData(database, userid, token, from, callback) {
     });
 }
 
-
+/**
+ * Slanje zahtjeva za sastankom
+ * @param {Object} database 
+ * @param {Object} userid 
+ * @param {Object} token 
+ * @param {Object} toEmail 
+ * @param {Object} startDate 
+ * @param {Object} subject 
+ * @param {Object} callback 
+ */
 function sendMeetingRequest(database,userid, token, toEmail, startDate,subject, callback) {
 
     let data = {
@@ -601,6 +636,13 @@ function sendMeetingRequest(database,userid, token, toEmail, startDate,subject, 
     });
 }
 
+/**
+ * Odgovor na zahtjev za sastankom
+ * @param {Object} database 
+ * @param {Object} token 
+ * @param {Object} accept 
+ * @param {Object} callback 
+ */
 function answerMeetingRequest(database,token,accept,callback) {
 
     let data = {

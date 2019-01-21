@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: constants/index.js</title>
+    <title>JSDoc: Source: routes/user/meeting.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: constants/index.js</h1>
+    <h1 class="page-title">Source: routes/user/meeting.js</h1>
 
     
 
@@ -26,43 +26,108 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * @file U ovoj datoteci se izlazu kao moduli numericka varijabla "port", objekt "databaseErrors",
- * objekt "databaseGetRequest" te objekt "databaseSendRequests" 
+            <pre class="prettyprint source linenums"><code>var express = require('express');
+var router = express.Router();
+
+const databaseManager = require('../../DatabaseManager');
+const sendIds = require('../../constants').databaseSendRequests;
+const operationStates = require('../../constants').databaseErrors;
+
+const emailManager = require('../../EmailManager');
+const urlParser = require('../../UrlManager');
+
+/**
+ * Parsiranje datuma
+ * @param {Object} dateSent 
+ * @returns {String} datum i pocetno vrijeme
  */
-module.exports.port = 3000;
+function parseDate(dateSent) {
 
-module.exports.databaseErrors = {
+    let date = new Date(dateSent);
 
-    OPERATION_SUCCESS : 0, // all good
-    OPERATION_FAILED  : 1, // failed to execute
-    OPERATION_WARRNING: 2, // operation succeded but might couse problems
-    OPERATION_DENIED  : 3  // operation might be dangoruse so it was blocked
-};
+    let month = '' + (date.getMonth() + 1);
+    let day   = '' + date.getDate();
+    let year  = '' + date.getFullYear();
 
-module.exports.databaseGetRequests = {
+    let hours = '' + date.getHours();
+    let min   = '' + date.getMinutes();
 
-    USER              : 1,  // request developers
-    VISIBLE_CALENDARS : 2,  // returns all users a current user has rights to see there calendar (needs in data field: userid, token)
-    GET_VERIFICATION  : 4,  // request verification details about user (needs in data field: email) returns (verified, userid *, token *) * -> if not verified 
-    GET_ALL_USERS     : 8,  // request all registrated teachers
-    GET_VERIFIED_USERS: 16, // request all verified teachers
-    GET_CALENDAR      : 32, // request calendar of user needs(in data field: userid, token , from*) * -> email of user you want calendar off, if not specified then return calendar
-    GET_ID_FROM_MAIL  : 64
-};
+    if (month.length &lt; 2) month = '0' + month;
+    if (day.length &lt; 2) day = '0' + day;
+    if (hours.length &lt; 2) hours = '0' + hours;
+    if (min.length &lt; 2) min = '0' + min;
 
-module.exports.databaseSendRequests = {
+    return [day, month, year].join('.') + " starting at " + hours + ":" + min;
+}
 
-    CREATE_NEW_USER     : 1, // create new user  (needs in data field: username, email, password, isStudent*) 
-    LOGIN_REQUEST       : 2, // login user (needs in data field: email, password)
-    TERMINATE_SESSION   : 3, // logout user from session (needs in data field: userid, token)
-    SHARE_CALENDAR      : 4, // share calendar with other user (needs in data field: userid, token, with) with - email of a user you want to share calendar with
-    VERIFY_USER         : 5, // verifie user (needs in data field: userid, verificationToken)
-    INSERT_CALENDAR_DATA: 6, // insert calendar data (needs in data field: userid, token, calendarInfo[] : {subject, startDate, endDate});
-    SEND_MEETING_REQUEST: 7, // send Meeting Request (needs in data field: toEmail, userid, token, startDate, subject);
-    SEND_MEETING_ANSWER : 8, // send answer to meeting request (needs in data field: token,accept);
-    DELETE_AVAILABLE    : 9
-};</code></pre>
+router.post('/request', (req, res) => {
+    let user = req.body.user;
+
+    let size = user.startDate.length;
+
+    for (let counter = 0; counter &lt; size; counter++) {
+
+        databaseManager.sendRequest({ id: sendIds.SEND_MEETING_REQUEST, data: { userid: user.userid, token: user.token, startDate: user.startDate[counter], toEmail: user.toEmail } }, (answer) => {
+
+            if (answer.state != operationStates.OPERATION_SUCCESS) {
+                //res.send({ error: answer.msg });
+                if (counter == (size - 1)) res.send({ error: null });
+                return;
+            }
+
+            console.log(answer);
+
+            let data = urlParser.getUrlDataFromRequest(req);
+
+            url_accept = data.protocol + '://' + data.host + '/user/meeting/' + answer.data.token + '/1';
+            url_refuse = data.protocol + '://' + data.host + '/user/meeting/' + answer.data.token + '/0';
+
+            //html for accepting or refusing
+
+            htmlStr = answer.data.email + " want's to have a meeting at " + parseDate(user.startDate[counter]);
+            htmlStr += '&lt;br> click here to accept: &lt;a href = "' + url_accept + '"> Accept &lt;/a> &lt;br> or here to refuse: &lt;a href = "' + url_refuse + '"> Refuse &lt;/a>';
+
+            emailManager.sendMailForMeetingConfirmation(user.toEmail, htmlStr);
+
+            if(counter == (size - 1)) res.send({ error: null });
+
+            //res.redirect('/');
+        });
+    }
+});
+
+
+router.get('/:token/:answer', (req, res) => {
+    
+    let accept = true;
+    if (req.params.answer == 0) accept = false;
+
+    databaseManager.sendRequest({ id: sendIds.SEND_MEETING_ANSWER, data: { token: req.params.token, accept: accept } }, (answer) => {
+
+        if (answer.state != operationStates.OPERATION_SUCCESS) {
+            res.send({ error: answer.msg });
+            return;
+        }
+
+        console.log(answer);
+
+        if (answer.data) {
+
+            let reciveEmail = answer.data.profEmail;
+            let senderEmail = answer.data.senderEmail;
+            let startDate   = answer.data.startDate;
+            let endDate     = answer.data.endDate;
+
+            // deal with outlook calendar
+
+        }
+
+        res.redirect('/');
+    });
+});
+
+
+module.exports = router;</code></pre>
         </article>
     </section>
 
