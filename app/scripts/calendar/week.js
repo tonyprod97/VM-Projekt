@@ -131,22 +131,25 @@ function appendHours() {
             tdElement.classList.add('available',roleClass,viewClass);
             if(clickableClass) tdElement.classList.add(clickableClass);
 
+            
             let divContainer = document.createElement('div');
             divContainer.className +='quarter-time-container';
-            tdElement.appendChild(divContainer);
-/*
+           // tdElement.appendChild(divContainer);
+
             for(let k = 0; k < 4; k++) {
-                let div = document.createElement('td');
+                let div = document.createElement('p');
+                
                 let minutes = k*15;
                 if(minutes === 0) minutes = '00';
                 div.id = i+':'+minutes+'-'+dateString;
                 div.className +='quarter-time';
-                divContainer.appendChild(div);
+                tdElement.appendChild(div);
+                
                 
                 div.addEventListener('click',function() {
                     cellClicked(i+':'+k*15,tempYear,tempMonth,tempDay)
                 });
-            } */
+            } 
 
             
             tdElement.addEventListener('click',function() {
@@ -166,12 +169,15 @@ function appendHours() {
 function fillCellsWithData() {
     if(calendarData === undefined) return;
     if(calendarData.length === 0) return;
-    resetCells();
+    appendWeek(currentDate);
+    //resetCells();
     
     calendarData.forEach(event=>{
+        console.log('event:', event)
         let data = new CalendarEvent(event.Subject,new Date(event.Start.DateTime),new Date(event.End.DateTime),event.Location ? event.Location.DisplayName : '');
         let id = data.start.getHours()+'-'+data.start.getFullYear()+'/'+Number(data.start.getMonth()+1)+'/'+data.start.getDate();
         let cell = document.getElementById(id);
+        cell.innerHTML = '';
         let div = document.createElement('div');
 
         console.log('new Date(event.Start.DateTime):', new Date(event.Start.DateTime))
@@ -203,6 +209,8 @@ function cellClicked(startingTimeHour,year,month,day) {
     let cell = document.getElementById(startingTimeHour+'-'+year+'/'+month+'/'+day);
     console.log('cell is clicked: ',cell);
     if(!cell.classList.contains('clickable')) return;
+    if(!cell.classList.contains('busy') && !role) return;
+    
     cell.classList.toggle('marked');
 
     
@@ -410,7 +418,8 @@ function deleteAvailable() {
         if (http.readyState === 4) {
             openPopup();
             console.log('Success');
-            resetCells();
+            //resetCells();
+            appendWeek(currentDate);
         }
     }
 }
