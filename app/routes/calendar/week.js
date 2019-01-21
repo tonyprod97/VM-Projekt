@@ -159,6 +159,7 @@ router.post('/', permit, (req,res)=>{
             }
         }, (answer) => {
             console.log(answer);
+            res.send({ error: null });
             });
 
     } else {
@@ -170,7 +171,7 @@ router.post('/', permit, (req,res)=>{
         console.log("ID: "+ user.id);
         console.log("User :" + user.sessionToken);
 
-        for (var i=0;i <requestedMeetings.length;i++) {
+        for (let i=0;i <requestedMeetings.length;i++) {
 
             var event = {
                 "Subject": "Test from App",
@@ -208,6 +209,8 @@ router.post('/', permit, (req,res)=>{
                 },
                 (answer) => {
                     console.log(answer.state);
+                    console.log({ i: i, len: requestedMeetings.length });
+                    if (i == (requestedMeetings.length - 1)) res.send({ error: null });
                 });
         }
         console.log([requestedMeetings]);
