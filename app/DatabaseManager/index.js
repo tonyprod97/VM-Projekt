@@ -76,6 +76,12 @@ function randomTokenString(size) {
     return crypto.randomBytes(size).toString('hex');
 }
 
+/**
+ * Dohvati e-mail korisnika
+ * @param {Object} database 
+ * @param {Object} userid 
+ * @param {Object} callback 
+ */
 function getUserEmailFromID(database, userid, callback) {
 
     database.input('userid', mssql.Int, userid);
@@ -374,6 +380,12 @@ function getVerification(database, email, callback) {
     });
 }
 
+/**
+ * Dohvat korisnika
+ * @param {Object} database 
+ * @param {Object} onlyVerified 
+ * @param {Object} callback 
+ */
 function getUsers(database, onlyVerified, callback) {
 
     let data = {
@@ -493,6 +505,14 @@ function insertCalendarData(userid, token, calendarInfo, callback) {
     });
 }
 
+/**
+ * Dohvat podataka kalendara
+ * @param {Object} database 
+ * @param {Object} userid 
+ * @param {Object} token 
+ * @param {Object} from 
+ * @param {Object} callback 
+ */
 function getCalendarData(database, userid, token, from, callback) {
 
     let data = {

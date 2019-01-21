@@ -1,4 +1,32 @@
-var express = require('express');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: routes/calendar/week.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: routes/calendar/week.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>var express = require('express');
 var router = express.Router();
 var permit = require('../user/permission');
 
@@ -40,10 +68,10 @@ function parseDate(dateSent) {
     let hours = '' + date.getHours();
     let min = '' + date.getMinutes();
 
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-    if (hours.length < 2) hours = '0' + hours;
-    if (min.length < 2) min = '0' + min;
+    if (month.length &lt; 2) month = '0' + month;
+    if (day.length &lt; 2) day = '0' + day;
+    if (hours.length &lt; 2) hours = '0' + hours;
+    if (min.length &lt; 2) min = '0' + min;
 
     return [day, month, year].join('.') + " starting at " + (hours - 1) + ":" + min;
 }
@@ -60,9 +88,9 @@ function constructIso8601(meeting) {
     let day   = '' + meeting.day;
     let hour  = '' + meeting.startingTime;
 
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-    if (hour.length < 2) hour = '0' + hour;
+    if (month.length &lt; 2) month = '0' + month;
+    if (day.length &lt; 2) day = '0' + day;
+    if (hour.length &lt; 2) hour = '0' + hour;
 
     return [year, month, day].join('-') + "T" + hour + ":00:00Z"; 
 }
@@ -94,7 +122,7 @@ router.post('/', permit, (req,res)=>{
 
         let size = req.body.requestedMeetings.length;
 
-        for (let counter = 0; counter < size; counter++) {
+        for (let counter = 0; counter &lt; size; counter++) {
 
             let body = req.body;
 
@@ -119,7 +147,7 @@ router.post('/', permit, (req,res)=>{
                 //html for accepting or refusing
 
                 let htmlStr = answer.data.email + " want's to have a meeting at " + parseDate(iso8601String);
-                htmlStr += '<br> click here to accept: <a href = "' + url_accept + '"> Accept </a> <br> or here to refuse: <a href = "' + url_refuse + '"> Refuse </a>';
+                htmlStr += '&lt;br> click here to accept: &lt;a href = "' + url_accept + '"> Accept &lt;/a> &lt;br> or here to refuse: &lt;a href = "' + url_refuse + '"> Refuse &lt;/a>';
 
                 mailHelper.sendMailForMeetingConfirmation(body.teacher, htmlStr);
 
@@ -151,7 +179,7 @@ router.post('/', permit, (req,res)=>{
         console.log("ID: "+ user.id);
         console.log("User :" + user.sessionToken);
 
-        for (var i=0;i <requestedMeetings.length;i++) {
+        for (var i=0;i &lt;requestedMeetings.length;i++) {
 
             var event = {
                 "Subject": "Test from App",
@@ -231,8 +259,8 @@ router.get('/:token/:answer', (req, res) => {
 
             let url_accept = data.protocol + '://' + data.host + '/calendar/week/student/' + startDate + '/' + subject;
 
-            htmlStr = 'your meeting request for ' + parseDate(startDate) + ' has been accepted <br>';
-            htmlStr += 'click here to add it to your outlook calendar: <a href = "' + url_accept + '"> Add </a>';
+            htmlStr = 'your meeting request for ' + parseDate(startDate) + ' has been accepted &lt;br>';
+            htmlStr += 'click here to add it to your outlook calendar: &lt;a href = "' + url_accept + '"> Add &lt;/a>';
 
             mailHelper.sendMailForMeetingConfirmation(senderEmail, htmlStr);
 
@@ -356,4 +384,26 @@ function postOutlookData(req, res, subject,requestedMeetings, recallback) {
     //res.redirect('/sync');
 }
 
-module.exports = router;
+module.exports = router;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="CalendarEvent.html">CalendarEvent</a></li><li><a href="CellObject.html">CellObject</a></li><li><a href="DatabaseManager.html">DatabaseManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#appendHours">appendHours</a></li><li><a href="global.html#appendWeek">appendWeek</a></li><li><a href="global.html#cellClicked">cellClicked</a></li><li><a href="global.html#checkMail">checkMail</a></li><li><a href="global.html#checkPassword">checkPassword</a></li><li><a href="global.html#checkPasswordConf">checkPasswordConf</a></li><li><a href="global.html#cleanCellsReservation">cleanCellsReservation</a></li><li><a href="global.html#compareDates">compareDates</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#constructIso8601">constructIso8601</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#dateChanged">dateChanged</a></li><li><a href="global.html#dateToMeetingFormat">dateToMeetingFormat</a></li><li><a href="global.html#deleteAvailable">deleteAvailable</a></li><li><a href="global.html#fetchCalendarData">fetchCalendarData</a></li><li><a href="global.html#fillCellsWithData">fillCellsWithData</a></li><li><a href="global.html#getCalendarData">getCalendarData</a></li><li><a href="global.html#getLocalDateFormat">getLocalDateFormat</a></li><li><a href="global.html#getUserEmailFromID">getUserEmailFromID</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#getUsersThatSheredCalendarWithYou">getUsersThatSheredCalendarWithYou</a></li><li><a href="global.html#getVerification">getVerification</a></li><li><a href="global.html#initDatabase">initDatabase</a></li><li><a href="global.html#initializeData">initializeData</a></li><li><a href="global.html#insertCalendarData">insertCalendarData</a></li><li><a href="global.html#isValidSessionInfo">isValidSessionInfo</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#newSession">newSession</a></li><li><a href="global.html#next">next</a></li><li><a href="global.html#onFormChange">onFormChange</a></li><li><a href="global.html#onOutlookLogin">onOutlookLogin</a></li><li><a href="global.html#onSubmit">onSubmit</a></li><li><a href="global.html#parseDate">parseDate</a></li><li><a href="global.html#postOutlookData">postOutlookData</a></li><li><a href="global.html#previous">previous</a></li><li><a href="global.html#randomTokenString">randomTokenString</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#resetCells">resetCells</a></li><li><a href="global.html#routeChanged">routeChanged</a></li><li><a href="global.html#seededSha256">seededSha256</a></li><li><a href="global.html#sendMarkAsAvailable">sendMarkAsAvailable</a></li><li><a href="global.html#sendRequestForMeetings">sendRequestForMeetings</a></li><li><a href="global.html#toJSON">toJSON</a></li><li><a href="global.html#tokenReceived">tokenReceived</a></li><li><a href="global.html#validateEmail">validateEmail</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jan 21 2019 09:51:48 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
