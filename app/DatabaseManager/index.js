@@ -980,9 +980,8 @@ class DatabaseManager {
 
                 getUserIDFromEmail(new mssql.Request(), requestData.data.mentFor, (forid) => {
                     getMeetingRequests(new mssql.Request(), requestData.data.userid, requestData.data.token, forid, callback);
-                    break;
                 });
-
+                break;
             }
         }
     }
