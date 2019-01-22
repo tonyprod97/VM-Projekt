@@ -55,7 +55,7 @@ exports.parseDate = function (dateSent) {
  * @param {Object} meeting
  * @returns {String} datum i vrijeme
  */
-exports.constructIso8601 = function (meeting) {
+function constructIso8601(meeting) {
 
     let year = '' + meeting.year;
     let month = '' + meeting.month;
@@ -244,7 +244,6 @@ router.post('/', permit, (req, res) => {
     }
 });
 
-<<<<<<< HEAD
 router.get('/student/:date/:subject', (req, res) => {
 
     console.log("called");
@@ -521,7 +520,4 @@ function tokenReceived(req, res, error, token) {
         //res.redirect('/sync');
     }
 }
-
-=======
->>>>>>> a2f825646a18257675278e1d6b752f0724ca30bf
 module.exports = router;
