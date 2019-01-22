@@ -24,6 +24,7 @@ const urlParser = require('../UrlManager');
 
 const sendIds = require('../constants').databaseSendRequests; // for testing 
 var afterLoginUrl;
+const week = require('./calendar/week');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -350,7 +351,7 @@ router.get('/calendar/week/student/:date/:subject', (req, res) => {
         return;
     }
 
-    postOutlookData(req, res, req.params.subject, dateToMeetingFormat(req.params.date));
+    postOutlookData(req, res, req.params.subject, week.dateToMeetingFormat(req.params.date));
 
     res.redirect('/');
 });
@@ -389,14 +390,13 @@ router.get('/calendar/week/:token/:answer', (req, res) => {
 
             let url_accept = data.protocol + '://' + data.host + '/calendar/week/student/' + startDate + '/' + subject;
 
-            htmlStr = 'your meeting request for ' + parseDate(startDate) + ' has been accepted <br>';
+            htmlStr = 'your meeting request for ' + week.parseDate(startDate) + ' has been accepted <br>';
             htmlStr += 'click here to add it to your outlook calendar: <a href = "' + url_accept + '"> Add </a>';
 
             mailHelper.sendMailForMeetingConfirmation(senderEmail, htmlStr);
 
             // deal with outlook calendar
-            postOutlookData(req, res, subject, dateToMeetingFormat(startDate));
-
+            postOutlookData(req, res, subject, week.dateToMeetingFormat(startDate));
         }
 
         res.redirect('/');
@@ -471,9 +471,9 @@ function postOutlookData(req, res, subject, requestedMeetings, recallback) {
     //    +requestedMeetings.day+'T'+calculatedEndTime+':00:00'+'Z';
 
     requestedMeetings.startingTime--;
-    let endTime = constructIso8601(requestedMeetings);
+    let endTime = week.constructIso8601(requestedMeetings);
     requestedMeetings.startingTime--;
-    let startTime = constructIso8601(requestedMeetings);
+    let startTime = week.constructIso8601(requestedMeetings);
 
     event.Start.DateTime = startTime;
     event.End.DateTime = endTime;
@@ -515,52 +515,6 @@ function postOutlookData(req, res, subject, requestedMeetings, recallback) {
 }
 
 router.use('/calendar', require('./calendar'));
-
-function parseDate(dateSent) {
-
-    let date = new Date(dateSent);
-
-    let month = '' + (date.getMonth() + 1);
-    let day = '' + date.getDate();
-    let year = '' + date.getFullYear();
-
-    let hours = '' + date.getHours();
-    let min = '' + date.getMinutes();
-
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-    if (hours.length < 2) hours = '0' + hours;
-    if (min.length < 2) min = '0' + min;
-
-    return [day, month, year].join('.') + " starting at " + (hours - 1) + ":" + min;
-}
-
-function dateToMeetingFormat(dateSent) {
-
-    let date = new Date(dateSent);
-
-    let month = '' + (date.getMonth() + 1);
-    let day = '' + date.getDate();
-    let year = '' + date.getFullYear();
-
-    let hours = '' + date.getHours();
-
-    return { year: year, month: month, day: day, startingTime: hours };
-}
-
-function constructIso8601(meeting) {
-
-    let year = '' + meeting.year;
-    let month = '' + meeting.month;
-    let day = '' + meeting.day;
-    let hour = '' + meeting.startingTime;
-
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-    if (hour.length < 2) hour = '0' + hour;
-
-    return [year, month, day].join('-') + "T" + hour + ":00:00Z";
-}
 /**
  * @constant ...
  */
