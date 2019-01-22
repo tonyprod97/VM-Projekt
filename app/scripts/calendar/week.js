@@ -155,7 +155,8 @@ function appendHours() {
                     mouseOver(event);
                 });
                 div.addEventListener('click',function() {
-                    cellClicked(i+':'+k*15,tempYear,tempMonth,tempDay)
+                    let minutes = k === 0 ? '00':k*15;
+                    cellClicked(event,i+':'+minutes,tempYear,tempMonth,tempDay)
                 });
                
                 
@@ -169,9 +170,9 @@ function appendHours() {
                 tdElement.appendChild(div);
             } 
 
-            tdElement.addEventListener('click',function() {
+            /*tdElement.addEventListener('click',function() {
                 cellClicked(i+':00',tempYear,tempMonth,tempDay)
-            });
+            });*/
 
             trElement.appendChild(tdElement);
         }
@@ -197,9 +198,6 @@ function fillCellsWithData() {
         let endHour = data.end.getHours();
         let endMinutes = data.end.getMinutes();
 
-        console.log('startEvent:', startEvent);
-        console.log('endMinutes:', endMinutes)
-        console.log('id:', id)
         let cell = document.getElementById(id);
         
         if(cell) cell.innerHTML = '';
@@ -213,10 +211,13 @@ function fillCellsWithData() {
                 div.innerHTML +="taken";
             }
             cell.appendChild(div);
-            console.log('endHour:', endHour)
+            /*console.log('endHour:', endHour)
             console.log('cellTime[0]+1:', +cellTime[0]+1)
-            /*if(+endHour == +cellTime[0]+1) {
-                //while(cell.nextSibling) cell.nextSibling.remove();
+            if(+endHour == +cellTime[0]+1) {
+                while(cell.nextSibling) {
+                    cell = cell.nextSibling;
+                    cell.appendChild(div);
+                }
                 cell.style.height = cell.parentElement.offsetHeight;
                 cell.style.width = cell.parentElement.offsetWidth;
                 
@@ -239,9 +240,11 @@ function fillCellsWithData() {
  * @param {Object} day - izabran dan
  */
 
-function cellClicked(startingTimeHour,year,month,day) {
+function cellClicked(ev,startingTimeHour,year,month,day) {
     let cell = document.getElementById(startingTimeHour+'-'+year+'/'+month+'/'+day);
-    if(!cell) return;
+    if(!cell) {
+        cell = ev.target.parentElement;
+    }
     console.log('cell:', cell)
     if(!cell.classList.contains('clickable')) return;
     if(!cell.classList.contains('busy') && !role) return;
@@ -249,11 +252,14 @@ function cellClicked(startingTimeHour,year,month,day) {
     cell.classList.toggle('marked');
     cell.classList.toggle('reserved');
 
+    console.log('startingTimeHour:', startingTimeHour)
     let newCellObject = new CellObject(year,month,day,startingTimeHour);
     let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
 
     if(reservedCells.length == newArray.length) newArray.push(newCellObject);
     reservedCells = newArray;
+    console.log('reservedCells:', reservedCells)
+
 }
 /**
  * Usporedba dva datuma
@@ -341,7 +347,7 @@ function cleanCellsReservation() {
 }
 
 function mouseUp(ev) {
-    
+    if(!role) return; 
     //push selected cells to array
     let selectedCells = document.querySelectorAll('div.selecting');
     console.log('selectedCells:', selectedCells)
