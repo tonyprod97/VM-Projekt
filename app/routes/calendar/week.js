@@ -31,7 +31,7 @@ router.get('/', permit, (req, res) => {
  * @param {Object} dateSent
  * @returns {String} datum i pocetno vrijeme
  */
-function parseDate(dateSent) {
+exports.parseDate = function (dateSent) {
 
     let date = new Date(dateSent);
 
@@ -55,7 +55,7 @@ function parseDate(dateSent) {
  * @param {Object} meeting
  * @returns {String} datum i vrijeme
  */
-function constructIso8601(meeting) {
+exports.constructIso8601 = function (meeting) {
 
     let year = '' + meeting.year;
     let month = '' + meeting.month;
@@ -100,8 +100,7 @@ function addFifteenMinutes(meeting){
  * @param {Object} dateSent
  * @returns {Object} objekt s varijablama datuma i vremena
  */
-function dateToMeetingFormat(dateSent) {
-
+exports.dateToMeetingFormat = function (dateSent) {
     let date = new Date(dateSent);
 
     let month = '' + (date.getMonth() + 1);
@@ -245,6 +244,7 @@ router.post('/', permit, (req, res) => {
     }
 });
 
+<<<<<<< HEAD
 router.get('/student/:date/:subject', (req, res) => {
 
     console.log("called");
@@ -522,4 +522,6 @@ function tokenReceived(req, res, error, token) {
     }
 }
 
+=======
+>>>>>>> a2f825646a18257675278e1d6b752f0724ca30bf
 module.exports = router;
