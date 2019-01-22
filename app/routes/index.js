@@ -8,7 +8,6 @@ var router = express.Router();
 // var response ="";
 
 router.use('/user', require('./user'));
-router.use('/calendar', require('./calendar'));
 router.use('/outlook',require('./outlook'));
 
 const databaseManager = require('../DatabaseManager');
@@ -21,8 +20,10 @@ var outlook = require('node-outlook');
 var moment = require('moment');
 
 const mailHelper = require('../EmailManager');
+const urlParser = require('../UrlManager');
 
 const sendIds = require('../constants').databaseSendRequests; // for testing 
+var afterLoginUrl;
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -159,7 +160,7 @@ router.get('/', function(req, res) {
     });
 });
 
-router.get('/authorize',permit, function (req, res) {
+router.get('/authorize', function (req, res) {
     var authCode = req.query.code;
     if (authCode) {
         console.log('');
@@ -191,7 +192,14 @@ function tokenReceived(req, res, error, token) {
         req.session.access_token = token.token.access_token;
         req.session.refresh_token = token.token.refresh_token;
         req.session.email = authHelper.getEmailFromIdToken(token.token.id_token);
-        res.redirect('/sync');
+
+        if (afterLoginUrl) {
+            var helper = afterLoginUrl;
+            afterLoginUrl = null;
+            res.redirect(helper);
+        } else {
+            res.redirect('/sync');
+        }
     }
 }
 
@@ -311,6 +319,248 @@ router.get('/sendmail', function(req, res) {
     res.redirect('/');
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+router.get('/calendar/week/student/:date/:subject', (req, res) => {
+
+    console.log("called");
+    var token = req.session.access_token;
+    var email = req.session.email;
+    if (!token || !email) {
+        afterLoginUrl = 'http://localhost:3000' + req.url;
+        res.redirect(authHelper.getAuthUrl());
+        return;
+    }
+
+    postOutlookData(req, res, req.params.subject, dateToMeetingFormat(req.params.date));
+
+    res.redirect('/');
+});
+
+router.get('/calendar/week/:token/:answer', (req, res) => {
+
+    let accept = true;
+    if (req.params.answer == 0) accept = false;
+
+    console.log(req.session);
+    var token = req.session.access_token;
+    var email = req.session.email;
+    if (!token || !email) {
+        afterLoginUrl = 'http://localhost:3000' + req.url;
+        res.redirect(authHelper.getAuthUrl());
+        return;
+    }
+
+    databaseManager.sendRequest({ id: sendIds.SEND_MEETING_ANSWER, data: { token: req.params.token, accept: accept } }, (answer) => {
+
+        if (answer.state != operationStates.OPERATION_SUCCESS) {
+            res.send({ error: answer.msg });
+            return;
+        }
+
+        console.log(answer);
+
+        if (answer.data) {
+
+            let reciveEmail = answer.data.profEmail;
+            let senderEmail = answer.data.senderEmail;
+            let startDate = answer.data.startDate;
+            let subject = answer.data.subject;
+
+            let data = urlParser.getUrlDataFromRequest(req);
+
+            let url_accept = data.protocol + '://' + data.host + '/calendar/week/student/' + startDate + '/' + subject;
+
+            htmlStr = 'your meeting request for ' + parseDate(startDate) + ' has been accepted <br>';
+            htmlStr += 'click here to add it to your outlook calendar: <a href = "' + url_accept + '"> Add </a>';
+
+            mailHelper.sendMailForMeetingConfirmation(senderEmail, htmlStr);
+
+            // deal with outlook calendar
+            postOutlookData(req, res, subject, dateToMeetingFormat(startDate));
+
+        }
+
+        res.redirect('/');
+    });
+});
+
+/**
+ * Unesi podatke u Outlook
+ * @param {Object} req 
+ * @param {Object} res 
+ * @param {Object} subject 
+ * @param {Object} requestedMeetings 
+ * @param {Object} recallback 
+ */
+function postOutlookData(req, res, subject, requestedMeetings, recallback) {
+    //student has requested meeting from teacher
+    //let teacher = req.body.teacher;
+    //console.log("Request: "+req.body.subject)
+    //console.log("Requested meeeting: "+req.body.requestedMeetings[0].day);
+    //console.log("Requested meeeting: "+req.body.rerequestedMeetings)
+    var token = req.session.access_token;
+    var email = req.session.email;
+    if (token === undefined || email === undefined) {
+        console.log('/post on Outlook called while not logged in');
+        res.redirect('/');
+        return;
+    }
+
+    // Set the endpoint to API v2
+    outlook.base.setApiEndpoint('https://outlook.office.com/api/v2.0');
+    // Set the user's email as the anchor mailbox
+    outlook.base.setAnchorMailbox(req.session.email);
+    // Set the preferred time zone
+    console.log("Zona je : " + outlook.base.preferredTimeZone());
+    outlook.base.setPreferredTimeZone('Europe/Berlin');
+    console.log("Zona je : " + outlook.base.preferredTimeZone());
+
+    // Use the syncUrl if available
+    var requestUrl = req.session.syncUrl;
+    if (requestUrl === undefined) {
+        // Calendar sync works on the CalendarView endpoint
+        requestUrl = outlook.base.apiEndpoint() + '/me/events';
+    }
+
+    // Set the required headers for sync
+    var headers = {
+        Prefer: [
+            // Requests only 5 changes per response
+            'odata.maxpagesize=5'
+        ]
+    };
+
+    var event = {
+        "Subject": "Test from App",
+        "Start": {
+            "DateTime": "2019-01-04T12:00:00",
+            "TimeZone": "Europe/Berlin"
+        },
+        "End": {
+            "DateTime": "2019-01-04T13:00:00",
+            "TimeZone": "Europe/Berlin"
+        }
+    };
+
+    //var calculatedStartTime = parseInt(requestedMeetings.startingTime,10)-1;
+    //var calculatedEndTime = parseInt(requestedMeetings.startingTime,10);
+
+    event.Subject = subject;
+    //var startTime = requestedMeetings.year+'-'+requestedMeetings.month+'-'
+    //    +requestedMeetings.day+'T'+calculatedStartTime+':00:00'+'Z';
+    //var endTime = requestedMeetings.year+'-'+requestedMeetings.month+'-'
+    //    +requestedMeetings.day+'T'+calculatedEndTime+':00:00'+'Z';
+
+    requestedMeetings.startingTime--;
+    let endTime = constructIso8601(requestedMeetings);
+    requestedMeetings.startingTime--;
+    let startTime = constructIso8601(requestedMeetings);
+
+    event.Start.DateTime = startTime;
+    event.End.DateTime = endTime;
+
+    //console.log("")
+    //console.log("CalculatedEndTime: "+ calculatedEndTime);
+    //console.log("Start time: "+ startTime);
+    //console.log("End time: "+ endTime);
+    console.log("Event je:" + JSON.stringify(event, null, 2));
+
+    var apiOptions = {
+        url: requestUrl,
+        token: token,
+        headers: headers,
+        event: event
+    };
+
+    let createEventParameters = {
+        token: token,
+        event: event
+    };
+
+    //console.log('requestUrl ' + apiOptions.url);
+    //console.log('token ' + apiOptions.token);
+    //console.log('headers ' + apiOptions.headers);
+    //console.log("Došao");
+
+    outlook.calendar.createEvent(createEventParameters, function (error, event) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log(event);
+        }
+    });
+
+    //console.log("prošao");
+    //console.log('subject: ',subject,'requested meetings: ',requestedMeetings);
+    //res.redirect('/sync');
+}
+
+router.use('/calendar', require('./calendar'));
+
+function parseDate(dateSent) {
+
+    let date = new Date(dateSent);
+
+    let month = '' + (date.getMonth() + 1);
+    let day = '' + date.getDate();
+    let year = '' + date.getFullYear();
+
+    let hours = '' + date.getHours();
+    let min = '' + date.getMinutes();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    if (hours.length < 2) hours = '0' + hours;
+    if (min.length < 2) min = '0' + min;
+
+    return [day, month, year].join('.') + " starting at " + (hours - 1) + ":" + min;
+}
+
+function dateToMeetingFormat(dateSent) {
+
+    let date = new Date(dateSent);
+
+    let month = '' + (date.getMonth() + 1);
+    let day = '' + date.getDate();
+    let year = '' + date.getFullYear();
+
+    let hours = '' + date.getHours();
+
+    return { year: year, month: month, day: day, startingTime: hours };
+}
+
+function constructIso8601(meeting) {
+
+    let year = '' + meeting.year;
+    let month = '' + meeting.month;
+    let day = '' + meeting.day;
+    let hour = '' + meeting.startingTime;
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    if (hour.length < 2) hour = '0' + hour;
+
+    return [year, month, day].join('-') + "T" + hour + ":00:00Z";
+}
 /**
  * @constant ...
  */
