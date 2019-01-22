@@ -342,8 +342,8 @@ router.get('/sendmail', function(req, res) {
 router.get('/calendar/week/student/:date/:subject', (req, res) => {
 
     console.log("called");
-    var token = req.session.access_token;
-    var email = req.session.email;
+    let token = req.session.access_token;
+    let email = req.session.email;
     if (!token || !email) {
         afterLoginUrl = 'http://localhost:3000' + req.url;
         res.redirect(authHelper.getAuthUrl());
@@ -360,11 +360,14 @@ router.get('/calendar/week/:token/:answer', (req, res) => {
     let accept = true;
     if (req.params.answer == 0) accept = false;
 
+    let data = urlParser.getUrlDataFromRequest(req);
+
     console.log(req.session);
-    var token = req.session.access_token;
-    var email = req.session.email;
+    let token = req.session.access_token;
+    let email = req.session.email;
     if (!token || !email) {
-        afterLoginUrl = 'http://localhost:3000' + req.url;
+        //afterLoginUrl = 'http://localhost:3000' + req.url;
+        afterLoginUrl = data.protocol + '://' + data.host + req.url;
         res.redirect(authHelper.getAuthUrl());
         return;
     }
@@ -385,8 +388,6 @@ router.get('/calendar/week/:token/:answer', (req, res) => {
             let startDate = answer.data.startDate;
             let subject = answer.data.subject;
 
-            let data = urlParser.getUrlDataFromRequest(req);
-
             let url_accept = data.protocol + '://' + data.host + '/calendar/week/student/' + startDate + '/' + subject;
 
             htmlStr = 'your meeting request for ' + parseDate(startDate) + ' has been accepted <br>';
@@ -395,6 +396,9 @@ router.get('/calendar/week/:token/:answer', (req, res) => {
             mailHelper.sendMailForMeetingConfirmation(senderEmail, htmlStr);
 
             // deal with outlook calendar
+
+            console.log(dateToMeetingFormat(startDate));
+
             postOutlookData(req, res, subject, dateToMeetingFormat(startDate));
         }
 
@@ -469,10 +473,16 @@ function postOutlookData(req, res, subject, requestedMeetings, recallback) {
     //var endTime = requestedMeetings.year+'-'+requestedMeetings.month+'-'
     //    +requestedMeetings.day+'T'+calculatedEndTime+':00:00'+'Z';
 
-    requestedMeetings.startingTime--;
-    let endTime = constructIso8601(requestedMeetings);
-    requestedMeetings.startingTime--;
+    //requestedMeetings.startingTime--;
+    //let endTime = constructIso8601(requestedMeetings);
+    //requestedMeetings.startingTime--;
+    //let startTime = constructIso8601(requestedMeetings);
+
+
+    addHours(requestedMeetings, -2);
     let startTime = constructIso8601(requestedMeetings);
+    addFifteenMinutes(requestedMeetings);
+    let endTime = constructIso8601(requestedMeetings);
 
     event.Start.DateTime = startTime;
     event.End.DateTime = endTime;
@@ -539,6 +549,8 @@ function parseDate(dateSent) {
  */
 function constructIso8601(meeting) {
 
+    console.log(meeting);
+
     let year = '' + meeting.year;
     let month = '' + meeting.month;
     let day = '' + meeting.day;
@@ -574,7 +586,18 @@ function addFifteenMinutes(meeting) {
     }
 
     meeting.startingTime = hour + ":" + minute;
+}
 
+function addHours(meeting, num) {
+
+    let time = meeting.startingTime;
+    console.log("Početno vrijeme: " + meeting.startingTime)
+    let hour = parseInt(time.split(":")[0], 10);
+    let minute = parseInt(time.split(":")[1], 10);
+
+    hour += num;
+
+    meeting.startingTime = hour + ":" + minute;
 }
 
 /**
@@ -585,13 +608,14 @@ function addFifteenMinutes(meeting) {
 function dateToMeetingFormat(dateSent) {
     let date = new Date(dateSent);
 
-    let month = '' + (date.getMonth() + 1);
-    let day = '' + date.getDate();
-    let year = '' + date.getFullYear();
+    let month   = '' + (date.getMonth() + 1);
+    let day     = '' + date.getDate();
+    let year    = '' + date.getFullYear();
 
-    let hours = '' + date.getHours();
+    let hours   = '' + date.getHours();
+    let minutes = '' + date.getMinutes();
 
-    return { year: year, month: month, day: day, startingTime: hours };
+    return { year: year, month: month, day: day, startingTime: ('' + hours + ':' + minutes) };
 }
 
 router.use('/calendar', require('./calendar'));

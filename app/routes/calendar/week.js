@@ -103,13 +103,14 @@ function addFifteenMinutes(meeting){
 function dateToMeetingFormat(dateSent) {
     let date = new Date(dateSent);
 
-    let month = '' + (date.getMonth() + 1);
-    let day = '' + date.getDate();
-    let year = '' + date.getFullYear();
+    let month   = '' + (date.getMonth() + 1);
+    let day     = '' + date.getDate();
+    let year    = '' + date.getFullYear();
 
-    let hours = '' + date.getHours();
+    let hours   = '' + date.getHours();
+    let minutes = '' + date.getMinutes();
 
-    return { year: year, month: month, day: day, startingTime: hours };
+    return { year: year, month: month, day: day, startingTime: ('' + hours + ':' + minutes) };
 }
 
 router.post('/get_meetings', (req, res) => {
@@ -131,6 +132,8 @@ router.post('/get_meetings', (req, res) => {
 });
 
 router.post('/', permit, (req, res) => {
+
+    console.log(req.body.requestedMeetings);
 
     if (req.query['operation'] == 'requestMeeting') {
         //let subject = req.body.subject;
