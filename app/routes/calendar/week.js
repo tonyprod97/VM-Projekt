@@ -244,8 +244,4 @@ router.post('/', permit, (req, res) => {
     }
 });
 
-module.exports.parseDate = parseDate;
-module.exports.constructIso8601 = constructIso8601;
-module.exports.dateToMeetingFormat = dateToMeetingFormat;
-module.exports.addFifteenMinutes = addFifteenMinutes;
 module.exports = router;

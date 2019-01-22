@@ -24,7 +24,6 @@ const urlParser = require('../UrlManager');
 
 const sendIds = require('../constants').databaseSendRequests; // for testing 
 var afterLoginUrl;
-const week = require('./calendar/week');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -351,7 +350,7 @@ router.get('/calendar/week/student/:date/:subject', (req, res) => {
         return;
     }
 
-    postOutlookData(req, res, req.params.subject, week.dateToMeetingFormat(req.params.date));
+    postOutlookData(req, res, req.params.subject, dateToMeetingFormat(req.params.date));
 
     res.redirect('/');
 });
@@ -390,13 +389,13 @@ router.get('/calendar/week/:token/:answer', (req, res) => {
 
             let url_accept = data.protocol + '://' + data.host + '/calendar/week/student/' + startDate + '/' + subject;
 
-            htmlStr = 'your meeting request for ' + week.parseDate(startDate) + ' has been accepted <br>';
+            htmlStr = 'your meeting request for ' + parseDate(startDate) + ' has been accepted <br>';
             htmlStr += 'click here to add it to your outlook calendar: <a href = "' + url_accept + '"> Add </a>';
 
             mailHelper.sendMailForMeetingConfirmation(senderEmail, htmlStr);
 
             // deal with outlook calendar
-            postOutlookData(req, res, subject, week.dateToMeetingFormat(startDate));
+            postOutlookData(req, res, subject, dateToMeetingFormat(startDate));
         }
 
         res.redirect('/');
@@ -471,9 +470,9 @@ function postOutlookData(req, res, subject, requestedMeetings, recallback) {
     //    +requestedMeetings.day+'T'+calculatedEndTime+':00:00'+'Z';
 
     requestedMeetings.startingTime--;
-    let endTime = week.constructIso8601(requestedMeetings);
+    let endTime = constructIso8601(requestedMeetings);
     requestedMeetings.startingTime--;
-    let startTime = week.constructIso8601(requestedMeetings);
+    let startTime = constructIso8601(requestedMeetings);
 
     event.Start.DateTime = startTime;
     event.End.DateTime = endTime;
@@ -512,6 +511,87 @@ function postOutlookData(req, res, subject, requestedMeetings, recallback) {
     //console.log("prošao");
     //console.log('subject: ',subject,'requested meetings: ',requestedMeetings);
     //res.redirect('/sync');
+}
+
+function parseDate(dateSent) {
+
+    let date = new Date(dateSent);
+
+    let month = '' + (date.getMonth() + 1);
+    let day = '' + date.getDate();
+    let year = '' + date.getFullYear();
+
+    let hours = '' + date.getHours();
+    let min = '' + date.getMinutes();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    if (hours.length < 2) hours = '0' + hours;
+    if (min.length < 2) min = '0' + min;
+
+    return [day, month, year].join('.') + " starting at " + (hours - 1) + ":" + min;
+}
+
+/**
+ * Zapis datuma i vremena po ISO 8601 standardu
+ * @param {Object} meeting
+ * @returns {String} datum i vrijeme
+ */
+function constructIso8601(meeting) {
+
+    let year = '' + meeting.year;
+    let month = '' + meeting.month;
+    let day = '' + meeting.day;
+    let time = meeting.startingTime.split(":");
+    let hour = time[0];
+    let minute = time[1];
+    console.log("Sati:" + hour);
+    console.log("Minute: " + minute);
+    //let hour = '' + meeting.startingTime;
+
+    console.log("Sati poslje:" + hour);
+    console.log("Minute poslje: " + minute);
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    if (hour.length < 2) hour = '0' + hour;
+    if (minute.length < 2) minute = '0' + minute;
+
+    return [year, month, day].join('-') + "T" + hour + ":" + minute + ":00Z";
+}
+
+function addFifteenMinutes(meeting) {
+    let time = meeting.startingTime;
+    console.log("Početno vrijeme: " + meeting.startingTime)
+    let hour = parseInt(time.split(":")[0], 10);
+    let minute = parseInt(time.split(":")[1], 10);
+
+    if (minute == 45) {
+        hour = hour + 1;
+        minute = 0;
+    } else {
+        minute = minute + 15;
+    }
+
+    meeting.startingTime = hour + ":" + minute;
+
+}
+
+/**
+ * ......
+ * @param {Object} dateSent
+ * @returns {Object} objekt s varijablama datuma i vremena
+ */
+function dateToMeetingFormat(dateSent) {
+    let date = new Date(dateSent);
+
+    let month = '' + (date.getMonth() + 1);
+    let day = '' + date.getDate();
+    let year = '' + date.getFullYear();
+
+    let hours = '' + date.getHours();
+
+    return { year: year, month: month, day: day, startingTime: hours };
 }
 
 router.use('/calendar', require('./calendar'));
