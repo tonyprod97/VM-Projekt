@@ -6,80 +6,6 @@
 @requested-cell: #2E7D32;
 @button-submit: #81D4FA;
 
-/*
-
-td {
-    border: 1px solid black;
-    background-color: @table-cell;
-
-    &:hover {
-        cursor: pointer;
-    }
-
-    &.free {
-        cursor: not-allowed;
-    }
-
-    &.taken {
-        background-color: @table-cell-taken;
-        border: 2px solid blue !important;
-        font-style: italic;
-        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-        font-weight: bold;
-        text-align: center;
-        cursor: pointer;
-        
-        &:hover {
-            background-color: rgb(104, 209, 104);
-            cursor: pointer;
-        }
-    }
-
-    &.reserved {
-        background-color: rgb(74, 81, 175);
-    }
-    
-    &.disabled {
-        cursor: default;
-    
-        &:hover {
-            background-color: @table-cell;
-            cursor: default;
-    
-            &.taken {
-                background-color: @table-cell-taken;
-                cursor: default;
-            }
-        }
-    }
-}
-
-th {
-    text-align: center;
-    background-color: @table-background;
-}
-
-
-.color-secondary {
-    background-color: @secondary;
-}
-
-.margin-right {
-    margin-right: 10px;
-}
-
-.float-right {
-    float: right;
-}
-
-.backgorund-main {
-    background-color: @backgorund-main-color;
-}
-
-.float-left {
-    float: left;
-}
-*/
 div {
     &.backgorund-main {
         background-color: @backgorund-main-color;
@@ -97,15 +23,31 @@ form {
 h3 {
     margin-left: 25%;
 }
+.quarter-time {
+    border-bottom: 1px #E8EAF6 dashed;
+    border-top: 1px #E8EAF6 dashed;
+    height: 100%;
+    color:white;
+    /*
+    &:hover {
+        background-color: red;
+    }
 
-
-td {
+    &.selecting {
+        background-color: yellow;
+    }
+    */
+}
+td, .quarter-time {
     padding: 0px !important;
     text-align: center;
     background-color: white;
 
     &.clickable {
         cursor: pointer;
+        &.selecting {
+            background-color: yellow;
+        }
     }
     &.marked {
         background-color: gray; 
@@ -134,7 +76,7 @@ td {
                     color: black;
                 }
             }
-            &.available {
+            &.available,&.selecting {
                 cursor: auto;
             }
         }
@@ -148,9 +90,10 @@ td {
         &.available {
             background-color: white;
 
-            &:hover {
+            &:hover, &.selecting {
                 background-color: @requestable-cell;
             }
+            
         }
         &.marked {
             background-color: @requested-cell;
@@ -165,18 +108,6 @@ td {
     margin: 0px 25px;
 }
 
-.quarter-time {
-    border-bottom: 1px #E8EAF6 dashed;
-    border-top: 1px #E8EAF6 dashed;
-    height: 100%;
-    &:hover {
-        background-color: red;
-    }
-
-    &.selecting {
-        background-color: yellow;
-    }
-}
 
 th, .time-column {
     text-align: center;

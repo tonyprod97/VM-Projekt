@@ -154,23 +154,24 @@ function appendHours() {
                 div.addEventListener('mouseover',function(){
                     mouseOver(event);
                 });
+                div.addEventListener('click',function() {
+                    cellClicked(i+':'+k*15,tempYear,tempMonth,tempDay)
+                });
+               
+                
+                div.classList = tdElement.classList;
 
                 let minutes = k*15;
                 if(minutes === 0) minutes = '00';
                 div.id = i+':'+minutes+'-'+dateString;
-                div.className +='quarter-time noselect';
-                div.innerText = '-';
+                div.classList.add('quarter-time','noselect');
+                div.innerText = '+';
                 tdElement.appendChild(div);
-                
-                
-                div.addEventListener('click',function() {
-                    cellClicked(i+':'+k*15,tempYear,tempMonth,tempDay)
-                });
             } 
 
-            tdElement.addEventListener('click',function() {
-                cellClicked(i,tempYear,tempMonth,tempDay,event)
-            });
+            /*tdElement.addEventListener('click',function() {
+                cellClicked(i+':00',tempYear,tempMonth,tempDay)
+            });*/
 
             trElement.appendChild(tdElement);
         }
@@ -190,18 +191,38 @@ function fillCellsWithData() {
     
     calendarData.forEach(event=>{
         let data = new CalendarEvent(event.Subject,new Date(event.Start.DateTime),new Date(event.End.DateTime),event.Location ? event.Location.DisplayName : '');
-        let id = data.start.getHours()+'-'+data.start.getFullYear()+'/'+Number(data.start.getMonth()+1)+'/'+data.start.getDate();
-        let cell = document.getElementById(id);
-        cell.innerHTML = '';
-        let div = document.createElement('div');
+        let minutes = data.start.getMinutes() === 0 ? '00' : data.start.getMinutes();
+        let id = data.start.getHours()+':'+minutes+'-'+data.start.getFullYear()+'/'+Number(data.start.getMonth()+1)+'/'+data.start.getDate();
+        let startEvent = data.start.getHours();
+        let endHour = data.end.getHours();
+        let endMinutes = data.end.getMinutes();
 
+        console.log('startEvent:', startEvent);
+        console.log('endMinutes:', endMinutes)
+        console.log('id:', id)
+        let cell = document.getElementById(id);
+        
+        if(cell) cell.innerHTML = '';
+        let div = document.createElement('div');
+        
         if(cell) {
+            let cellTime = id.split('-')[0].split(':');
             if(data.subject) {
-                div.innerHTML=data.subject;
+                div.innerHTML +=data.subject;
             } else {
-                div.innerHTML="taken";
+                div.innerHTML +="taken";
             }
             cell.appendChild(div);
+            console.log('endHour:', endHour)
+            console.log('cellTime[0]+1:', +cellTime[0]+1)
+            /*if(+endHour == +cellTime[0]+1) {
+                //while(cell.nextSibling) cell.nextSibling.remove();
+                cell.style.height = cell.parentElement.offsetHeight;
+                cell.style.width = cell.parentElement.offsetWidth;
+                
+                cell.style.display = 'table';
+                cell.children[0].setAttribute('style','display:table-cell;vertical-align:middle');
+            }*/
             
             cell.classList.add('busy');
             if(!role) cell.classList.add('clickable');
@@ -218,10 +239,10 @@ function fillCellsWithData() {
  * @param {Object} day - izabran dan
  */
 
-function cellClicked(startingTimeHour,year,month,day,event) {
-    //let cell = document.getElementById('cell'+startingTimeHour+'-'+year+'/'+month+'/'+day);
+function cellClicked(startingTimeHour,year,month,day) {
     let cell = document.getElementById(startingTimeHour+'-'+year+'/'+month+'/'+day);
-    //console.log('cell is clicked: ',cell,'event: ',event);
+    if(!cell) return;
+    console.log('cell:', cell)
     if(!cell.classList.contains('clickable')) return;
     if(!cell.classList.contains('busy') && !role) return;
     
@@ -347,6 +368,8 @@ function mouseUp(ev) {
   
   function mouseDown(ev) {
     let target = ev.target;
+    if(!target.classList.contains('clickable')) return;
+    if(!target.classList.contains('busy') && !role) return;
     target.classList.toggle('selecting');
     selectingMode = true;
   }
