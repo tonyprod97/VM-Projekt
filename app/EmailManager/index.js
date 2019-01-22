@@ -2,8 +2,22 @@ var nodemailer = require('nodemailer');
 
 const verificationText = 'To verify your account please click on the link: ';
 
+//var transporter = nodemailer.createTransport({
+//    service: 'gmail',
+//    auth: {
+//        user: 'projectvm00@gmail.com',
+//        pass: 'vmproject123'
+//    },
+//    tls: {
+//        rejectUnauthorized: false
+//    }
+//});
+
 var transporter = nodemailer.createTransport({
-    service: 'gmail',
+    //service: 'gmail',
+    host: "smtp.gmail.com",
+    domains: ["gmail.com", "googlemail.com"],
+    port: 587,
     auth: {
         user: 'projectvm00@gmail.com',
         pass: 'vmproject123'

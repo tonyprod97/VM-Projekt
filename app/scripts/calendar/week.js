@@ -169,9 +169,9 @@ function appendHours() {
                 tdElement.appendChild(div);
             } 
 
-            /*tdElement.addEventListener('click',function() {
+            tdElement.addEventListener('click',function() {
                 cellClicked(i+':00',tempYear,tempMonth,tempDay)
-            });*/
+            });
 
             trElement.appendChild(tdElement);
         }
