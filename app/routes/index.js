@@ -341,11 +341,14 @@ router.get('/sendmail', function(req, res) {
 
 router.get('/calendar/week/student/:date/:subject', (req, res) => {
 
+    let data = urlParser.getUrlDataFromRequest(req);
+
     console.log("called");
     let token = req.session.access_token;
     let email = req.session.email;
     if (!token || !email) {
-        afterLoginUrl = 'http://localhost:3000' + req.url;
+        //afterLoginUrl = 'http://localhost:3000' + req.url;
+        afterLoginUrl = data.protocol + '://' + data.host + req.url;
         res.redirect(authHelper.getAuthUrl());
         return;
     }
