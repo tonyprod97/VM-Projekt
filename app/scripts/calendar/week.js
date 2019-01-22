@@ -12,6 +12,7 @@ let currentDate;
 let daysOfWeek = ["Sunday","Monday", "Tuesday", "Wednesday", 
 "Thursday", "Friday", "Saturday"];
 let monday;
+let selectingMode;
 
 window.addEventListener('load',initializeData);
 
@@ -30,6 +31,9 @@ function initializeData() {
     currentDate = new Date();
     setMonday();
     appendWeek(new Date());
+    document.addEventListener('dragstart',()=>{
+        dragStart(event);
+    })
 };
 
 
@@ -78,6 +82,11 @@ function appendWeek(date) {
     appendHours();
 }
 
+function dragStart(ev) {
+    console.log('ev:', ev);
+    selectingMode = false;
+    if(ev.target.classList.contains('quarter-time')) ev.target.classList.add('selecting');
+}
 /**
  * Stvaranje redaka po satima
  */
@@ -131,18 +140,26 @@ function appendHours() {
             tdElement.classList.add('available',roleClass,viewClass);
             if(clickableClass) tdElement.classList.add(clickableClass);
 
-            
-            let divContainer = document.createElement('div');
-            divContainer.className +='quarter-time-container';
-           // tdElement.appendChild(divContainer);
-
             for(let k = 0; k < 4; k++) {
-                let div = document.createElement('p');
+                let div = document.createElement('div');
+                div.setAttribute('draggable',false);
                 
+
+                div.addEventListener('mousedown',function(){
+                    mouseDown(event);
+                });
+                div.addEventListener('mouseup',function(){
+                    mouseUp(event);
+                });
+                div.addEventListener('mouseover',function(){
+                    mouseOver(event);
+                });
+
                 let minutes = k*15;
                 if(minutes === 0) minutes = '00';
                 div.id = i+':'+minutes+'-'+dateString;
-                div.className +='quarter-time';
+                div.className +='quarter-time noselect';
+                div.innerText = '-';
                 tdElement.appendChild(div);
                 
                 
@@ -151,9 +168,8 @@ function appendHours() {
                 });
             } 
 
-            
             tdElement.addEventListener('click',function() {
-                cellClicked(i,tempYear,tempMonth,tempDay)
+                cellClicked(i,tempYear,tempMonth,tempDay,event)
             });
 
             trElement.appendChild(tdElement);
@@ -173,14 +189,12 @@ function fillCellsWithData() {
     //resetCells();
     
     calendarData.forEach(event=>{
-        console.log('event:', event)
         let data = new CalendarEvent(event.Subject,new Date(event.Start.DateTime),new Date(event.End.DateTime),event.Location ? event.Location.DisplayName : '');
         let id = data.start.getHours()+'-'+data.start.getFullYear()+'/'+Number(data.start.getMonth()+1)+'/'+data.start.getDate();
         let cell = document.getElementById(id);
         cell.innerHTML = '';
         let div = document.createElement('div');
 
-        console.log('new Date(event.Start.DateTime):', new Date(event.Start.DateTime))
         if(cell) {
             if(data.subject) {
                 div.innerHTML=data.subject;
@@ -204,24 +218,21 @@ function fillCellsWithData() {
  * @param {Object} day - izabran dan
  */
 
-function cellClicked(startingTimeHour,year,month,day) {
+function cellClicked(startingTimeHour,year,month,day,event) {
     //let cell = document.getElementById('cell'+startingTimeHour+'-'+year+'/'+month+'/'+day);
     let cell = document.getElementById(startingTimeHour+'-'+year+'/'+month+'/'+day);
-    console.log('cell is clicked: ',cell);
+    //console.log('cell is clicked: ',cell,'event: ',event);
     if(!cell.classList.contains('clickable')) return;
     if(!cell.classList.contains('busy') && !role) return;
     
     cell.classList.toggle('marked');
+    cell.classList.toggle('reserved');
 
-    
-        cell.classList.toggle('reserved');
+    let newCellObject = new CellObject(year,month,day,startingTimeHour);
+    let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
 
-        let newCellObject = new CellObject(year,month,day,startingTimeHour);
-        let newArray = reservedCells.filter(obj => !obj.equals(newCellObject));
-
-        if(reservedCells.length == newArray.length) newArray.push(newCellObject);
-        reservedCells = newArray;
-
+    if(reservedCells.length == newArray.length) newArray.push(newCellObject);
+    reservedCells = newArray;
 }
 /**
  * Usporedba dva datuma
@@ -231,37 +242,6 @@ function cellClicked(startingTimeHour,year,month,day) {
  */
 function compareDates(x,y) {
     return x.getDate()==y.getDate() && x.getFullYear() == y.getFullYear() && x.getMonth() == y.getMonth();
-}
-
-/**
- * Dohvat podataka kalendara
- */
-function fetchCalendarData() {
-    let url = '/outlook/calendarData';
-    
-    if(teacherElement) {
-        url += '?teacher='+teacherElement.innerText; 
-    } 
-    //send http POST
-    var http = new XMLHttpRequest();
-    http.open("POST", url, true);
-    http.setRequestHeader('Content-Type', 'application/json');
-    http.setRequestHeader('Accept','application/json');
-    http.responseType = 'json';
-    
-    http.send(JSON.stringify({user:user})); 
-
-    http.onreadystatechange = function() {
-        if (http.readyState === 4 && http.status == 200 && http.response) {
-            console.log('http res: ',typeof http.response.calendarData);
-            console.log('post to get data: ',http.response.calendarData)
-            console.log('after parsing : ',JSON.parse(http.response.calendarData));
-            calendarData = JSON.parse(http.response.calendarData);
-            fillCellsWithData();
-        } else {
-            if(http.readyState === 4 && http.status == 200) appendWeek(currentDate);
-        }
-      }
 }
 
 function setMonday() {
@@ -282,8 +262,6 @@ function dateChanged() {
     }
     fillCellsWithData();
 }
-
-
 
 /**
  * Brisanje zauzetosti izabranih celija
@@ -330,101 +308,6 @@ function previous() {
 }
 
 /**
- * Vracanje ispravnog formata datuma za HTML input datuma
- * @param {Object} date
- * @returns {Object}
- */
-function getLocalDateFormat(date) {
-    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-    return date.toJSON().slice(0,10);
-}
-
-/**
- * Slanje zahtjeva za sastancima
- */
-function sendRequestForMeetings() {
-    
-    let dataToSend = reservedCells.slice();
-    cleanCellsReservation();
-    console.log('data to send: ',dataToSend);
-
-    let subjectElement = document.querySelector("#subject");
-    let subject = subjectElement.value;
-    subjectElement.value='';
-
-    //send http POST
-    var http = new XMLHttpRequest();
-    http.open("POST", '/calendar/week?operation=requestMeeting', true);
-    http.setRequestHeader('Content-Type', 'application/json');
-    http.setRequestHeader('Accept','application/json');
-    http.responseType = 'json';
-    http.send(JSON.stringify({
-        user: user,
-        teacher: teacherElement.innerText,
-        subject: subject,
-        requestedMeetings: dataToSend
-    })); 
-    http.onreadystatechange = function () {
-        if (http.readyState === 4) {
-            openPopup();
-            cleanCellsReservation();
-            console.log('Success')
-        }
-      }
-
-}
-
-/**
- * Postavljanje dosptupnosti termina
- */
-
-function sendMarkAsAvailable() {
-
-    let dataToSend = reservedCells.slice();
-    console.log('data to send: ',dataToSend);
-    //send http POST
-    var http = new XMLHttpRequest();
-    http.open("POST", '/calendar/week?operation=markAsAvailable', true);
-    http.setRequestHeader('Content-Type', 'application/json');
-    http.setRequestHeader('Accept','application/json');
-    http.responseType = 'json';
-    http.send(JSON.stringify({
-        user: user,
-        available: dataToSend
-    })); 
-    http.onreadystatechange = function () {
-        if (http.readyState === 4) {
-            openPopup();
-            cleanCellsReservation();
-            console.log('Success');
-            document.location.reload();
-        }
-      }
-}
-
-/**
- * Uklanja slobodne termine
- */
-function deleteAvailable() {
-    var http = new XMLHttpRequest();
-    http.open("POST", '/calendar/week?operation=deleteAvailable', true);
-    http.setRequestHeader('Content-Type', 'application/json');
-    http.setRequestHeader('Accept', 'application/json');
-    http.responseType = 'json';
-    http.send(JSON.stringify({
-        user: user
-    }));
-    http.onreadystatechange = function () {
-        if (http.readyState === 4) {
-            openPopup();
-            console.log('Success');
-            //resetCells();
-            appendWeek(currentDate);
-        }
-    }
-}
-
-/**
  * Uklanjanje rezerviranih termina
  */
 
@@ -435,6 +318,44 @@ function cleanCellsReservation() {
     });
     reservedCells = new Array();
 }
+
+function mouseUp(ev) {
+    
+    //push selected cells to array
+    let selectedCells = document.querySelectorAll('div.selecting');
+    console.log('selectedCells:', selectedCells)
+
+    selectedCells.forEach(cell => {
+        //id exp. 8:00-2019/1/23
+        let date = cell.id.split('-')[1].split('/');
+        let newCellObject = new CellObject(date[0],date[1],date[2],cell.id.split('-')[0]);
+        let existingCell = reservedCells.find(c => {
+            console.log('newCellObject.equals(c):', newCellObject.equals(c))
+            return newCellObject.equals(c);
+        });
+        console.log('existingCell:', existingCell)
+        if(existingCell) {
+            reservedCells = reservedCells.filter(c => newCellObject.equals(c));
+        } else {
+            reservedCells.push(newCellObject);
+        }
+        
+    });
+    console.log('reservedCells:', reservedCells)
+    selectingMode = false;
+  }
+  
+  function mouseDown(ev) {
+    let target = ev.target;
+    target.classList.toggle('selecting');
+    selectingMode = true;
+  }
+  
+  function mouseOver(ev) {
+    if(selectingMode) {
+        ev.target.classList.toggle('selecting');
+    }
+  }
 
 /**
  * @class Klasa koja predstavlja celiju

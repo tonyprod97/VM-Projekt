@@ -169,6 +169,13 @@ td {
     border-bottom: 1px #E8EAF6 dashed;
     border-top: 1px #E8EAF6 dashed;
     height: 100%;
+    &:hover {
+        background-color: red;
+    }
+
+    &.selecting {
+        background-color: yellow;
+    }
 }
 
 th, .time-column {
@@ -184,3 +191,13 @@ th, .time-column {
     color: white;
     text-shadow: 2px 2px 4px #000000;
 }
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome and Opera */
+  }
