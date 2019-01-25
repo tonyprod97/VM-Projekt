@@ -1,16 +1,10 @@
 var express = require('express');
 var router = express.Router();
+var permit = require('../user/permission');
 
-router.use('/week',require('./week'));
-router.use('/teachers',require('./teachers'));
+router.use('/week', require('./week'));
+router.use('/teachers', require('./teachers'));
+router.get('/', permit, (req, res) => res.render('./calendar/week', { loggedIn: true }));
 
-router.get('/', (req, res) => {
-    if (req.session.user == undefined) {
-        res.redirect('../user/login');
-        return;
-    }
-
-    res.render('./calendar/index');
-});
 
 module.exports = router;

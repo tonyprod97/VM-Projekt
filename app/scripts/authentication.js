@@ -1,3 +1,7 @@
+/**
+ * @file Ovdje se nalaze varijable i metode za ispravnu registraciju i prijavu korisnika
+ */
+
 let form;
 let emailInput;
 let passwordInput;
@@ -5,6 +9,7 @@ let submitButton;
 let passwordConfirmInput;
 let emailError;
 let errorPassword;
+let roleSelected;
 
 window.onload =()=>{
     form = document.querySelector("form");
@@ -14,10 +19,25 @@ window.onload =()=>{
     passwordConfirmInput = document.getElementById("passwordConfirm");
     emailError = document.getElementById("errorEmail");
     errorPassword = document.getElementById("errorPassword");
+    roleSelected = document.getElementById("roleSelect");
+    
+    if(passwordInput) {
+        passwordInput.onkeydown = e => {
+            if(e.keyCode == 13) submitButton.click();
+        };
+    }
+
+    if(passwordConfirmInput) {
+        passwordConfirmInput.onkeydown = e => {
+            if(e.keyCode == 13) submitButton.click();
+        };
+    }
+
 };
 
+
 /**
- *Checking if user is trying to register or log in
+ * Provjera zeli li se user registrirati ili prijaviti
  */
 function onFormChange() {
     // If passwordConfirmInput exists user is trying to register else to log in.
@@ -29,19 +49,23 @@ function onFormChange() {
 }
 
 /**
- * Logging in on outlook
+ * Prijava na outlook
  */
 function onOutlookLogin() {
     window.location.href = './outlookLogin';
 }
 
 /**
- * Doing action on submit
+ * Provjera unesenih podataka za prijavu ili registraciju i obavljanje odredene akcije
  */
 function onSubmit() {  
     let url;
     let email = emailInput.value;
     let password = passwordInput.value;
+    let user = { user: {
+        email: emailInput.value,
+        password: passwordInput.value,
+    }};
 
     let valid = checkMail(email);
     // If passwordConfirmInput exists user is trying to register else to log in.
@@ -55,6 +79,7 @@ function onSubmit() {
         }
 
         url = './register';
+        user.user.role = roleSelected.value;
     } else {
         // Check if user logged in succesfully.
         if (valid) {
@@ -74,12 +99,8 @@ function onSubmit() {
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Accept','application/json');
     xhr.responseType = 'json';
-    xhr.send(JSON.stringify({
-        user: {
-            email: emailInput.value,
-            password: passwordInput.value
-        }
-    })); 
+    
+    xhr.send(JSON.stringify(user)); 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if(!passwordConfirmInput) {
@@ -98,6 +119,12 @@ function onSubmit() {
 
 }
 
+/**
+ * Provjera ispravnosti e-mail adrese
+ * @param {Object} email - adresa elektronicke poste korisnika
+ * @returns {boolean}
+ */
+
 function checkMail(email) {
     if (validateEmail(email)) {
         emailError.innerHTML = "";
@@ -107,6 +134,13 @@ function checkMail(email) {
         return false;
     }
 }
+
+/**
+ * Provjera ispravnosti potvrde lozinke
+ * @param {Object} password - lozinka
+ * @param {Object} confirmPassword - potvrda lozinke
+ * @returns {boolean}
+ */
 
 function checkPasswordConf(password, confirmPassword) {
     if (!checkPassword(password)) {
@@ -118,6 +152,12 @@ function checkPasswordConf(password, confirmPassword) {
 
     return true;
 }
+
+/**
+ * Provjera ispravnosti lozinke
+ * @param {Object} password - lozinka
+ * @returns {boolean}
+ */
 
 function checkPassword(password) {
     if (password.length < 6) {
@@ -131,7 +171,7 @@ function checkPassword(password) {
 }
 
 /**
- * Enabling registration
+ * Provjera polja i omogucavanje registracije
  */
 function register() {
     if(emailInput.value && passwordInput.value && passwordConfirmInput 
@@ -142,7 +182,7 @@ function register() {
 }
 
 /**
- * Logging out
+ * Odjava
  */
 function logout() {
     let userData = JSON.parse(localStorage.getItem("user"));
@@ -163,13 +203,14 @@ function logout() {
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
             localStorage.removeItem("user");
+            localStorage.removeItem("calendarData");
             console.log(xhr.response);
             window.location.href = xhr.response.redirectUrl;
         }
       }
 }
 /**
- * Enabling login 
+ * Provjera polja i omogucavanje prijave 
  */
 function login() {
     if(emailInput.value && passwordInput.value 
@@ -178,21 +219,11 @@ function login() {
     } 
 }
 /**
- * Validating email
- * @param {Object} email
+ * Provjera ispravnosti e-mail formata
+ * @param {Object} email - adresa elektronicke poste korisnika
  * @returns {boolean}
  */
 function validateEmail(email) {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
-}
-
-/*
-* Request to home page
-*/
-function homeClicked() {
-    let user = localStorage.getItem("user");
-
-    let url = user ? '/home' : '/';
-    window.location.href = url;    
 }

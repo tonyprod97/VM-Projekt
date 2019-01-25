@@ -1,6 +1,8 @@
-<link rel="stylesheet" href="/css/calendar/teachers.css">
+<link rel="stylesheet/less" type="text/css" href="/css/calendar/teachers.less">
+<script src="/scripts/calendar/teachers.js"></script>
 
-{{> calendarNav }}
+<div class="backgorund-main">
+    {{> calendarNav }}
 <div class="container">
     <div class="row">
         <div class="table-responsive">
@@ -12,10 +14,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{#each teachers as |teacher|}}
+                    {{#each people as |person|}}
                         <tr>
-                        <th scope="row">{{teacher.index}}.</th>
-                        <td><a href="./teachers?index={{teacher.index}}&fullName={{teacher.fullName}}">{{teacher.fullName}}</a></td>
+                        <th scope="row">{{person.index}}.</th>
+                        <td><a onclick="sendPostForTeacher('{{person.fullName}}')">{{person.fullName}}</a></td>
                         </tr>    
                     {{/each}}
                     <tr>
@@ -23,4 +25,5 @@
             </table>
         </div>
     </div>
+</div>
 </div>

@@ -7,6 +7,7 @@ router.post('/',(req,res)=>{
    let user = req.body.user;
    //console.log(user);
 
+   req.session.destroy();
    databaseManager.sendRequest({
         id: sendIds.TERMINATE_SESSION, 
            data: { 

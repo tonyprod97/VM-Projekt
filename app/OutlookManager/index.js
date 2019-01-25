@@ -1,3 +1,7 @@
+/**
+ * @file Ovdje se nalaze varijable i metode potrebne za komunikaciju s Outlookom
+ */
+
 var clientId = '678c5f43-0181-48da-a411-3e4ae5ded2e5';
 var clientSecret = 'tfcPCM76^ejyaCYXP106@--';
 var redirectUri = 'http://localhost:3000/authorize';

@@ -25,10 +25,12 @@ const sendRequests = require('../constants').databaseSendRequests;
 
 const crypto = require('crypto');
 
-const userTable    = 'Profile';
-const sessionTable = 'Session';
+const userTable       = 'Profile';
+const sessionTable    = 'Session';
 const unverifiedTable = 'Unverified';
 const visibilityTable = 'Visibility';
+const calendarTable   = 'CalendarData';
+const meetingTable    = 'MeetingRequest';
 
 const sessionLifeTime = 10;
 
@@ -75,13 +77,55 @@ function randomTokenString(size) {
 }
 
 /**
+ * Dohvati e-mail korisnika
+ * @param {Object} database 
+ * @param {Object} userid 
+ * @param {Object} callback 
+ */
+function getUserEmailFromID(database, userid, callback) {
+
+    database.input('userid', mssql.Int, userid);
+
+    database.query('SELECT email FROM ' + userTable + ' WHERE id = @userid', (error, result) => {
+
+        if (error) {
+            setTimeout(() => callback(null));
+            return;
+        }
+
+        setTimeout(() => callback(toJSON(result)[0][0][0].email));
+    });
+}
+
+/**
+ * Dohvati e-mail korisnika
+ * @param {Object} database 
+ * @param {Object} email 
+ * @param {Object} callback 
+ */
+function getUserIDFromEmail(database, email, callback) {
+
+    database.input('email', mssql.VarChar(100), email);
+
+    database.query('SELECT id FROM ' + userTable + ' WHERE email = @email', (error, result) => {
+
+        if (error) {
+            setTimeout(() => callback(null));
+            return;
+        }
+
+        setTimeout(() => callback(toJSON(result)[0][0][0].id));
+    });
+}
+
+/**
  * Stvaranje korisnika u bazi podataka
  * @param {Object}database - objekt koji predstavlja bazu podataka
  * @param {String}email - adresa elektronicke poste korisnika
  * @param {String}password - lozinka korisnika
  * @param {Function}callback - funkcija koja ce se izvesti
  */
-function createUser(database, email, password, callback) {
+function createUser(database, email, password, isStudent, callback) {
 
     let answer = {
         state: null,
@@ -92,8 +136,9 @@ function createUser(database, email, password, callback) {
     //database.input('username', mssql.VarChar(30), username);
     database.input('email', mssql.VarChar(100), email);
     database.input('hash', mssql.VarChar(70), seededSha256(email, password));
+    database.input('isStudent', mssql.Bit, isStudent);
 
-    database.query('INSERT INTO ' + userTable + ' (email, passwordHash) VALUES (@email, @hash)', (error) => {
+    database.query('INSERT INTO ' + userTable + ' (email, passwordHash, isStudent) VALUES (@email, @hash, @isStudent)', (error) => {
 
         if (error) {
 
@@ -149,6 +194,7 @@ function createUser(database, email, password, callback) {
 //        setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, username: toJSON(result)[0][0][0].username}), 0);
 //    });
 //}
+
 /**
  * Provjera ako je sjednica vazeca
  * @param {Object}database - objekt koji predstavlja bazu podataka
@@ -158,6 +204,8 @@ function createUser(database, email, password, callback) {
  */
 function isValidSessionInfo(database, userid, sessionToken, callback) {
 
+    //console.log({ userid: userid, token: sessionToken });
+
     database.input('userid', mssql.Int, userid);
     database.input('sessionToken', mssql.VarChar(70), sessionToken);
 
@@ -165,16 +213,16 @@ function isValidSessionInfo(database, userid, sessionToken, callback) {
 
         if (error) {
             console.log(error);
-            setTimeout(() => callback({ state: dbConsts.OPERATION_FAILED }));
+            setTimeout(() => callback({ state: dbConsts.OPERATION_FAILED, msg: "can't check for valid token" }));
             return;
         }
 
         if (result.rowsAffected[0] == 0) {
-            setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, valid: false }));
+            setTimeout(() => callback({ state: dbConsts.OPERATION_DENIED, msg: "invalid sessionToken" }));
             return;
         }
 
-        setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, valid: true }));
+        setTimeout(() => callback({ state: dbConsts.OPERATION_SUCCESS, msg: "operation success" }));
     });
 }
 
@@ -243,7 +291,7 @@ function login(database,email,password, callback) {
     database.input('email', mssql.VarChar(100), email);
     database.input('hash', mssql.VarChar(70), seededSha256(email, password));
 
-    database.query('SELECT id,email FROM ' + userTable + ' WHERE email = @email and passwordHash = @hash', (error, result) => {
+    database.query('SELECT id,email,isStudent FROM ' + userTable + ' WHERE email = @email and passwordHash = @hash', (error, result) => {
 
         if ((error) || (result.rowsAffected[0] == 0)) {
 
@@ -287,10 +335,10 @@ function getUsersThatSheredCalendarWithYou(database, userid, sessionToken, callb
 
     isValidSessionInfo(new mssql.Request(), sessionToken, (answer) => {
 
-        if (!answer.valid) {
-            setTimeout(() => callback({ state: dbConsts.OPERATION_DENIED, msg: "invalid sessionToken" }), 0);
-            return;
-        }
+        //if (!answer.valid) {
+        //    setTimeout(() => callback({ state: dbConsts.OPERATION_DENIED, msg: "invalid sessionToken" }), 0);
+        //    return;
+        //}
 
         //TODO
 
@@ -338,6 +386,381 @@ function getVerification(database, email, callback) {
     });
 }
 
+/**
+ * Dohvat korisnika
+ * @param {Object} database 
+ * @param {Object} onlyVerified 
+ * @param {Object} callback 
+ */
+function getUsers(database, onlyVerified, callback) {
+
+    let data = {
+        state: null,
+        msg: "",
+        data: null
+    };
+
+    database.query('SELECT email FROM ' + userTable + ' WHERE isStudent = 0' + ((onlyVerified) ? ' AND id NOT IN (SELECT userid FROM ' + unverifiedTable + ' )' : ' '), (error, result) => {
+
+        if (error) {
+
+            data.state = dbConsts.OPERATION_FAILED;
+            data.msg   = "Failed to get users";
+            setTimeout(() => callback(data));
+            return;
+        }
+
+        data.state = dbConsts.OPERATION_SUCCESS;
+        data.msg   = "operation success";
+
+        data.data = toJSON(result)[0][0];
+        setTimeout(() => callback(data));
+    });
+
+}
+
+/**
+ * Dohvati ID korisnika iz e-mail adrese
+ * @param {Object} database 
+ * @param {Object} email 
+ * @param {Object} callback 
+ */
+function getIdFromEmail(database, email, callback) {
+
+    let data = {
+        state: null,
+        msg: "",
+        data: null
+    };
+
+    database.input('email', mssql.VarChar(100), email);
+    console.log("Email: "+ email);
+    database.query('SELECT id FROM Profile WHERE email = @email ' , (error, result) => {
+
+        if (error) {
+            data.state = dbConsts.OPERATION_FAILED;
+            data.msg   = "Failed to get users";
+            setTimeout(() => callback(data));
+            return;
+        }
+
+        data.state = dbConsts.OPERATION_SUCCESS;
+        data.msg   = "operation success";
+
+        data.data = toJSON(result)[0][0];
+        setTimeout(() => callback(data));
+    });
+
+}
+
+/**
+ * Izbrisi dostupnost
+ * @param {Object} database 
+ * @param {Object} token 
+ * @param {Object} userid 
+ * @param {Object} callback 
+ */
+function deleteAvailable(database, token, userid, callback) {
+    let data = {
+        state: dbConsts.OPERATION_SUCCESS,
+        msg: "operation success",
+        data: null
+    };
+
+    isValidSessionInfo(database, userid, token, (answer) => {
+
+        if (answer.state != dbConsts.OPERATION_SUCCESS) {
+            setTimeout(() => callback(answer));
+            return;
+        }
+
+        database.query('DELETE FROM ' + calendarTable + ' WHERE userid=@userid', (error) => {
+            if (error) {
+                console.log(error);
+            }
+
+            setTimeout(() => callback(data));
+        });
+    });
+}
+
+/**
+ * Unesi podatke kalendara
+ * @param {Object} userid 
+ * @param {Object} token 
+ * @param {Object} calendarInfo 
+ * @param {Object} callback 
+ */
+function insertCalendarData(userid, token, calendarInfo, callback) {
+
+    let data = {
+        state: dbConsts.OPERATION_SUCCESS,
+        msg: "operation success",
+        data: null
+    };
+
+    isValidSessionInfo(new mssql.Request(), userid, token, (answer) => {
+
+        if (answer.state != dbConsts.OPERATION_SUCCESS) {
+            setTimeout(() => callback(answer));
+            return;
+        }
+
+        let size = calendarInfo.length;
+
+        calendarInfo.forEach((element, index) => {
+
+            let database = new mssql.Request();
+
+            database.input('userid', mssql.Int, userid);
+            database.input('subject', mssql.VarChar(100), element.subject);
+            database.input('startDate', mssql.DateTime2, element.startDate);
+            database.input('endDate', mssql.DateTime2, element.endDate);
+
+            database.query('INSERT INTO ' + calendarTable + '(userid, subject, startDate, endDate) VALUES (@userid, @subject, @startDate, @endDate)', (error) => {
+
+                if (error) {
+                    //console.log(error);
+                    data.state = dbConsts.OPERATION_WARRNING;
+                    data.msg   = "some data was not saved";
+                }
+
+                if (index == (size - 1)) setTimeout(() => callback(data));
+            });
+        });
+    });
+}
+
+/**
+ * Dohvat podataka kalendara
+ * @param {Object} database 
+ * @param {Object} userid 
+ * @param {Object} token 
+ * @param {Object} from 
+ * @param {Object} callback 
+ */
+function getCalendarData(database, userid, token, from, callback) {
+
+    let data = {
+        state: -1,
+        msg: "",
+        data: null
+    };
+
+    console.log({ userid: userid, email: from });
+
+    isValidSessionInfo(database, userid, token, (answer) => {
+        /*
+        if (answer.state != dbConsts.OPERATION_SUCCESS) {
+            setTimeout(() => callback(answer));
+            return;
+        }*/
+
+        database.input('email', mssql.VarChar(100), from);
+
+        database.query('SELECT subject, startDate, endDate FROM ' + calendarTable + ' JOIN ' + userTable + ' ON userid = id WHERE email = @email ', (error, result) => {
+
+            if (error) {
+                console.log(error);
+                data.state = dbConsts.OPERATION_FAILED;
+                data.msg   = "failed to get calendar info";
+                setTimeout(() => callback(data));
+                return;
+            }
+
+            data.state = dbConsts.OPERATION_SUCCESS;
+            data.msg   = "operation success";
+            data.data  = toJSON(result)[0][0];
+
+            setTimeout(() => callback(data));
+        });
+    });
+}
+
+/**
+ * Slanje zahtjeva za sastankom
+ * @param {Object} database 
+ * @param {Object} userid 
+ * @param {Object} token 
+ * @param {Object} toEmail 
+ * @param {Object} startDate 
+ * @param {Object} subject 
+ * @param {Object} callback 
+ */
+function sendMeetingRequest(database,userid, token, toEmail, startDate,subject, callback) {
+
+    let data = {
+        state: -1,
+        msg: "",
+        data: null
+    };
+
+    isValidSessionInfo(database, userid, token, (answer) => {
+
+        if (answer.state != dbConsts.OPERATION_SUCCESS) {
+            setTimeout(() => callback(answer));
+            return;
+        }
+
+        getUserIDFromEmail(database, toEmail, (toid) => {
+
+            let strToken = randomTokenString(64);
+
+            database.input('meetingToken', mssql.VarChar(130), strToken);
+            database.input('toid', mssql.Int, toid);
+            database.input('date', mssql.DateTime2, startDate);
+            database.input('subject', mssql.VarChar(100), subject);
+
+            database.query('INSERT INTO ' + meetingTable + ' (userid,senderid,startDate,token,subject) VALUES (@toid,@userid,@date,@meetingToken,@subject)', (error) => {
+
+                if (error) {
+                    data.state = dbConsts.OPERATION_FAILED;
+                    data.msg   = 'failed to send request, request already sent or time is not available any more';
+                    setTimeout(() => callback(data));
+                    return;
+                }
+
+                data.state = dbConsts.OPERATION_SUCCESS;
+                data.msg   = 'operation success';
+                data.data  = {};
+
+                getUserEmailFromID(new mssql.Request(), userid, (email) => {
+
+                    data.data.email = email;
+                    data.data.token = strToken;
+
+                    setTimeout(() => callback(data));
+                });
+            });
+        });
+    });
+}
+
+/**
+ * Odgovor na zahtjev za sastankom
+ * @param {Object} database 
+ * @param {Object} token 
+ * @param {Object} accept 
+ * @param {Object} callback 
+ */
+function answerMeetingRequest(database,token,accept,callback) {
+
+    let data = {
+        state: -1,
+        msg: "",
+        data: null
+    };
+
+    database.input('token', mssql.VarChar(130), token);
+
+    database.query('SELECT senderid, userid , startDate, subject FROM ' + meetingTable + ' WHERE token = @token', (error, result) => {
+
+        if (error) {
+            data.state = dbConsts.OPERATION_FAILED;
+            data.msg   = 'failed to answer a request';
+            setTimeout(() => callback(data));
+            return;
+        }
+
+        if (result.rowsAffected[0] == 0) {
+            data.state = dbConsts.OPERATION_FAILED;
+            data.msg   = 'invalid request or request not available any more';
+            setTimeout(() => callback(data));
+            return;
+        }
+
+        let tempResult = toJSON(result)[0][0][0];
+
+        database.input('userid', mssql.VarChar(130), tempResult.userid);
+        database.input('senderid', mssql.VarChar(130), tempResult.senderid);
+        database.input('startDate', mssql.VarChar(130), tempResult.startDate);
+
+        database.query('DELETE FROM ' + meetingTable + ' WHERE userid = @userid AND startDate = @startDate AND senderid = @senderid', (error, result) => {
+
+            if (error) { // shouldn't happen
+                console.log(error);
+            }
+
+            data.state = dbConsts.OPERATION_SUCCESS;
+            data.msg   = 'operation success';
+
+            if (accept) {
+
+                data.data = {};
+
+                data.data.startDate = tempResult.startDate;
+                data.data.subject   = tempResult.subject;
+
+                database.query('SELECT endDate FROM ' + calendarTable + ' WHERE userid = @userid AND startDate = @startDate', (error, result) => {
+
+                    if (error) { // shouldn't happen
+                        console.log(error);
+                    }
+
+                    data.data.endDate = toJSON(result)[0][0][0].endDate;
+
+                    database.query('DELETE FROM ' + calendarTable + ' WHERE userid = @userid AND startDate = @startDate', (error) => {
+
+                        if (error) { // shouldn't happen
+                            console.log(error);
+                        }
+
+                        getUserEmailFromID(new mssql.Request(), tempResult.userid, (profMail) => {
+
+                            data.data.profMail = profMail;
+
+                            getUserEmailFromID(new mssql.Request(), tempResult.senderid, (senderEmail) => {
+
+                                data.data.senderEmail = senderEmail;
+
+                                setTimeout(() => callback(data));
+                            });
+                        });
+                    });
+                });
+                return;
+            }
+
+            setTimeout(() => callback(data));
+        });
+    });
+}
+
+function getMeetingRequests(database, userid, token, forid , callback) {
+
+    let data = {
+        state: -1,
+        msg: "",
+        data: null
+    };
+
+    isValidSessionInfo(database, userid, token, (answer) => {
+
+        if (answer.state != dbConsts.OPERATION_SUCCESS) {
+            setTimeout(() => callback(answer));
+            return;
+        }
+
+        database.input("forid", mssql.Int, forid);
+
+        database.query('SELECT startDate FROM ' + meetingTable + ' WHERE userid = @forid' , (error, result) => {
+
+            if (error) {
+
+                data.state = dbConsts.OPERATION_FAILED;
+                data.msg   = "Failed to get meeting data";
+                setTimeout(() => callback(data), 0);
+                return;
+            }
+
+            data.state = dbConsts.OPERATION_SUCCESS;
+            data.msg   = "operation success";
+            data.data  = toJSON(result)[0][0];
+
+            setTimeout(() => callback(data), 0);
+        }); 
+    });
+}
 
 //var db = null; //mssql.connect(config).Request();
 var readyForUse = false;
@@ -368,8 +791,7 @@ class DatabaseManager {
             }
 
             console.log(errorMSG);
-            console.log(error);
-
+            //console.log(error);
 
             if (errorState == dbConsts.OPERATION_SUCCESS) {
 
@@ -520,6 +942,47 @@ class DatabaseManager {
                 getVerification(new mssql.Request(), requestData.data.email, callback);
                 break;
             }
+        
+            case getRequests.GET_ALL_USERS: {
+                getUsers(new mssql.Request(), false, callback);
+                break;
+            }
+                
+            case getRequests.GET_VERIFIED_USERS: {
+                getUsers(new mssql.Request(), true, callback);
+                break;
+            }
+
+            case getRequests.GET_ID_FROM_MAIL: {
+                getIdFromEmail(new mssql.Request(),requestData.data.email, callback);
+                break;
+            }
+
+            case getRequests.GET_CALENDAR: {
+
+                if (!requestData.data.from) {
+                    getUserEmailFromID(new mssql.Request(), requestData.data.userid, (email) => {
+                        getCalendarData(new mssql.Request(), requestData.data.userid, requestData.data.token, email, callback);
+                    });
+                    break;
+                }
+
+                getCalendarData(new mssql.Request(), requestData.data.userid, requestData.data.token, requestData.data.from, callback);
+                break;
+            }
+
+            case getRequests.GET_MEETING_REQUEST: {
+
+                if (!requestData.data.mentFor) {
+                    getMeetingRequests(new mssql.Request(), requestData.data.userid, requestData.data.token, requestData.data.userid, callback);
+                    break;
+                }
+
+                getUserIDFromEmail(new mssql.Request(), requestData.data.mentFor, (forid) => {
+                    getMeetingRequests(new mssql.Request(), requestData.data.userid, requestData.data.token, forid, callback);
+                });
+                break;
+            }
         }
     }
 
@@ -539,7 +1002,7 @@ class DatabaseManager {
         switch (sentData.id) {
 
             case sendRequests.CREATE_NEW_USER: {
-                createUser(new mssql.Request(), sentData.data.email, sentData.data.password, callback);
+                createUser(new mssql.Request(), sentData.data.email, sentData.data.password, sentData.data.isStudent, callback);
                 break;
             }
 
@@ -582,12 +1045,21 @@ class DatabaseManager {
                 database.input('userid', mssql.Int, sentData.data.userid);
                 database.input('token', mssql.VarChar(70), sentData.data.verificationToken);
 
-                database.query('DELETE FROM ' + unverifiedTable + ' WHERE userid = @userid and token = @token', (error) => {
+                database.query('DELETE FROM ' + unverifiedTable + ' WHERE userid = @userid and token = @token', (error,result) => {
 
                     if (error) {
 
                         response.state = dbConsts.OPERATION_FAILED;
                         response.msg   = "failed to verify user";
+
+                        setTimeout(() => callback(response));
+                        return;
+                    }
+
+                    if ((result.rowsAffected[0] == 0)) {
+
+                        response.state = dbConsts.OPERATION_FAILED;
+                        response.msg = "already verified or invalid params";
 
                         setTimeout(() => callback(response));
                         return;
@@ -601,6 +1073,26 @@ class DatabaseManager {
 
                 break;
             }
+
+            case sendRequests.INSERT_CALENDAR_DATA: {
+                insertCalendarData(sentData.data.userid, sentData.data.token, sentData.data.calendarInfo, callback);
+                break;
+            }
+
+            case sendRequests.SEND_MEETING_REQUEST: {
+                sendMeetingRequest(new mssql.Request(), sentData.data.userid, sentData.data.token, sentData.data.toEmail, sentData.data.startDate,sentData.data.subject, callback);
+                break;
+            }
+
+            case sendRequests.SEND_MEETING_ANSWER: {
+                answerMeetingRequest(new mssql.Request(), sentData.data.token, sentData.data.accept, callback);
+                break;
+            }
+
+            case sendRequests.DELETE_AVAILABLE: {
+                deleteAvailable(new mssql.Request(), sentData.data.token, sentData.data.userid, callback);
+                break;
+            } 
         }
     }
 }

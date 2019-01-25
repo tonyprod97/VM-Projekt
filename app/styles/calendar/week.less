@@ -1,0 +1,134 @@
+@import "../style.less";
+
+@headers-color:#E0E0E0;
+@busy-cell:#616161;
+@requestable-cell: #A5D6A7;
+@requested-cell: #2E7D32;
+@button-submit: #81D4FA;
+
+div {
+    &.backgorund-main {
+        background-color: @backgorund-main-color;
+        height: -webkit-fill-available;
+        font-family: sans-serif;
+    }
+}
+
+form {
+    &.calendar-form {
+        width: -webkit-fill-available;
+    }
+}
+
+h3 {
+    margin-left: 25%;
+}
+.quarter-time {
+    border-bottom: 1px #E8EAF6 dashed;
+    border-top: 1px #E8EAF6 dashed;
+    height: 100%;
+    color:white;
+    /*
+    &:hover {
+        background-color: red;
+    }
+
+    &.selecting {
+        background-color: yellow;
+    }
+    */
+}
+td, .quarter-time {
+    padding: 0px !important;
+    text-align: center;
+    background-color: white;
+
+    &.clickable {
+        cursor: pointer;
+        &.selecting {
+            background-color: yellow;
+        }
+    }
+    &.marked {
+        background-color: gray; 
+    }
+
+    &.student {
+        &.personal-view {
+            &:hover {
+                cursor: auto;
+            }
+            &.busy {
+                background-color: @busy-cell;
+                color: white;
+            }
+        }
+    
+        &.teacher-view {
+            //disable if not busy
+            
+            &.busy {
+                background-color: @requestable-cell;
+                color: white;
+
+                &.marked {
+                    background-color: @requested-cell;
+                    color: black;
+                }
+            }
+            &.available,&.selecting {
+                cursor: auto;
+            }
+        }
+    }
+
+    &.teacher {
+        &.busy {
+            background-color: @busy-cell;
+            color: white;
+        }
+        &.available {
+            background-color: white;
+
+            &:hover, &.selecting {
+                background-color: @requestable-cell;
+            }
+            
+        }
+        &.marked,&.selecting {
+            background-color: @requested-cell;
+            &:hover {
+                background-color: @requested-cell;
+            }
+        }
+    }
+}
+
+.table-responsive {
+    margin: 0px 25px;
+}
+
+
+th, .time-column {
+    text-align: center;
+    background-color: @headers-color;
+}
+
+.color-submit {
+    background-color: @button-submit;
+}
+
+.hover-shadow:hover {
+    color: white;
+    text-shadow: 2px 2px 4px #000000;
+}
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome and Opera */
+  }
